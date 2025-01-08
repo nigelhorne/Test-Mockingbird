@@ -2,16 +2,20 @@
 
 Test::Mockingbird - Advanced mocking library for Perl with support for dependency injection and spies.
 
+# VERSION
+
+our $VERSION = '0.01';
+
 # SYNOPSIS
 
     use Test::Mockingbird;
 
     # Mocking
-    Test::Mockingbird::mock('My::Module', 'method', sub { return "mocked!" });
+    Test::Mockingbird::mock('My::Module', 'method', sub { return 'mocked!' });
 
     # Spying
     my $spy = Test::Mockingbird::spy('My::Module', 'method');
-    My::Module::method("arg1", "arg2");
+    My::Module::method('arg1', 'arg2');
     my @calls = $spy->(); # Get captured calls
 
     # Dependency Injection
@@ -33,18 +37,38 @@ Test::Mockingbird provides powerful mocking, spying, and dependency injection ca
 
     Mocks a method in the specified package.
 
+## unmock($package, $method)
+
+Restores the original method for a mocked method.
+
 - spy($package, $method)
 
     Spies on a method, tracking calls and arguments.
 
-- inject($package, $dependency, $mock\_object)
+## inject($package, $dependency, $mock\_object)
 
-    Injects a mock object for a dependency.
+Injects a mock object for a dependency.
 
-- unmock($package, $method)
+## restore\_all()
 
-    Restores the original method for a mocked method.
+Restores all mocked methods and dependencies to their original state.
 
-- restore\_all()
+# POD ERRORS
 
-    Restores all mocked methods and dependencies to their original state.
+Hey! **The above document had some coding errors, which are explained below:**
+
+- Around line 48:
+
+    '=item' outside of any '=over'
+
+- Around line 69:
+
+    You forgot a '=back' before '=head2'
+
+- Around line 91:
+
+    '=item' outside of any '=over'
+
+- Around line 125:
+
+    You forgot a '=back' before '=head2'

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::Most;
+use Test::Most tests => 3;
 
 use lib 'lib';
 use Test::Mockingbird;

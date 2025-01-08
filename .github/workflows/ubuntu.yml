@@ -1,0 +1,40 @@
+---
+name: Test::Mockingbird
+
+on:
+  push:
+    branches:
+      - '*'
+    tags-ignore:
+      - '*'
+  # workflow_dispatch:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          # Set the desired Perl version
+          perl-version: '5.40'
+
+      - name: Install dependencies
+        run: |
+          cpanm --notest --quiet --installdeps .
+
+      - name: Run tests
+        run: |
+          prove -l t
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: build/test-results/
