@@ -6,6 +6,7 @@ README.md
 t/00-load.t
 t/add.t
 t/comment-spelling.t
+t/cover.t
 t/inject.t
 t/mock.t
 t/spy.t

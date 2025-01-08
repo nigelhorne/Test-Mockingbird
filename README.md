@@ -4,7 +4,7 @@ Test::Mockingbird - Advanced mocking library for Perl with support for dependenc
 
 # VERSION
 
-our $VERSION = '0.01';
+Version 0.01
 
 # SYNOPSIS
 
@@ -41,9 +41,9 @@ Mocks a method in the specified package.
 
 Restores the original method for a mocked method.
 
-- spy($package, $method)
+## spy($package, $method)
 
-    Spies on a method, tracking calls and arguments.
+Spies on a method, tracking calls and arguments.
 
 ## inject($package, $dependency, $mock\_object)
 
@@ -52,15 +52,3 @@ Injects a mock object for a dependency.
 ## restore\_all()
 
 Restores all mocked methods and dependencies to their original state.
-
-# POD ERRORS
-
-Hey! **The above document had some coding errors, which are explained below:**
-
-- Around line 91:
-
-    '=item' outside of any '=over'
-
-- Around line 125:
-
-    You forgot a '=back' before '=head2'

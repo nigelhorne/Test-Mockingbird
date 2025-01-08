@@ -90,7 +90,7 @@ sub unmock {
 	}
 }
 
-=item spy($package, $method)
+=head2 spy($package, $method)
 
 Spies on a method, tracking calls and arguments.
 
