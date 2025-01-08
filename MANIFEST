@@ -1,3 +1,4 @@
+Changes
 lib/Test/Mockingbird.pm
 LICENSE
 Makefile.PL
@@ -7,6 +8,8 @@ t/00-load.t
 t/add.t
 t/comment-spelling.t
 t/cover.t
+t/eof.t
+t/eol.t
 t/inject.t
 t/mock.t
 t/spy.t
