@@ -14,9 +14,11 @@ Test::Mockingbird - Advanced mocking library for Perl with support for dependenc
 
 =head1 VERSION
 
-our $VERSION = '0.01';
+Version 0.01
 
 =cut
+
+our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
@@ -45,7 +47,7 @@ Test::Mockingbird provides powerful mocking, spying, and dependency injection ca
 
 =head1 METHODS
 
-=item mock($package, $method, $replacement)
+=head2 mock($package, $method, $replacement)
 
 Mocks a method in the specified package.
 

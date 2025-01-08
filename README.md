@@ -33,9 +33,9 @@ Test::Mockingbird provides powerful mocking, spying, and dependency injection ca
 
 # METHODS
 
-- mock($package, $method, $replacement)
+## mock($package, $method, $replacement)
 
-    Mocks a method in the specified package.
+Mocks a method in the specified package.
 
 ## unmock($package, $method)
 
@@ -56,14 +56,6 @@ Restores all mocked methods and dependencies to their original state.
 # POD ERRORS
 
 Hey! **The above document had some coding errors, which are explained below:**
-
-- Around line 48:
-
-    '=item' outside of any '=over'
-
-- Around line 69:
-
-    You forgot a '=back' before '=head2'
 
 - Around line 91:
 

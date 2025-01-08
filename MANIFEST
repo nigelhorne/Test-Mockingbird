@@ -5,6 +5,7 @@ MANIFEST			This list of files
 README.md
 t/00-load.t
 t/add.t
+t/comment-spelling.t
 t/inject.t
 t/mock.t
 t/spy.t
