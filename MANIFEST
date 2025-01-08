@@ -11,6 +11,7 @@ t/cover.t
 t/eof.t
 t/eol.t
 t/fixme.t
+t/gv.t
 t/inject.t
 t/mock.t
 t/spy.t
