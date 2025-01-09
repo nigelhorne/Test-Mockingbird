@@ -4,7 +4,7 @@ Test::Mockingbird - Advanced mocking library for Perl with support for dependenc
 
 # VERSION
 
-Version 0.01
+Version 0.02
 
 # SYNOPSIS
 
