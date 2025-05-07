@@ -181,8 +181,8 @@ You can find documentation for this module with the perldoc command.
 
 You can also look for information at:
 
-1;
-
 =cut
+
+1;
 
 __END__
