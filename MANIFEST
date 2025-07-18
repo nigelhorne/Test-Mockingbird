@@ -18,4 +18,5 @@ t/manifest.t
 t/mock.t
 t/object.t
 t/pod-cm.t
+t/pod.t
 t/spy.t

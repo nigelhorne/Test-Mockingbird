@@ -179,10 +179,6 @@ You can find documentation for this module with the perldoc command.
 
     perldoc Test::Mockingbird
 
-You can also look for information at:
-
 =cut
 
 1;
-
-__END__
