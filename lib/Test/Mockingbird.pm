@@ -3,6 +3,8 @@ package Test::Mockingbird;
 use strict;
 use warnings;
 
+# TODO: Look into Sub::Install
+
 use Carp qw(croak);
 
 # Store mocked data
