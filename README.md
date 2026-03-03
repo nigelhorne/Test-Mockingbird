@@ -36,22 +36,65 @@ Test::Mockingbird provides powerful mocking, spying, and dependency injection ca
 ## mock($package, $method, $replacement)
 
 Mocks a method in the specified package.
+Supports two forms:
+
+    mock('My::Module', 'method', sub { ... });
+
+or the shorthand:
+
+    mock 'My::Module::method' => sub { ... };
 
 ## unmock($package, $method)
 
 Restores the original method for a mocked method.
+Supports two forms:
+
+    unmock('My::Module', 'method');
+
+or the shorthand:
+
+    unmock 'My::Module::method';
 
 ## spy($package, $method)
 
-Spies on a method, tracking calls and arguments.
+Wraps a method so that all calls and arguments are recorded.
+Supports two forms:
+
+    spy('My::Module', 'method');
+
+or the shorthand:
+
+    spy 'My::Module::method';
+
+Returns a coderef which, when invoked, returns the list of captured calls.
+The original method is preserved and still executed.
 
 ## inject($package, $dependency, $mock\_object)
 
-Injects a mock object for a dependency.
+Injects a mock dependency. Supports two forms:
+
+    inject('My::Module', 'Dependency', $mock_object);
+
+or the shorthand:
+
+    inject 'My::Module::Dependency' => $mock_object;
+
+The injected dependency can be restored with `restore_all` or `unmock`.
 
 ## restore\_all()
 
-Restores all mocked methods and dependencies to their original state.
+Restores mocked methods and injected dependencies.
+
+Called with no arguments, it restores everything:
+
+    restore_all();
+
+You may also restore only a specific package:
+
+    restore_all 'My::Module';
+
+This restores all mocked methods whose fully qualified names begin with
+`My::Module::`.
 
 # SUPPORT
 
