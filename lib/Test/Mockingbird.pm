@@ -9,15 +9,16 @@ use Carp qw(croak);
 use Exporter 'import';
 
 our @EXPORT = qw(
-    mock
-    unmock
-    spy
-    inject
-    restore_all
+	mock
+	unmock
+	mock_scoped
+	spy
+	inject
+	restore_all
 );
 
 # Store mocked data
-my %mocked;
+my %mocked;  # becomes: method => [ stack of backups ]
 
 =head1 NAME
 
@@ -99,7 +100,7 @@ sub mock {
 	my $full_method = "${package}::$method";
 
 	# Backup original if not already mocked
-	$mocked{$full_method} = \&{$full_method} unless exists $mocked{$full_method};
+push @{ $mocked{$full_method} }, \&{$full_method};
 
 	# Replace with mocked version
 	no warnings 'redefine';
@@ -120,25 +121,9 @@ or the shorthand:
 =cut
 
 sub unmock {
-	my ($arg1, $arg2) = @_;
+    my ($arg1, $arg2) = @_;
 
-	my ($package, $method);
-
-    # ------------------------------------------------------------
-    # New shorthand syntax:
-    #   unmock 'My::Module::method'
-    # ------------------------------------------------------------
-    if (defined $arg1 && !defined $arg2 && $arg1 =~ /^(.*)::([^:]+)$/) {
-        $package = $1;
-        $method  = $2;
-    }
-    # ------------------------------------------------------------
-    # Original syntax:
-    #   unmock('My::Module', 'method')
-    # ------------------------------------------------------------
-    else {
-        ($package, $method) = ($arg1, $arg2);
-    }
+    my ($package, $method) = _parse_target(@_);
 
     croak 'Package and method are required for unmocking'
         unless $package && $method;
@@ -147,11 +132,56 @@ sub unmock {
     my $full_method = "${package}::$method";
 
     # Restore original method if backed up
-    if (exists $mocked{$full_method}) {
-        no warnings 'redefine';
-        *{$full_method} = $mocked{$full_method};
-        delete $mocked{$full_method};
+if (exists $mocked{$full_method} && @{ $mocked{$full_method} }) {
+    my $prev = pop @{ $mocked{$full_method} };
+    no warnings 'redefine';
+    *{$full_method} = $prev;
+
+    delete $mocked{$full_method} unless @{ $mocked{$full_method} };
+}
+
+}
+
+=head2 mock_scoped
+
+Creates a scoped mock that is automatically restored when it goes out of scope.
+
+This behaves like C<mock>, but instead of requiring an explicit call to
+C<unmock> or C<restore_all>, the mock is reverted automatically when the
+returned guard object is destroyed.
+
+This is useful when you want a mock to apply only within a lexical block:
+
+    {
+        my $g = mock_scoped 'My::Module::method' => sub { 'mocked' };
+        My::Module::method();   # returns 'mocked'
     }
+
+    My::Module::method();       # original behaviour restored
+
+Supports both the longhand and shorthand forms:
+
+    my $g = mock_scoped('My::Module', 'method', sub { ... });
+
+    my $g = mock_scoped 'My::Module::method' => sub { ... };
+
+Returns a guard object whose destruction triggers automatic unmocking.
+
+=cut
+
+sub mock_scoped {
+	my ($arg1, $arg2, $arg3) = @_;
+
+	# Reuse mock() to install the mock
+	mock($arg1, $arg2, $arg3);
+
+	# Determine full method name using same parsing rules
+
+	my ($package, $method) = _parse_target(@_);
+
+	my $full_method = "${package}::$method";
+
+	return Test::Mockingbird::Guard->new($full_method);
 }
 
 =head2 spy($package, $method)
@@ -171,49 +201,32 @@ The original method is preserved and still executed.
 =cut
 
 sub spy {
-    my ($arg1, $arg2) = @_;
+	my ($arg1, $arg2) = @_;
 
-    my ($package, $method);
+	my ($package, $method) = _parse_target(@_);
 
-    # ------------------------------------------------------------
-    # New shorthand syntax:
-    #   spy 'My::Module::method'
-    # ------------------------------------------------------------
-    if (defined $arg1 && !defined $arg2 && $arg1 =~ /^(.*)::([^:]+)$/) {
-        $package = $1;
-        $method  = $2;
-    }
-    # ------------------------------------------------------------
-    # Original syntax:
-    #   spy('My::Module', 'method')
-    # ------------------------------------------------------------
-    else {
-        ($package, $method) = ($arg1, $arg2);
-    }
-
-    croak 'Package and method are required for spying'
-        unless $package && $method;
+	croak 'Package and method are required for spying' unless $package && $method;
 
     no strict 'refs';
-
     my $full_method = "${package}::$method";
 
-    # Backup original if not already mocked
-    $mocked{$full_method} = \&{$full_method}
-        unless exists $mocked{$full_method};
+    # Backup previous layer
+    push @{ $mocked{$full_method} }, \&{$full_method};
 
-	# Spy data
     my @calls;
 
     no warnings 'redefine';
+    *{$full_method} = sub {
+        push @calls, [ $full_method, @_ ];
 
-	# Wrap the original method in a spy
-	*{$full_method} = sub { push @calls, [ $full_method, @_ ]; return $mocked{$full_method}->(@_); };
+        # Call previous layer
+        my $prev = $mocked{$full_method}[-1];
+        return $prev->(@_);
+    };
 
-	return sub {
-		return @calls; # Return all captured calls
-	};
+    return sub { @calls };
 }
+
 
 =head2 inject($package, $dependency, $mock_object)
 
@@ -258,8 +271,8 @@ sub inject {
     my $full_dependency = "${package}::$dependency";
 
     # Backup original if not already mocked
-    $mocked{$full_dependency} = \&{$full_dependency}
-        unless exists $mocked{$full_dependency};
+push @{ $mocked{$full_dependency} }, \&{$full_dependency};
+    
 
     no warnings 'redefine';
 
@@ -285,37 +298,49 @@ C<My::Module::>.
 =cut
 
 sub restore_all {
-	# Restore all mocked methods and dependencies
-	my $arg = $_[0];
+    my $arg = $_[0];
 
-	no strict 'refs';
-	no warnings 'redefine';
+    no strict 'refs';
+    no warnings 'redefine';
 
-    # ------------------------------------------------------------
-    # New syntax:
-    #   restore_all 'My::Module'
-    # ------------------------------------------------------------
     if (defined $arg) {
         my $package = $arg;
 
         for my $full_method (keys %mocked) {
             next unless $full_method =~ /^\Q$package\E::/;
 
-            *{$full_method} = $mocked{$full_method};
+            while (@{ $mocked{$full_method} }) {
+                my $prev = pop @{ $mocked{$full_method} };
+                *{$full_method} = $prev;
+            }
+
             delete $mocked{$full_method};
         }
 
         return;
     }
 
-    # ------------------------------------------------------------
-    # Original behavior: restore everything
-    # ------------------------------------------------------------
+    # Global restore
     for my $full_method (keys %mocked) {
-        *{$full_method} = $mocked{$full_method};
+        while (@{ $mocked{$full_method} }) {
+            my $prev = pop @{ $mocked{$full_method} };
+            *{$full_method} = $prev;
+        }
     }
 
-	%mocked = ();
+    %mocked = ();
+}
+
+sub _parse_target {
+    my ($arg1, $arg2, $arg3) = @_;
+
+    # Shorthand: 'Pkg::method'
+    if (defined $arg1 && !defined $arg3 && $arg1 =~ /^(.*)::([^:]+)$/) {
+        return ($1, $2);
+    }
+
+    # Longhand: ('Pkg','method')
+    return ($arg1, $arg2);
 }
 
 =head1 SUPPORT
@@ -333,5 +358,19 @@ You can find documentation for this module with the perldoc command.
     perldoc Test::Mockingbird
 
 =cut
+
+1;
+
+package Test::Mockingbird::Guard;
+
+sub new {
+	my ($class, $full_method) = @_;
+	return bless { full_method => $full_method }, $class;
+}
+
+sub DESTROY {
+	my ($self) = @_;
+	Test::Mockingbird::unmock($self->{full_method});
+}
 
 1;

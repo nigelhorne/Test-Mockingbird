@@ -55,6 +55,31 @@ or the shorthand:
 
     unmock 'My::Module::method';
 
+## mock\_scoped
+
+Creates a scoped mock that is automatically restored when it goes out of scope.
+
+This behaves like `mock`, but instead of requiring an explicit call to
+`unmock` or `restore_all`, the mock is reverted automatically when the
+returned guard object is destroyed.
+
+This is useful when you want a mock to apply only within a lexical block:
+
+    {
+        my $g = mock_scoped 'My::Module::method' => sub { 'mocked' };
+        My::Module::method();   # returns 'mocked'
+    }
+
+    My::Module::method();       # original behaviour restored
+
+Supports both the longhand and shorthand forms:
+
+    my $g = mock_scoped('My::Module', 'method', sub { ... });
+
+    my $g = mock_scoped 'My::Module::method' => sub { ... };
+
+Returns a guard object whose destruction triggers automatic unmocking.
+
 ## spy($package, $method)
 
 Wraps a method so that all calls and arguments are recorded.

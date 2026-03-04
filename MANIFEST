@@ -17,7 +17,9 @@ t/gv.t
 t/inject.t
 t/manifest.t
 t/mock.t
+t/mock_scoped.t
 t/object.t
 t/pod-cm.t
 t/pod.t
+t/shorthand.t
 t/spy.t
