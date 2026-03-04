@@ -365,7 +365,8 @@ sub new {
 }
 
 sub DESTROY {
-	my ($self) = @_;
+	my $self = $_[0];
+
 	Test::Mockingbird::unmock($self->{full_method});
 }
 

@@ -1,12 +1,13 @@
 use strict;
 use warnings;
 use Test::Most;
-use Test::Mockingbird;
+
+BEGIN { use_ok('Test::Mockingbird') }
 
 {
-    package Dummy::Scoped;
-    sub foo { "original foo" }
-    sub bar { "original bar" }
+	package Dummy::Scoped;
+	sub foo { "original foo" }
+	sub bar { "original bar" }
 }
 
 subtest 'scoped mock (shorthand)' => sub {
@@ -41,8 +42,8 @@ subtest 'scoped mock does not interfere with normal mock' => sub {
 
     is Dummy::Scoped::foo(), "persistent foo", 'persistent mock restored after scope';
 
-    unmock 'Dummy::Scoped::foo';
-    is Dummy::Scoped::foo(), "original foo", 'persistent mock cleaned up';
+	unmock 'Dummy::Scoped::foo';
+	is(Dummy::Scoped::foo(), 'original foo', 'persistent mock cleaned up');
 };
 
 done_testing();
