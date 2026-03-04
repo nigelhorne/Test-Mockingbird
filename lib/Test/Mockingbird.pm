@@ -82,8 +82,8 @@ sub mock {
 	#   mock 'My::Module::method' => sub { ... }
 	# ------------------------------------------------------------
 	if (defined $arg1 && !defined $arg3 && $arg1 =~ /^(.*)::([^:]+)$/) {
-		$package     = $1;
-		$method      = $2;
+		$package = $1;
+		$method = $2;
 		$replacement = $arg2;
 	}
 	# ------------------------------------------------------------
@@ -100,7 +100,7 @@ sub mock {
 	my $full_method = "${package}::$method";
 
 	# Backup original if not already mocked
-push @{ $mocked{$full_method} }, \&{$full_method};
+	push @{ $mocked{$full_method} }, \&{$full_method};
 
 	# Replace with mocked version
 	no warnings 'redefine';
@@ -121,25 +121,23 @@ or the shorthand:
 =cut
 
 sub unmock {
-    my ($arg1, $arg2) = @_;
+	my ($arg1, $arg2) = @_;
 
-    my ($package, $method) = _parse_target(@_);
+	my ($package, $method) = _parse_target(@_);
 
-    croak 'Package and method are required for unmocking'
-        unless $package && $method;
+	croak 'Package and method are required for unmocking' unless $package && $method;
 
-    no strict 'refs';
-    my $full_method = "${package}::$method";
+	no strict 'refs';
+	my $full_method = "${package}::$method";
 
-    # Restore original method if backed up
-if (exists $mocked{$full_method} && @{ $mocked{$full_method} }) {
-    my $prev = pop @{ $mocked{$full_method} };
-    no warnings 'redefine';
-    *{$full_method} = $prev;
+	# Restore original method if backed up
+	if (exists $mocked{$full_method} && @{ $mocked{$full_method} }) {
+		my $prev = pop @{ $mocked{$full_method} };
+		no warnings 'redefine';
+		*{$full_method} = $prev;
 
-    delete $mocked{$full_method} unless @{ $mocked{$full_method} };
-}
-
+		delete $mocked{$full_method} unless @{ $mocked{$full_method} };
+	}
 }
 
 =head2 mock_scoped
@@ -207,26 +205,26 @@ sub spy {
 
 	croak 'Package and method are required for spying' unless $package && $method;
 
-    no strict 'refs';
-    my $full_method = "${package}::$method";
+	no strict 'refs';
+	my $full_method = "${package}::$method";
 
-    # Backup previous layer
-    push @{ $mocked{$full_method} }, \&{$full_method};
+	# Backup previous layer
+	push @{ $mocked{$full_method} }, \&{$full_method};
 
-    my @calls;
+	# Data
+	my @calls;
 
-    no warnings 'redefine';
-    *{$full_method} = sub {
-        push @calls, [ $full_method, @_ ];
+	no warnings 'redefine';
+	*{$full_method} = sub {
+		push @calls, [ $full_method, @_ ];
 
-        # Call previous layer
-        my $prev = $mocked{$full_method}[-1];
-        return $prev->(@_);
-    };
+		# Call previous layer
+		my $prev = $mocked{$full_method}[-1];
+		return $prev->(@_);
+	};
 
-    return sub { @calls };
+	return sub { @calls };
 }
-
 
 =head2 inject($package, $dependency, $mock_object)
 
@@ -243,41 +241,39 @@ The injected dependency can be restored with C<restore_all> or C<unmock>.
 =cut
 
 sub inject {
-    my ($arg1, $arg2, $arg3) = @_;
+	my ($arg1, $arg2, $arg3) = @_;
 
-    my ($package, $dependency, $mock_object);
+	my ($package, $dependency, $mock_object);
 
-    # ------------------------------------------------------------
-    # New shorthand syntax:
-    #   inject 'My::Module::Dependency' => $mock_obj
-    # ------------------------------------------------------------
-    if (defined $arg1 && !defined $arg3 && $arg1 =~ /^(.*)::([^:]+)$/) {
-        $package     = $1;
-        $dependency  = $2;
-        $mock_object = $arg2;
-    }
-    # ------------------------------------------------------------
-    # Original syntax:
-    #   inject('My::Module', 'Dependency', $mock_obj)
-    # ------------------------------------------------------------
-    else {
-        ($package, $dependency, $mock_object) = ($arg1, $arg2, $arg3);
-    }
+	# ------------------------------------------------------------
+	# New shorthand syntax:
+	#   inject 'My::Module::Dependency' => $mock_obj
+	# ------------------------------------------------------------
+	if (defined $arg1 && !defined $arg3 && $arg1 =~ /^(.*)::([^:]+)$/) {
+		$package     = $1;
+		$dependency  = $2;
+		$mock_object = $arg2;
+	}
+	# ------------------------------------------------------------
+	# Original syntax:
+	#   inject('My::Module', 'Dependency', $mock_obj)
+	# ------------------------------------------------------------
+	else {
+		($package, $dependency, $mock_object) = ($arg1, $arg2, $arg3);
+	}
 
-    croak 'Package and dependency are required for injection'
-        unless $package && $dependency;
+	croak 'Package and dependency are required for injection' unless $package && $dependency;
 
-    no strict 'refs';
-    my $full_dependency = "${package}::$dependency";
+	no strict 'refs';
+my $full_dependency = "${package}::$dependency";
 
-    # Backup original if not already mocked
-push @{ $mocked{$full_dependency} }, \&{$full_dependency};
-    
+	# Backup original if not already mocked
+	push @{ $mocked{$full_dependency} }, \&{$full_dependency};
 
-    no warnings 'redefine';
+	no warnings 'redefine';
 
 	# Replace with the mock object
-    *{$full_dependency} = sub { $mock_object };
+	*{$full_dependency} = sub { $mock_object };
 }
 
 =head2 restore_all()
@@ -298,49 +294,49 @@ C<My::Module::>.
 =cut
 
 sub restore_all {
-    my $arg = $_[0];
+	my $arg = $_[0];
 
-    no strict 'refs';
-    no warnings 'redefine';
+	no strict 'refs';
+	no warnings 'redefine';
 
-    if (defined $arg) {
-        my $package = $arg;
+	if (defined $arg) {
+		my $package = $arg;
 
-        for my $full_method (keys %mocked) {
-            next unless $full_method =~ /^\Q$package\E::/;
+		for my $full_method (keys %mocked) {
+			next unless $full_method =~ /^\Q$package\E::/;
 
-            while (@{ $mocked{$full_method} }) {
-                my $prev = pop @{ $mocked{$full_method} };
-                *{$full_method} = $prev;
-            }
+			while (@{ $mocked{$full_method} }) {
+				my $prev = pop @{ $mocked{$full_method} };
+				*{$full_method} = $prev;
+			}
 
-            delete $mocked{$full_method};
-        }
+			delete $mocked{$full_method};
+		}
 
-        return;
-    }
+		return;
+	}
 
-    # Global restore
-    for my $full_method (keys %mocked) {
-        while (@{ $mocked{$full_method} }) {
-            my $prev = pop @{ $mocked{$full_method} };
-            *{$full_method} = $prev;
-        }
-    }
+	# Global restore
+	for my $full_method (keys %mocked) {
+		while (@{ $mocked{$full_method} }) {
+			my $prev = pop @{ $mocked{$full_method} };
+			*{$full_method} = $prev;
+		}
+	}
 
-    %mocked = ();
+	%mocked = ();
 }
 
 sub _parse_target {
-    my ($arg1, $arg2, $arg3) = @_;
+	my ($arg1, $arg2, $arg3) = @_;
 
-    # Shorthand: 'Pkg::method'
-    if (defined $arg1 && !defined $arg3 && $arg1 =~ /^(.*)::([^:]+)$/) {
-        return ($1, $2);
-    }
+	# Shorthand: 'Pkg::method'
+	if (defined $arg1 && !defined $arg3 && $arg1 =~ /^(.*)::([^:]+)$/) {
+		return ($1, $2);
+	}
 
-    # Longhand: ('Pkg','method')
-    return ($arg1, $arg2);
+	# Longhand: ('Pkg','method')
+	return ($arg1, $arg2);
 }
 
 =head1 SUPPORT
