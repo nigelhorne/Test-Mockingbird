@@ -1,6 +1,7 @@
-# Generated from Makefile.PL
+# Generated from Makefile.PL using makefilepl2cpanfile
 
 requires 'Carp';
+requires 'Exporter';
 requires 'ExtUtils::MakeMaker', '6.64';
 
 on 'test' => sub {
