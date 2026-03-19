@@ -223,32 +223,28 @@ sub spy {
 
 	my $full_method = "${package}::$method";
 
+	# Capture the current implementation BEFORE installing the wrapper
 	my $orig;
-
 	{
-		## no critic (ProhibitNoStrict)  # symbolic reference required
+		## no critic (ProhibitNoStrict)
 		no strict 'refs';
 		$orig = \&{$full_method};
 	}
 
+	# Track the original implementation
 	push @{ $mocked{$full_method} }, $orig;
 
-	# Data
 	my @calls;
 
-	# Build the spy wrapper outside the strict-free block
+	# Wrapper: record call, then delegate to the captured original
 	my $wrapper = sub {
 		push @calls, [ $full_method, @_ ];
-
-		# Call previous layer
-		my $prev = $mocked{$full_method}[-1];
-		return $prev->(@_);
+		return $orig->(@_);
 	};
 
 	no warnings 'redefine';
-
 	{
-		## no critic (ProhibitNoStrict)  # symbolic reference required for mocking
+		## no critic (ProhibitNoStrict)
 		no strict 'refs';
 		*{$full_method} = $wrapper;
 	}
