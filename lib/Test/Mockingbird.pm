@@ -149,7 +149,6 @@ sub unmock {
 	}
 }
 
-
 =head2 mock_scoped
 
 Creates a scoped mock that is automatically restored when it goes out of scope.
@@ -275,7 +274,7 @@ sub inject {
 	croak 'Package and dependency are required for injection' unless $package && $dependency;
 
 	no strict 'refs';
-my $full_dependency = "${package}::$dependency";
+	my $full_dependency = "${package}::$dependency";
 
 	# Backup original if not already mocked
 	push @{ $mocked{$full_dependency} }, \&{$full_dependency};

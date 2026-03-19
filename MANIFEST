@@ -17,6 +17,7 @@ t/eol.t
 t/fixme.t
 t/gv.t
 t/inject.t
+t/integration.t
 t/manifest.t
 t/mock.t
 t/mock_scoped.t

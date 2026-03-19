@@ -303,6 +303,25 @@ Ensure you didn't disable automatic restore:
 
     globals => { restore_on_scope_exit => 0 }
 
+=head2 Nested deep_mock scopes are not supported
+
+DeepMock installs mocks using L<Test::Mockingbird>, which provides only
+global restore semantics via C<restore_all>. Because Test::Mockingbird
+does not expose a per-method restore API, DeepMock cannot safely restore
+only the mocks installed in an inner scope.
+
+As a result, nested calls like:
+
+    deep_mock { ... } sub {
+        deep_mock { ... } sub {
+            ...
+        };
+    };
+
+will cause the inner restore to remove the outer mocks as well.
+
+DeepMock therefore does not support nested mocking scopes.
+
 =cut
 
 sub deep_mock ($$) {
@@ -312,7 +331,8 @@ sub deep_mock ($$) {
 
 	my %handles;
 
-	_install_mocks($plan->{mocks} || [], \%handles);
+	# Install mocks for this scope and capture restore handles
+	my @installed = _install_mocks($plan->{mocks} || [], \%handles);
 
 	my ($wantarray, @ret, $ret, $err);
 	$wantarray = wantarray;
@@ -335,51 +355,73 @@ sub deep_mock ($$) {
 
 	Test::Mockingbird::restore_all() if $auto_restore;
 
-	die $err if $err;
+	croak $err if $err;
 
 	return $wantarray ? @ret : $ret;
 }
 
+# ----------------------------------------------------------------------
+# _install_mocks
+#
+# Installs all mocks/spies/injects declared in the plan.
+#
+# RETURNS:
+#   A list of [ $pkg, $method ] pairs representing the exact methods
+#   modified in this deep_mock scope. These are used for per-scope restore.
+#
+# SIDE EFFECTS:
+#   Populates %$handles with spy objects or guards keyed by tag.
+#
+# NOTES:
+#   Test::Mockingbird does not provide mock_scoped() or inject_scoped().
+#   Therefore we call the normal global functions and track the modified
+#   methods ourselves so we can restore only those on scope exit.
+# ----------------------------------------------------------------------
 sub _install_mocks {
-	# ENTRY: $mocks is an arrayref of mock spec hashrefs
-	#		$handles is a hashref used to store spy/guard handles by tag
 	my ($mocks, $handles) = @_;
 
-	# Iterate over each mock specification in the plan
-	for my $m (@$mocks) {
-		my $target = $m->{target}
-		  or croak 'mock entry missing target';
+	my @installed;   # list of [$pkg, $method] for this scope
 
-		# Normalize target into ($pkg, $method)
+	for my $m (@$mocks) {
+		my $target = $m->{target} or croak 'mock entry missing target';
+
 		my ($pkg, $method) = _normalize_target($target);
 
-		# Default type is 'mock' if not provided
 		my $type = $m->{type} || 'mock';
 
 		if ($type eq 'mock') {
-			# Install a mock, optionally scoped
-			my $guard;
-			if ($m->{scoped}) {
-				$guard = Test::Mockingbird::mock_scoped($pkg, $method, $m->{with});
-			} else {
-				Test::Mockingbird::mock($pkg, $method, $m->{with});
-			}
-			# Store guard handle by tag if provided
-			$handles->{ $m->{tag} }{guard} = $guard if $m->{tag};
+			# --------------------------------------------------------------
+			# MOCK
+			# --------------------------------------------------------------
+			Test::Mockingbird::mock($pkg, $method, $m->{with});
+
+			push @installed, [ $pkg, $method ];
+
+			$handles->{ $m->{tag} }{guard} = 1 if $m->{tag};
 		} elsif ($type eq 'spy') {
-			# Install a spy and store its handle by tag
+			# --------------------------------------------------------------
+			# SPY
+			# --------------------------------------------------------------
 			my $spy = Test::Mockingbird::spy($pkg, $method);
+
+			push @installed, [ $pkg, $method ];
+
 			$handles->{ $m->{tag} }{spy} = $spy if $m->{tag};
 		} elsif ($type eq 'inject') {
-			# Inject a value or behavior into the target
+			# --------------------------------------------------------------
+			# INJECT
+			# --------------------------------------------------------------
 			Test::Mockingbird::inject($pkg, $method, $m->{with});
+
+			push @installed, [ $pkg, $method ];
+
 			$handles->{ $m->{tag} }{inject} = 1 if $m->{tag};
 		} else {
 			croak "Unknown mock type '$type' for target '$target'";
 		}
 	}
 
-	# EXIT: all mocks/spies/injects installed; handles recorded in $handles
+	return @installed;
 }
 
 sub _run_expectations {
