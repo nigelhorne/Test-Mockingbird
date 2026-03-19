@@ -1,6 +1,6 @@
 Revision history for Test::Mockingbird - Advanced mocking library for Perl with support for dependency injection and spies
 
-0.05
+0.05	Thu Mar 19 19:05:22 EDT 2026
 	- DeepMock:
 		- Added args_eq and args_deeply expectation types for exact and deep argument matching
 		- Added never expectation type to assert that a spy was not called

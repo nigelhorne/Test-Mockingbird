@@ -30,11 +30,11 @@ Test::Mockingbird - Advanced mocking library for Perl with support for dependenc
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 SYNOPSIS
 
