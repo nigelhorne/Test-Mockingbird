@@ -3,6 +3,8 @@ use warnings;
 use Test::Most;
 use Test::Warnings;
 use Test::Deep;
+use Test::Strict;
+use Test::Vars;
 use lib 'lib';
 
 use Test::Mockingbird;
