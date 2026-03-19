@@ -85,26 +85,30 @@ sub mock {
 		$package = $1;
 		$method = $2;
 		$replacement = $arg2;
-	}
-	# ------------------------------------------------------------
-	# Original syntax:
-	#   mock('My::Module', 'method', sub { ... })
-	# ------------------------------------------------------------
-	else {
+	} else {
+		# ------------------------------------------------------------
+		# Original syntax:
+		#   mock('My::Module', 'method', sub { ... })
+		# ------------------------------------------------------------
 		($package, $method, $replacement) = ($arg1, $arg2, $arg3);
 	}
 
 	croak 'Package and method are required for mocking' unless $package && $method;
 
-	no strict 'refs'; # Allow symbolic references
 	my $full_method = "${package}::$method";
 
 	# Backup original if not already mocked
 	push @{ $mocked{$full_method} }, \&{$full_method};
 
-	# Replace with mocked version
+	my $code = $replacement || sub {};
+
 	no warnings 'redefine';
-	*{$full_method} = $replacement || sub {};
+
+	{
+		## no critic (ProhibitNoStrict)  # symbolic reference required for mocking
+		no strict 'refs';
+		*{$full_method} = $code;
+	}
 }
 
 =head2 unmock($package, $method)
@@ -137,14 +141,17 @@ sub unmock {
 
 	my $full_method = "${package}::$method";
 
-	no strict 'refs';
-	no warnings 'redefine';
-
 	# Restore previous layer if present
 	if (exists $mocked{$full_method} && @{ $mocked{$full_method} }) {
 		my $prev = pop @{ $mocked{$full_method} };
-		*{$full_method} = $prev;
 
+		no warnings 'redefine';
+
+		{
+			## no critic (ProhibitNoStrict)  # symbolic reference required for restore
+			no strict 'refs';
+			*{$full_method} = $prev;
+		}
 		delete $mocked{$full_method} unless @{ $mocked{$full_method} };
 	}
 }
@@ -214,23 +221,37 @@ sub spy {
 
 	croak 'Package and method are required for spying' unless $package && $method;
 
-	no strict 'refs';
 	my $full_method = "${package}::$method";
 
-	# Backup previous layer
-	push @{ $mocked{$full_method} }, \&{$full_method};
+	my $orig;
+
+	{
+		## no critic (ProhibitNoStrict)  # symbolic reference required
+		no strict 'refs';
+		$orig = \&{$full_method};
+	}
+
+	push @{ $mocked{$full_method} }, $orig;
 
 	# Data
 	my @calls;
 
-	no warnings 'redefine';
-	*{$full_method} = sub {
+	# Build the spy wrapper outside the strict-free block
+	my $wrapper = sub {
 		push @calls, [ $full_method, @_ ];
 
 		# Call previous layer
 		my $prev = $mocked{$full_method}[-1];
 		return $prev->(@_);
 	};
+
+	no warnings 'redefine';
+
+	{
+		## no critic (ProhibitNoStrict)  # symbolic reference required for mocking
+		no strict 'refs';
+		*{$full_method} = $wrapper;
+	}
 
 	return sub { @calls };
 }
@@ -273,16 +294,28 @@ sub inject {
 
 	croak 'Package and dependency are required for injection' unless $package && $dependency;
 
-	no strict 'refs';
 	my $full_dependency = "${package}::$dependency";
 
-	# Backup original if not already mocked
-	push @{ $mocked{$full_dependency} }, \&{$full_dependency};
+	my $orig;
+
+	{
+		## no critic (ProhibitNoStrict)  # symbolic reference required
+		no strict 'refs';
+		$orig = \&{$full_dependency};
+	}
+
+	push @{ $mocked{$full_dependency} }, $orig;
+
+	# Build the injected dependency wrapper outside the strict-free block
+	my $wrapper = sub { $mock_object };
 
 	no warnings 'redefine';
 
-	# Replace with the mock object
-	*{$full_dependency} = sub { $mock_object };
+	{
+		## no critic (ProhibitNoStrict)  # symbolic reference required for injection
+		no strict 'refs';
+		*{$full_dependency} = $wrapper;
+	}
 }
 
 =head2 restore_all()
@@ -305,8 +338,10 @@ C<My::Module::>.
 sub restore_all {
 	my $arg = $_[0];
 
-	no strict 'refs';
-	no warnings 'redefine';
+	# ------------------------------------------------------------------
+	# If a package name is provided, restore only methods belonging to
+	# that package. Otherwise, restore everything.
+	# ------------------------------------------------------------------
 
 	if (defined $arg) {
 		my $package = $arg;
@@ -314,25 +349,42 @@ sub restore_all {
 		for my $full_method (keys %mocked) {
 			next unless $full_method =~ /^\Q$package\E::/;
 
+			# Restore all layers for this method
 			while (@{ $mocked{$full_method} }) {
 				my $prev = pop @{ $mocked{$full_method} };
-				*{$full_method} = $prev;
-			}
 
+				no warnings 'redefine';
+
+				{
+					## no critic (ProhibitNoStrict)  # symbolic reference required for restore
+					no strict 'refs';
+					*{$full_method} = $prev;
+				}
+			}
 			delete $mocked{$full_method};
 		}
 
 		return;
 	}
 
-	# Global restore
+	# ------------------------------------------------------------------
+	# Global restore: revert every mocked or injected method
+	# ------------------------------------------------------------------
 	for my $full_method (keys %mocked) {
 		while (@{ $mocked{$full_method} }) {
 			my $prev = pop @{ $mocked{$full_method} };
-			*{$full_method} = $prev;
+
+			no warnings 'redefine';
+
+			{
+				## no critic (ProhibitNoStrict)  # symbolic reference required for restore
+				no strict 'refs';
+				*{$full_method} = $prev;
+			}
 		}
 	}
 
+	# Clear all tracking
 	%mocked = ();
 }
 

@@ -5,7 +5,7 @@ use Test::Warnings;
 use Test::Deep;
 use lib 'lib';
 
-use Test::Mockingbird::DeepMock;
+use_ok('Test::Mockingbird::DeepMock');
 
 # ----------------------------------------------------------------------
 # FUNCTION LEVEL TESTS

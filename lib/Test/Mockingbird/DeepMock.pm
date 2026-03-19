@@ -423,7 +423,8 @@ until restored.
 
 =cut
 
-sub deep_mock ($$) {
+sub deep_mock
+{
 	my ($plan, $code) = @_;
 
 	croak 'deep_mock expects a HASHREF plan' unless ref $plan eq 'HASH';
