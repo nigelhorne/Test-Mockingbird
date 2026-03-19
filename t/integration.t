@@ -202,4 +202,60 @@ subtest 'missing spy tag in expectation dies' => sub {
 	} 'missing tag in expectation dies';
 };
 
+subtest 'args_eq works' => sub {
+	{
+		package DM_EQ;
+		sub foo { $_[1] }
+	}
+
+	deep_mock(
+		{
+			mocks => [
+				{ target => 'DM_EQ::foo', type => 'spy', tag => 's' },
+			],
+			expectations => [
+				{
+					tag	 => 's',
+					args_eq => [
+						[ 'alpha' ],
+						[ 'beta'  ],
+					],
+				},
+			],
+		},
+		sub {
+			DM_EQ::foo('alpha');
+			DM_EQ::foo('beta');
+		}
+	);
+};
+
+subtest 'args_deeply works' => sub {
+	{
+		package DM_DEEP;
+		sub foo { $_[1] }
+	}
+
+	deep_mock(
+		{
+			mocks => [
+				{ target => 'DM_DEEP::foo', type => 'spy', tag => 's' },
+			],
+			expectations => [
+				{
+					tag		 => 's',
+					args_deeply => [
+						[ { a => 1, b => [2,3] } ],
+						[ { x => 9 } ],
+					],
+				},
+			],
+		},
+		sub {
+			DM_DEEP::foo({ a => 1, b => [2,3] });
+			DM_DEEP::foo({ x => 9 });
+		}
+	);
+};
+
 done_testing();

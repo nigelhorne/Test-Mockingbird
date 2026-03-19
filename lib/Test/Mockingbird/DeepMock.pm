@@ -185,6 +185,16 @@ Identifies which spy this expectation applies to.
 
 Expected number of calls.
 
+=item C<args_eq>
+
+Arrayref of arrayrefs. Each inner array lists exact argument values expected
+for a specific call. Values are compared with C<Test::More::is>.
+
+=item C<args_deeply>
+
+Arrayref of arrayrefs. Each inner array lists deep structures to compare
+against the arguments for a specific call. Uses C<Test::Deep::cmp_deeply>.
+
 =item C<args_like>
 
 Arrayref of arrayrefs of regexes. Each inner array describes expected
@@ -432,52 +442,102 @@ sub _install_mocks {
 	return @installed;
 }
 
+# ----------------------------------------------------------------------
+# _run_expectations
+#
+# Evaluates all expectations declared in the plan.
+#
+# Supports:
+#   - calls      => expected call count
+#   - args_like  => regex-based argument matching
+#   - args_eq    => exact argument matching
+#   - args_deeply => deep structural matching (via Test::Deep)
+#
+# Each expectation refers to a spy by tag.
+# ----------------------------------------------------------------------
 sub _run_expectations {
-	# ENTRY: $exps is an arrayref of expectation hashrefs
-	#		$handles is the same hashref populated by _install_mocks
-	my ($exps, $handles) = @_;
+    my ($exps, $handles) = @_;
 
-	# Iterate over each expectation in the plan
-	for my $exp (@$exps) {
-		my $tag = $exp->{tag}
-		  or croak 'expectation missing tag';
+    for my $exp (@$exps) {
+        my $tag = $exp->{tag}
+          or croak 'expectation missing tag';
 
-		# Look up the spy handle by tag
-		my $spy = $handles->{$tag}{spy}
-		  or croak "no spy handle for tag '$tag'";
+        my $spy = $handles->{$tag}{spy}
+          or croak "no spy handle for tag '$tag'";
 
-		# Call the spy to retrieve recorded calls
-		my @calls = $spy->(); # each call: [ full_method, @args ]
+        my @calls = $spy->();   # each call: [ full_method, @args ]
 
-		# Check expected call count if provided
-		if (defined $exp->{calls}) {
-			Test::More::is(
-				scalar(@calls),
-				$exp->{calls},
-				"DeepMock: calls for $tag"
-			);
-		}
+        # --------------------------------------------------------------
+        # CALL COUNT
+        # --------------------------------------------------------------
+        if (defined $exp->{calls}) {
+            Test::More::is(
+                scalar(@calls),
+                $exp->{calls},
+                "DeepMock: calls for $tag"
+            );
+        }
 
-		# Check argument patterns if args_like is provided
-		if (my $args_like = $exp->{args_like}) {
-			for my $i (0 .. $#$args_like) {
-				my $patterns = $args_like->[$i];
-				my $call	 = $calls[$i] || [];
-				my @args	 = @$call[1 .. $#$call];  # skip full_method
+        # --------------------------------------------------------------
+        # args_like  (regex matching)
+        # --------------------------------------------------------------
+        if (my $args_like = $exp->{args_like}) {
+            for my $i (0 .. $#$args_like) {
+                my $patterns = $args_like->[$i];
+                my $call     = $calls[$i] || [];
+                my @args     = @$call[1 .. $#$call];
 
-				for my $j (0 .. $#$patterns) {
-					my $re = $patterns->[$j];
-					Test::More::like(
-						$args[$j],
-						ref $re ? $re : qr/$re/,
-						"DeepMock: arg $j for call $i of $tag"
-					);
-				}
-			}
-		}
-	}
+                for my $j (0 .. $#$patterns) {
+                    my $re = $patterns->[$j];
+                    Test::More::like(
+                        $args[$j],
+                        ref $re ? $re : qr/$re/,
+                        "DeepMock: arg $j for call $i of $tag (args_like)"
+                    );
+                }
+            }
+        }
 
-	# EXIT: all expectations evaluated via Test::More assertions
+        # --------------------------------------------------------------
+        # args_eq  (exact string/number matching)
+        # --------------------------------------------------------------
+        if (my $args_eq = $exp->{args_eq}) {
+            for my $i (0 .. $#$args_eq) {
+                my $expected = $args_eq->[$i];
+                my $call     = $calls[$i] || [];
+                my @args     = @$call[1 .. $#$call];
+
+                for my $j (0 .. $#$expected) {
+                    Test::More::is(
+                        $args[$j],
+                        $expected->[$j],
+                        "DeepMock: arg $j for call $i of $tag (args_eq)"
+                    );
+                }
+            }
+        }
+
+        # --------------------------------------------------------------
+        # args_deeply  (structural deep comparison)
+        # --------------------------------------------------------------
+        if (my $args_deeply = $exp->{args_deeply}) {
+            require Test::Deep;
+
+            for my $i (0 .. $#$args_deeply) {
+                my $expected = $args_deeply->[$i];
+                my $call     = $calls[$i] || [];
+                my @args     = @$call[1 .. $#$call];
+
+                for my $j (0 .. $#$expected) {
+                    Test::Deep::cmp_deeply(
+                        $args[$j],
+                        $expected->[$j],
+                        "DeepMock: arg $j for call $i of $tag (args_deeply)"
+                    );
+                }
+            }
+        }
+    }
 }
 
 sub _normalize_target {

@@ -188,4 +188,62 @@ subtest 'empty mocks and expectations do nothing' => sub {
 	} 'empty arrays are safe';
 };
 
+subtest '_run_expectations args_eq' => sub {
+	{
+		package UT_EQ;
+		sub foo { $_[1] }
+	}
+
+	my %handles;
+	my $spy = Test::Mockingbird::spy('UT_EQ', 'foo');
+	$handles{s}{spy} = $spy;
+
+	UT_EQ::foo('x');
+	UT_EQ::foo('y');
+
+	Test::Mockingbird::DeepMock::_run_expectations(
+		[
+			{
+				tag	 => 's',
+				args_eq => [
+					[ 'x' ],
+					[ 'y' ],
+				],
+			}
+		],
+		\%handles,
+	);
+
+	Test::Mockingbird::restore_all();
+};
+
+subtest '_run_expectations args_deeply' => sub {
+	{
+		package UT_DEEP;
+		sub foo { $_[1] }
+	}
+
+	my %handles;
+	my $spy = Test::Mockingbird::spy('UT_DEEP', 'foo');
+	$handles{s}{spy} = $spy;
+
+	UT_DEEP::foo({ a => 1 });
+	UT_DEEP::foo({ b => [2,3] });
+
+	Test::Mockingbird::DeepMock::_run_expectations(
+		[
+			{
+				tag		 => 's',
+				args_deeply => [
+					[ { a => 1 } ],
+					[ { b => [2,3] } ],
+				],
+			}
+		],
+		\%handles,
+	);
+
+	Test::Mockingbird::restore_all();
+};
+
 done_testing;
