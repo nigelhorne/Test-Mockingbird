@@ -5,6 +5,8 @@ use Test::Warnings;
 use Test::Deep;
 use lib 'lib';
 
+use Test::Mockingbird;
+
 use_ok('Test::Mockingbird::DeepMock');
 
 # ----------------------------------------------------------------------
@@ -177,6 +179,49 @@ subtest 'deep_mock basic function-level integration' => sub {
 			},
 		);
 	} 'deep_mock basic function-level integration passes';
+};
+
+subtest 'mock_return basic behaviour' => sub {
+    {
+        package Edge::Target;
+        sub x { return 'orig' }
+    }
+
+    mock_return 'Edge::Target::x' => 123;
+
+    is Edge::Target::x(), 123, 'mock_return overrides method';
+
+    restore_all();
+};
+
+subtest 'mock_exception basic behaviour' => sub {
+    {
+        package Edge::Target;
+        sub y { return 'orig' }
+    }
+
+    mock_exception 'Edge::Target::y' => 'boom';
+
+    dies_ok { Edge::Target::y() } 'mock_exception throws';
+    like $@, qr/boom/, 'exception message matches';
+
+    restore_all();
+};
+
+subtest 'mock_sequence basic behaviour' => sub {
+    {
+        package Edge::Target;
+        sub z { return 'orig' }
+    }
+
+    mock_sequence 'Edge::Target::z' => (10, 20, 30);
+
+    is Edge::Target::z(), 10, 'first value';
+    is Edge::Target::z(), 20, 'second value';
+    is Edge::Target::z(), 30, 'third value';
+    is Edge::Target::z(), 30, 'sequence repeats last value';
+
+    restore_all();
 };
 
 # ----------------------------------------------------------------------

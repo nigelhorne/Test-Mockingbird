@@ -146,4 +146,16 @@ subtest 'restore_all(): repeated calls are safe' => sub {
 	lives_ok { restore_all() } 'second restore_all safe';
 };
 
+subtest 'mock_return croaks without target' => sub {
+    dies_ok { mock_return undef, 1 } 'undef target croaks';
+};
+
+subtest 'mock_exception croaks without message' => sub {
+    dies_ok { mock_exception 'Edge::Target::e' } 'missing message croaks';
+};
+
+subtest 'mock_sequence croaks without values' => sub {
+    dies_ok { mock_sequence 'Edge::Target::f' } 'no values croaks';
+};
+
 done_testing();

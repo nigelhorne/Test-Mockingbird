@@ -15,6 +15,9 @@ our @EXPORT = qw(
 	spy
 	inject
 	restore_all
+	mock_return
+	mock_exception
+	mock_sequence
 );
 
 # Store mocked data
@@ -380,6 +383,132 @@ sub restore_all {
 
 	# Clear all tracking
 	%mocked = ();
+}
+
+=head2 mock_return
+
+Mock a method so that it always returns a fixed value.
+
+Takes a single target (either C<'Pkg::method'> or C<('Pkg','method')>) and
+a value to return. Returns nothing. Side effects: installs a mock layer
+using L</mock>.
+
+=head3 API specification
+
+=head4 Input
+
+Params::Validate::Strict schema:
+
+- C<target>: required, scalar, string; method target in shorthand or longhand form
+- C<value>: required, any type; value to be returned by the mock
+
+=head4 Output
+
+Returns::Set schema:
+
+- C<return>: undef
+
+=cut
+
+sub mock_return {
+	my ($target, $value) = @_;
+
+	# Entry: target must be defined, value may be any defined/undef scalar
+	# Exit: mock layer installed for target, no return value
+	# Side effects: modifies symbol table via mock()
+	# Notes: uses existing mock() parsing and stacking semantics
+	croak 'mock_return requires a target and a value' unless defined $target;
+
+	my $code = sub { $value };
+
+	# MUST use the shorthand form:
+	return mock $target => $code;
+}
+
+=head2 mock_exception
+
+Mock a method so that it always throws an exception.
+
+Takes a single target (either C<'Pkg::method'> or C<('Pkg','method')>) and
+an exception message. Returns nothing. Side effects: installs a mock layer
+using L</mock>.
+
+=head3 API specification
+
+=head4 Input
+
+Params::Validate::Strict schema:
+
+- C<target>: required, scalar, string; method target in shorthand or longhand form
+- C<message>: required, scalar, string; exception text to C<croak> with
+
+=head4 Output
+
+Returns::Set schema:
+
+- C<return>: undef
+
+=cut
+
+sub mock_exception {
+	my ($target, $message) = @_;
+
+	# Entry: target and message must be defined scalars
+	# Exit: mock layer installed for target, no return value
+	# Side effects: modifies symbol table via mock()
+	# Notes: exception is thrown with croak semantics from the mocked method
+
+	croak 'mock_exception requires a target and an exception message' unless defined $target && defined $message;
+
+	my $code = sub { croak $message };  # Throw on every call
+
+	return mock($target, $code);
+}
+
+=head2 mock_sequence
+
+Mock a method so that it returns a sequence of values over successive calls.
+
+Takes a single target (either C<'Pkg::method'> or C<('Pkg','method')>) and
+one or more values. Returns nothing. Side effects: installs a mock layer
+using L</mock>. When the sequence is exhausted, the last value is repeated.
+
+=head3 API specification
+
+=head4 Input
+
+Params::Validate::Strict schema:
+
+- C<target>: required, scalar, string; method target in shorthand or longhand form
+- C<values>: required, array; one or more values to be returned in order
+
+=head4 Output
+
+Returns::Set schema:
+
+- C<return>: undef
+
+=cut
+
+sub mock_sequence {
+	my ($target, @values) = @_;
+
+	# Entry: target defined, at least one value provided
+	# Exit: mock layer installed for target, no return value
+	# Side effects: modifies symbol table via mock()
+	# Notes: last value is repeated once the sequence is exhausted
+
+	croak 'mock_sequence requires a target and at least one value' unless defined $target && @values;
+
+	my @queue = @values;  # Local copy of the sequence
+
+	my $code = sub {
+		# If only one value remains, repeat it
+		return $queue[0] if @queue == 1;
+		return shift @queue;
+	};
+
+	return mock($target, $code);
 }
 
 sub _parse_target {

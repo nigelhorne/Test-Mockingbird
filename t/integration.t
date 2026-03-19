@@ -280,5 +280,22 @@ subtest 'never works' => sub {
     );
 };
 
+subtest 'combined mock_return + mock_exception + mock_sequence' => sub {
+    {
+        package Edge::Service;
+        sub status { return 'ok' }
+    }
+
+    mock_return    'Edge::Service::status' => 'warmup';
+    mock_sequence  'Edge::Service::status' => ('retry1', 'retry2', 'steady');
+    mock_exception 'Edge::Service::status' => 'fatal';
+
+    dies_ok { Edge::Service::status() } 'topmost mock_exception wins';
+    like $@, qr/fatal/, 'fatal error seen';
+
+    restore_all();
+
+    is Edge::Service::status(), 'ok', 'original restored';
+};
 
 done_testing();

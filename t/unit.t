@@ -6,7 +6,7 @@ use warnings;
 use lib 'lib';
 
 use Test::Most;
-use_ok('Test::Mockingbird');
+use Test::Mockingbird;
 use_ok('Test::Mockingbird::DeepMock');
 
 # We need direct access to internal functions
@@ -273,5 +273,35 @@ subtest '_run_expectations never' => sub {
     Test::Mockingbird::restore_all();
 };
 
+subtest 'mock_return stacks with mock' => sub {
+    {
+        package Edge::Target;
+        sub a { return 'orig' }
+    }
+
+    mock_return 'Edge::Target::a' => 'first';
+    mock 'Edge::Target::a' => sub { 'second' };
+
+    is Edge::Target::a(), 'second', 'top mock wins';
+
+    restore_all();
+};
+
+subtest 'mock_sequence with restore_all' => sub {
+    {
+        package Edge::Target;
+        sub b { return 'orig' }
+    }
+
+    mock_sequence 'Edge::Target::b' => (1, 2);
+
+    is Edge::Target::b(), 1, 'first';
+    is Edge::Target::b(), 2, 'second';
+
+    restore_all();
+
+    is Edge::Target::b(), 'orig', 'restore_all restores original';
+
+};
 
 done_testing;
