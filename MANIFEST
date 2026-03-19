@@ -26,3 +26,4 @@ t/pod-cm.t
 t/pod.t
 t/shorthand.t
 t/spy.t
+t/unit.t
