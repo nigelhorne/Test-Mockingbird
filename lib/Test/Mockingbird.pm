@@ -93,21 +93,19 @@ sub mock {
 		($package, $method, $replacement) = ($arg1, $arg2, $arg3);
 	}
 
-	croak 'Package and method are required for mocking' unless $package && $method;
+	croak 'Package, method and replacement are required for mocking' unless $package && $method && $replacement;
 
 	my $full_method = "${package}::$method";
 
 	# Backup original if not already mocked
 	push @{ $mocked{$full_method} }, \&{$full_method};
-
-	my $code = $replacement || sub {};
-
+	
 	no warnings 'redefine';
 
 	{
 		## no critic (ProhibitNoStrict)  # symbolic reference required for mocking
 		no strict 'refs';
-		*{$full_method} = $code;
+		*{$full_method} = $replacement;
 	}
 }
 

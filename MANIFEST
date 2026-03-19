@@ -12,7 +12,9 @@ t/00-load.t
 t/class.t
 t/comment-spelling.t
 t/cover.t
+t/critic.t
 t/deepmock.t
+t/edge-cases.t
 t/eof.t
 t/eol.t
 t/fixme.t
@@ -25,6 +27,7 @@ t/mock.t
 t/mock_scoped.t
 t/object.t
 t/pod-cm.t
+t/pod-coverage.t
 t/pod.t
 t/shorthand.t
 t/spy.t
