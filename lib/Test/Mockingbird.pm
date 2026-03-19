@@ -123,22 +123,32 @@ or the shorthand:
 sub unmock {
 	my ($arg1, $arg2) = @_;
 
-	my ($package, $method) = _parse_target(@_);
+	my ($package, $method);
+
+	if (defined $arg1 && !defined $arg2 && $arg1 =~ /^(.*)::([^:]+)$/) {
+		# Case 1: unmock 'Pkg::method'
+		($package, $method) = ($1, $2);
+	} else {
+		# Case 2: unmock 'Pkg', 'method'
+		($package, $method) = ($arg1, $arg2);
+	}
 
 	croak 'Package and method are required for unmocking' unless $package && $method;
 
-	no strict 'refs';
 	my $full_method = "${package}::$method";
 
-	# Restore original method if backed up
+	no strict 'refs';
+	no warnings 'redefine';
+
+	# Restore previous layer if present
 	if (exists $mocked{$full_method} && @{ $mocked{$full_method} }) {
 		my $prev = pop @{ $mocked{$full_method} };
-		no warnings 'redefine';
 		*{$full_method} = $prev;
 
 		delete $mocked{$full_method} unless @{ $mocked{$full_method} };
 	}
 }
+
 
 =head2 mock_scoped
 
