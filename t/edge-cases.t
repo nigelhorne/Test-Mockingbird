@@ -129,7 +129,7 @@ subtest 'restore_all(): package-specific restore' => sub {
 # ------------------------------------------------------------
 
 subtest 'mock(): undef replacement becomes empty sub' => sub {
-	dies_ok { mock 'Edge::Target::a' => undef }, 'undef replacement is not allowed';
+	dies_ok { mock 'Edge::Target::a' => undef } 'undef replacement is not allowed';
 
 	restore_all();
 };
