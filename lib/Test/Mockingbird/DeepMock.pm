@@ -200,6 +200,11 @@ against the arguments for a specific call. Uses C<Test::Deep::cmp_deeply>.
 Arrayref of arrayrefs of regexes. Each inner array describes expected
 arguments for a specific call.
 
+=item C<never>
+
+Asserts that the spy was never called.
+Mutually exclusive with C<calls>.
+
 =back
 
 =head2 C<globals>
@@ -456,88 +461,98 @@ sub _install_mocks {
 # Each expectation refers to a spy by tag.
 # ----------------------------------------------------------------------
 sub _run_expectations {
-    my ($exps, $handles) = @_;
+	my ($exps, $handles) = @_;
 
-    for my $exp (@$exps) {
-        my $tag = $exp->{tag}
-          or croak 'expectation missing tag';
+	for my $exp (@$exps) {
+		my $tag = $exp->{tag}
+		  or croak 'expectation missing tag';
 
-        my $spy = $handles->{$tag}{spy}
-          or croak "no spy handle for tag '$tag'";
+		my $spy = $handles->{$tag}{spy}
+		  or croak "no spy handle for tag '$tag'";
 
-        my @calls = $spy->();   # each call: [ full_method, @args ]
+		my @calls = $spy->();   # each call: [ full_method, @args ]
 
-        # --------------------------------------------------------------
-        # CALL COUNT
-        # --------------------------------------------------------------
-        if (defined $exp->{calls}) {
-            Test::More::is(
-                scalar(@calls),
-                $exp->{calls},
-                "DeepMock: calls for $tag"
-            );
-        }
+		# --------------------------------------------------------------
+		# CALL COUNT
+		# --------------------------------------------------------------
+		if (defined $exp->{calls}) {
+			Test::More::is(
+				scalar(@calls),
+				$exp->{calls},
+				"DeepMock: calls for $tag"
+			);
+		}
 
-        # --------------------------------------------------------------
-        # args_like  (regex matching)
-        # --------------------------------------------------------------
-        if (my $args_like = $exp->{args_like}) {
-            for my $i (0 .. $#$args_like) {
-                my $patterns = $args_like->[$i];
-                my $call     = $calls[$i] || [];
-                my @args     = @$call[1 .. $#$call];
+		# --------------------------------------------------------------
+		# args_like  (regex matching)
+		# --------------------------------------------------------------
+		if (my $args_like = $exp->{args_like}) {
+			for my $i (0 .. $#$args_like) {
+				my $patterns = $args_like->[$i];
+				my $call	 = $calls[$i] || [];
+				my @args	 = @$call[1 .. $#$call];
 
-                for my $j (0 .. $#$patterns) {
-                    my $re = $patterns->[$j];
-                    Test::More::like(
-                        $args[$j],
-                        ref $re ? $re : qr/$re/,
-                        "DeepMock: arg $j for call $i of $tag (args_like)"
-                    );
-                }
-            }
-        }
+				for my $j (0 .. $#$patterns) {
+					my $re = $patterns->[$j];
+					Test::More::like(
+						$args[$j],
+						ref $re ? $re : qr/$re/,
+						"DeepMock: arg $j for call $i of $tag (args_like)"
+					);
+				}
+			}
+		}
 
-        # --------------------------------------------------------------
-        # args_eq  (exact string/number matching)
-        # --------------------------------------------------------------
-        if (my $args_eq = $exp->{args_eq}) {
-            for my $i (0 .. $#$args_eq) {
-                my $expected = $args_eq->[$i];
-                my $call     = $calls[$i] || [];
-                my @args     = @$call[1 .. $#$call];
+		# --------------------------------------------------------------
+		# args_eq  (exact string/number matching)
+		# --------------------------------------------------------------
+		if (my $args_eq = $exp->{args_eq}) {
+			for my $i (0 .. $#$args_eq) {
+				my $expected = $args_eq->[$i];
+				my $call	 = $calls[$i] || [];
+				my @args	 = @$call[1 .. $#$call];
 
-                for my $j (0 .. $#$expected) {
-                    Test::More::is(
-                        $args[$j],
-                        $expected->[$j],
-                        "DeepMock: arg $j for call $i of $tag (args_eq)"
-                    );
-                }
-            }
-        }
+				for my $j (0 .. $#$expected) {
+					Test::More::is(
+						$args[$j],
+						$expected->[$j],
+						"DeepMock: arg $j for call $i of $tag (args_eq)"
+					);
+				}
+			}
+		}
 
-        # --------------------------------------------------------------
-        # args_deeply  (structural deep comparison)
-        # --------------------------------------------------------------
-        if (my $args_deeply = $exp->{args_deeply}) {
-            require Test::Deep;
+		# --------------------------------------------------------------
+		# args_deeply  (structural deep comparison)
+		# --------------------------------------------------------------
+		if (my $args_deeply = $exp->{args_deeply}) {
+			require Test::Deep;
 
-            for my $i (0 .. $#$args_deeply) {
-                my $expected = $args_deeply->[$i];
-                my $call     = $calls[$i] || [];
-                my @args     = @$call[1 .. $#$call];
+			for my $i (0 .. $#$args_deeply) {
+				my $expected = $args_deeply->[$i];
+				my $call	 = $calls[$i] || [];
+				my @args	 = @$call[1 .. $#$call];
 
-                for my $j (0 .. $#$expected) {
-                    Test::Deep::cmp_deeply(
-                        $args[$j],
-                        $expected->[$j],
-                        "DeepMock: arg $j for call $i of $tag (args_deeply)"
-                    );
-                }
-            }
-        }
-    }
+				for my $j (0 .. $#$expected) {
+					Test::Deep::cmp_deeply(
+						$args[$j],
+						$expected->[$j],
+						"DeepMock: arg $j for call $i of $tag (args_deeply)"
+					);
+				}
+			}
+		}
+		# --------------------------------------------------------------
+		# never  (assert spy was never called)
+		# --------------------------------------------------------------
+		if ($exp->{never}) {
+			Test::More::is(
+				scalar(@calls),
+				0,
+				"DeepMock: $tag was never called"
+			);
+		}
+	}
 }
 
 sub _normalize_target {

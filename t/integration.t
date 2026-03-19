@@ -258,4 +258,27 @@ subtest 'args_deeply works' => sub {
 	);
 };
 
+subtest 'never works' => sub {
+
+    {
+        package DM_NEVER;
+        sub foo { $_[1] }
+    }
+
+    deep_mock(
+        {
+            mocks => [
+                { target => 'DM_NEVER::foo', type => 'spy', tag => 's' },
+            ],
+            expectations => [
+                { tag => 's', never => 1 },
+            ],
+        },
+        sub {
+            # Intentionally do NOT call DM_NEVER::foo
+        }
+    );
+};
+
+
 done_testing();

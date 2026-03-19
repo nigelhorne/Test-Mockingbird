@@ -246,4 +246,32 @@ subtest '_run_expectations args_deeply' => sub {
 	Test::Mockingbird::restore_all();
 };
 
+# ----------------------------------------------------------------------
+subtest '_run_expectations never' => sub {
+
+    {
+        package UT_NEVER;
+        sub foo { $_[1] }
+    }
+
+    my %handles;
+
+    # Install a spy but do NOT call the method
+    my $spy = Test::Mockingbird::spy('UT_NEVER', 'foo');
+    $handles{s}{spy} = $spy;
+
+    Test::Mockingbird::DeepMock::_run_expectations(
+        [
+            {
+                tag   => 's',
+                never => 1,
+            }
+        ],
+        \%handles,
+    );
+
+    Test::Mockingbird::restore_all();
+};
+
+
 done_testing;
