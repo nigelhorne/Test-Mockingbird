@@ -14,6 +14,14 @@ our @EXPORT_OK = qw(deep_mock);
 
 Test::Mockingbird::DeepMock - Declarative, structured mocking and spying for Perl tests
 
+=head1 VERSION
+
+Version 0.04
+
+=cut
+
+our $VERSION = '0.04';
+
 =head1 SYNOPSIS
 
     use Test::Mockingbird::DeepMock qw(deep_mock);
