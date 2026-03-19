@@ -488,7 +488,6 @@ sub deep_mock ($$) {
 #     - Internal helper, not part of the public API
 #     - Does not support nested mocking scopes
 # ----------------------------------------------------------------------
-
 sub _install_mocks {
 	my ($mocks, $handles) = @_;
 
@@ -505,6 +504,8 @@ sub _install_mocks {
 			# --------------------------------------------------------------
 			# MOCK
 			# --------------------------------------------------------------
+			croak "mock type requires 'with' coderef" unless defined $m->{with} && ref $m->{with} eq 'CODE';
+
 			Test::Mockingbird::mock($pkg, $method, $m->{with});
 
 			push @installed, [ $pkg, $method ];
