@@ -22,6 +22,7 @@ t/function.t
 t/gv.t
 t/inject.t
 t/integration.t
+t/kwalitee.t
 t/manifest.t
 t/mock.t
 t/mock_scoped.t
