@@ -121,6 +121,75 @@ You may also restore only a specific package:
 This restores all mocked methods whose fully qualified names begin with
 `My::Module::`.
 
+## mock\_return
+
+Mock a method so that it always returns a fixed value.
+
+Takes a single target (either `'Pkg::method'` or `('Pkg','method')`) and
+a value to return. Returns nothing. Side effects: installs a mock layer
+using ["mock"](#mock).
+
+### API specification
+
+#### Input
+
+Params::Validate::Strict schema:
+
+\- `target`: required, scalar, string; method target in shorthand or longhand form
+\- `value`: required, any type; value to be returned by the mock
+
+#### Output
+
+Returns::Set schema:
+
+\- `return`: undef
+
+## mock\_exception
+
+Mock a method so that it always throws an exception.
+
+Takes a single target (either `'Pkg::method'` or `('Pkg','method')`) and
+an exception message. Returns nothing. Side effects: installs a mock layer
+using ["mock"](#mock).
+
+### API specification
+
+#### Input
+
+Params::Validate::Strict schema:
+
+\- `target`: required, scalar, string; method target in shorthand or longhand form
+\- `message`: required, scalar, string; exception text to `croak` with
+
+#### Output
+
+Returns::Set schema:
+
+\- `return`: undef
+
+## mock\_sequence
+
+Mock a method so that it returns a sequence of values over successive calls.
+
+Takes a single target (either `'Pkg::method'` or `('Pkg','method')`) and
+one or more values. Returns nothing. Side effects: installs a mock layer
+using ["mock"](#mock). When the sequence is exhausted, the last value is repeated.
+
+### API specification
+
+#### Input
+
+Params::Validate::Strict schema:
+
+\- `target`: required, scalar, string; method target in shorthand or longhand form
+\- `values`: required, array; one or more values to be returned in order
+
+#### Output
+
+Returns::Set schema:
+
+\- `return`: undef
+
 # SUPPORT
 
 This module is provided as-is without any warranty.
