@@ -226,5 +226,20 @@ subtest 'mock_sequence basic behaviour' => sub {
     restore_all();
 };
 
+subtest 'mock_once basic behaviour' => sub {
+    {
+        package Edge::Target;
+        sub a { return 'orig' }
+    }
+
+    mock_once 'Edge::Target::a' => sub { 'once' };
+
+    is Edge::Target::a(), 'once', 'first call uses mock_once';
+    is Edge::Target::a(), 'orig', 'second call restored original';
+
+    restore_all();
+};
+
+
 # ----------------------------------------------------------------------
 done_testing();

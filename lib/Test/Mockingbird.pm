@@ -18,6 +18,7 @@ our @EXPORT = qw(
 	mock_return
 	mock_exception
 	mock_sequence
+	mock_once
 );
 
 # Store mocked data
@@ -509,6 +510,65 @@ sub mock_sequence {
 	};
 
 	return mock($target, $code);
+}
+
+=head2 mock_once
+
+Install a mock that is executed exactly once. After the first call, the
+previous implementation is automatically restored. This is useful for
+testing retry logic, fallback behaviour, and state transitions.
+
+=head3 API specification
+
+=head4 Input (Params::Validate::Strict schema)
+
+- C<target>: required, scalar, string; method target in shorthand or longhand form
+- C<code>: required, coderef; mock implementation to run once
+
+=head4 Output (Returns::Set schema)
+
+- C<return>: undef
+
+=cut
+
+sub mock_once {
+    my ($target, $code) = @_;
+
+    # Entry criteria:
+    # - target must be defined
+    # - code must be a coderef
+    croak 'mock_once requires a target and a coderef'
+        unless defined $target && ref($code) eq 'CODE';
+
+    # Parse target using existing logic
+    my ($package, $method) = _parse_target($target);
+    my $full_method = "${package}::$method";
+
+    # Capture original implementation before installing the wrapper
+    my $orig;
+    {
+        ## no critic (ProhibitNoStrict)
+        no strict 'refs';
+        $orig = \&{$full_method};
+    }
+
+    # Install a wrapper that:
+    # - runs the mock once
+    # - restores the original
+    # - delegates all subsequent calls to the original
+    my $wrapper = sub {
+        # Run the mock implementation
+        my @result = $code->(@_);
+
+        # Restore the previous implementation
+        Test::Mockingbird::unmock($package, $method);
+
+        # Return the mock's result
+        return wantarray ? @result : $result[0];
+    };
+
+    # Install the wrapper as a mock layer
+    return mock $target => $wrapper;
 }
 
 sub _parse_target {

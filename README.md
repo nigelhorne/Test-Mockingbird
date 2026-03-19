@@ -190,6 +190,23 @@ Returns::Set schema:
 
 \- `return`: undef
 
+## mock\_once
+
+Install a mock that is executed exactly once. After the first call, the
+previous implementation is automatically restored. This is useful for
+testing retry logic, fallback behaviour, and state transitions.
+
+### API specification
+
+#### Input (Params::Validate::Strict schema)
+
+\- `target`: required, scalar, string; method target in shorthand or longhand form
+\- `code`: required, coderef; mock implementation to run once
+
+#### Output (Returns::Set schema)
+
+\- `return`: undef
+
 # SUPPORT
 
 This module is provided as-is without any warranty.
@@ -221,3 +238,16 @@ Nigel Horne, `<njh at nigelhorne.com>`
 # SUPPORT
 
 This module is provided as-is without any warranty.
+
+# LICENCE AND COPYRIGHT
+
+Copyright 2025-2026 Nigel Horne.
+
+Usage is subject to licence terms.
+
+The licence terms of this software are as follows:
+
+- Personal single user, single computer use: GPL2
+- All other users (including Commercial, Charity, Educational, Government)
+  must apply in writing for a licence for use from Nigel Horne at the
+  above e-mail.

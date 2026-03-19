@@ -298,4 +298,18 @@ subtest 'combined mock_return + mock_exception + mock_sequence' => sub {
     is Edge::Service::status(), 'ok', 'original restored';
 };
 
+subtest 'mock_once with retry logic' => sub {
+    {
+        package Edge::Service;
+        sub ping { return 'ok' }
+    }
+
+    mock_once 'Edge::Service::ping' => sub { 'fail' };
+
+    is Edge::Service::ping(), 'fail', 'first call fails';
+    is Edge::Service::ping(), 'ok',   'second call succeeds';
+
+    restore_all();
+};
+
 done_testing();

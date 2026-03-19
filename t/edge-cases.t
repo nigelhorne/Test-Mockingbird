@@ -158,4 +158,23 @@ subtest 'mock_sequence croaks without values' => sub {
     dies_ok { mock_sequence 'Edge::Target::f' } 'no values croaks';
 };
 
+subtest 'mock_once croaks on missing coderef' => sub {
+    dies_ok { mock_once 'Edge::Target::x' => undef }
+        'undef coderef rejected';
+};
+
+subtest 'mock_once does not recurse' => sub {
+    {
+        package Edge::Target;
+        sub y { return 'orig' }
+    }
+
+    mock_once 'Edge::Target::y' => sub { 'once' };
+
+    is Edge::Target::y(), 'once', 'first call ok';
+    is Edge::Target::y(), 'orig', 'no recursion after restore';
+
+    restore_all();
+};
+
 done_testing();

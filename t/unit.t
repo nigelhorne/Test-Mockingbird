@@ -249,59 +249,74 @@ subtest '_run_expectations args_deeply' => sub {
 # ----------------------------------------------------------------------
 subtest '_run_expectations never' => sub {
 
-    {
-        package UT_NEVER;
-        sub foo { $_[1] }
-    }
+	{
+		package UT_NEVER;
+		sub foo { $_[1] }
+	}
 
-    my %handles;
+	my %handles;
 
-    # Install a spy but do NOT call the method
-    my $spy = Test::Mockingbird::spy('UT_NEVER', 'foo');
-    $handles{s}{spy} = $spy;
+	# Install a spy but do NOT call the method
+	my $spy = Test::Mockingbird::spy('UT_NEVER', 'foo');
+	$handles{s}{spy} = $spy;
 
-    Test::Mockingbird::DeepMock::_run_expectations(
-        [
-            {
-                tag   => 's',
-                never => 1,
-            }
-        ],
-        \%handles,
-    );
+	Test::Mockingbird::DeepMock::_run_expectations(
+		[
+			{
+				tag   => 's',
+				never => 1,
+			}
+		],
+		\%handles,
+	);
 
-    Test::Mockingbird::restore_all();
+	Test::Mockingbird::restore_all();
 };
 
 subtest 'mock_return stacks with mock' => sub {
-    {
-        package Edge::Target;
-        sub a { return 'orig' }
-    }
+	{
+		package Edge::Target;
+		sub a { return 'orig' }
+	}
 
-    mock_return 'Edge::Target::a' => 'first';
-    mock 'Edge::Target::a' => sub { 'second' };
+	mock_return 'Edge::Target::a' => 'first';
+	mock 'Edge::Target::a' => sub { 'second' };
 
-    is Edge::Target::a(), 'second', 'top mock wins';
+	is Edge::Target::a(), 'second', 'top mock wins';
 
-    restore_all();
+	restore_all();
 };
 
 subtest 'mock_sequence with restore_all' => sub {
-    {
-        package Edge::Target;
-        sub b { return 'orig' }
-    }
+	{
+		package Edge::Target;
+		sub b { return 'orig' }
+	}
 
-    mock_sequence 'Edge::Target::b' => (1, 2);
+	mock_sequence 'Edge::Target::b' => (1, 2);
 
-    is Edge::Target::b(), 1, 'first';
-    is Edge::Target::b(), 2, 'second';
+	is Edge::Target::b(), 1, 'first';
+	is Edge::Target::b(), 2, 'second';
 
-    restore_all();
+	restore_all();
 
-    is Edge::Target::b(), 'orig', 'restore_all restores original';
+	is Edge::Target::b(), 'orig', 'restore_all restores original';
 
+};
+
+subtest 'mock_once stacks correctly' => sub {
+	{
+		package Edge::Target;
+		sub c { return 'orig' }
+	}
+
+	mock_return 'Edge::Target::c' => 'first';
+	mock_once   'Edge::Target::c' => sub { 'once' };
+
+	is Edge::Target::c(), 'once',  'mock_once fires first';
+	is Edge::Target::c(), 'first', 'then previous mock restored';
+
+	restore_all();
 };
 
 done_testing;
