@@ -3,8 +3,6 @@
 # https://github.com/marketplace/actions/setup-perl-environment
 
 name: Test Code
-permissions:
-  contents: read
 on:
   push:
     branches:
@@ -14,6 +12,12 @@ on:
   pull_request:
   schedule:
     - cron: '11 0 7 * *'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -41,7 +45,6 @@ jobs:
           cpanm -iqn --skip-satisfied --installdeps --notest .
       - name: Make Module
         env:
-          AUTHOR_TESTING: 1
           AUTOMATED_TESTING: 1
           NO_NETWORK_TESTING: 1
           NONINTERACTIVE_TESTING: 1
@@ -51,7 +54,6 @@ jobs:
           make
       - name: Run Tests
         env:
-          AUTHOR_TESTING: 1
           AUTOMATED_TESTING: 1
           NO_NETWORK_TESTING: 1
           NONINTERACTIVE_TESTING: 1
@@ -63,3 +65,12 @@ jobs:
         #   curl -Os https://uploader.codecov.io/latest/macos/codecov
         #   chmod +x codecov
         #   ./codecov -t ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Show cpanm build log on failure (Windows)
+        if: runner.os == 'Windows' && failure()
+        shell: pwsh
+        run: Get-Content "$env:USERPROFILE\.cpanm\work\*\build.log" -Tail 100
+
+      - name: Show cpanm build log on failure (non-Windows)
+        if: runner.os != 'Windows' && failure()
+        run: tail -100 "$HOME/.cpanm/work/*/build.log"
