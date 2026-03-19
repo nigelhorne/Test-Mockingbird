@@ -362,6 +362,28 @@ You can find documentation for this module with the perldoc command.
 
     perldoc Test::Mockingbird
 
+=head1 AUTHOR
+
+Nigel Horne, C<< <njh at nigelhorne.com> >>
+
+=head1 BUGS
+
+=head1 SEE ALSO
+
+=over 4
+
+=item * L<Test::Mockingbird::DeepMock>
+
+=back
+
+=head1 REPOSITORY
+
+L<https://github.com/nigelhorne/Test-Mockingbird>
+
+=head1 SUPPORT
+
+This module is provided as-is without any warranty.
+
 =cut
 
 1;

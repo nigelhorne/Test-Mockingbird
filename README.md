@@ -134,3 +134,21 @@ automatically be notified of progress on your bug as I make changes.
 You can find documentation for this module with the perldoc command.
 
     perldoc Test::Mockingbird
+
+# AUTHOR
+
+Nigel Horne, `<njh at nigelhorne.com>`
+
+# BUGS
+
+# SEE ALSO
+
+- [Test::Mockingbird::DeepMock](https://metacpan.org/pod/Test%3A%3AMockingbird%3A%3ADeepMock)
+
+# REPOSITORY
+
+[https://github.com/nigelhorne/Test-Mockingbird](https://github.com/nigelhorne/Test-Mockingbird)
+
+# SUPPORT
+
+This module is provided as-is without any warranty.
