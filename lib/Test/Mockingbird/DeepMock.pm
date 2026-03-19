@@ -345,6 +345,82 @@ will cause the inner restore to remove the outer mocks as well.
 
 DeepMock therefore does not support nested mocking scopes.
 
+=head2 deep_mock
+
+Run a block of code with a set of mocks and expectations applied.
+
+=head3 Purpose
+
+Provides a declarative wrapper around Test::Mockingbird that installs mocks,
+runs a code block, and then validates expectations such as call counts and
+argument patterns.
+
+=head3 Arguments
+
+=over 4
+
+=item * C<$plan> - HashRef
+
+A plan describing mocks and expectations. Keys:
+
+=over 4
+
+=item * C<mocks> - ArrayRef of mock specifications
+
+Each specification includes:
+
+- C<target> - "Package::method"
+- C<type> - "mock" or "spy"
+- C<with> - coderef for mock behavior (mock only)
+- C<tag> - identifier for later expectations
+
+=item * C<expectations> - ArrayRef of expectation specifications
+
+Each specification includes:
+
+- C<tag> - spy tag to validate
+- C<calls> - expected call count
+- C<args_like> - regex argument matching
+- C<args_eq> - exact argument matching
+- C<args_deeply> - deep structural matching
+- C<never> - assert spy was not called
+
+=back
+
+=item * C<$code> - CodeRef
+
+The block to execute while mocks are active.
+
+=back
+
+=head3 Returns
+
+Nothing. Dies on expectation failure.
+
+=head3 Side Effects
+
+Temporarily installs mocks and spies into the target packages. All mocks are
+removed after the code block completes.
+
+=head3 Notes
+
+This routine does not support nested deep_mock scopes. All mocks are global
+until restored.
+
+=head3 API
+
+=head4 Input (Params::Validate::Strict)
+
+    {
+        mocks        => ArrayRef,
+        expectations => ArrayRef,
+    },
+    CodeRef
+
+=head4 Output (Returns::Set)
+
+    returns: undef
+
 =cut
 
 sub deep_mock ($$) {
@@ -384,22 +460,35 @@ sub deep_mock ($$) {
 }
 
 # ----------------------------------------------------------------------
-# _install_mocks
+# NAME
+#     _install_mocks
 #
-# Installs all mocks/spies/injects declared in the plan.
+# PURPOSE
+#     Install mocks and spies as described in the plan. Creates
+#     Test::Mockingbird handles and stores them in the provided hash.
 #
-# RETURNS:
-#   A list of [ $pkg, $method ] pairs representing the exact methods
-#   modified in this deep_mock scope. These are used for per-scope restore.
+# ENTRY CRITERIA
+#     - $mocks: ArrayRef of mock specifications
+#     - $handles: HashRef for storing created mock and spy handles
+#     - Each mock specification must include:
+#         target => "Package::method"
+#         type   => "mock" or "spy"
+#         tag    => identifier for expectations
+#         with   => coderef (required for type "mock")
 #
-# SIDE EFFECTS:
-#   Populates %$handles with spy objects or guards keyed by tag.
+# EXIT STATUS
+#     - Returns a list of guard objects for later cleanup
+#     - Croaks on invalid specifications
 #
-# NOTES:
-#   Test::Mockingbird does not provide mock_scoped() or inject_scoped().
-#   Therefore we call the normal global functions and track the modified
-#   methods ourselves so we can restore only those on scope exit.
+# SIDE EFFECTS
+#     - Modifies symbol tables of target packages to install mocks/spies
+#     - Populates $handles with created spy and mock handles
+#
+# NOTES
+#     - Internal helper, not part of the public API
+#     - Does not support nested mocking scopes
 # ----------------------------------------------------------------------
+
 sub _install_mocks {
 	my ($mocks, $handles) = @_;
 
@@ -448,18 +537,37 @@ sub _install_mocks {
 }
 
 # ----------------------------------------------------------------------
-# _run_expectations
+# NAME
+#     _run_expectations
 #
-# Evaluates all expectations declared in the plan.
+# PURPOSE
+#     Validate expectations against recorded spy calls. Supports call
+#     counts, regex matching, exact matching, deep matching, and "never".
 #
-# Supports:
-#   - calls      => expected call count
-#   - args_like  => regex-based argument matching
-#   - args_eq    => exact argument matching
-#   - args_deeply => deep structural matching (via Test::Deep)
+# ENTRY CRITERIA
+#     - $expectations: ArrayRef of expectation specifications
+#     - $handles: HashRef containing spy handles keyed by tag
+#     - Each expectation may include:
+#         tag          => spy tag to validate
+#         calls        => expected call count
+#         args_like    => regex argument matching
+#         args_eq      => exact argument matching
+#         args_deeply  => deep structural matching
+#         never        => assert spy was not called
 #
-# Each expectation refers to a spy by tag.
+# EXIT STATUS
+#     - Returns nothing
+#     - Emits TAP output via Test::More and Test::Deep
+#     - Croaks if a required spy handle is missing
+#
+# SIDE EFFECTS
+#     - Produces test output
+#
+# NOTES
+#     - Internal helper, not part of the public API
+#     - Caller must ensure all tags refer to installed spies
 # ----------------------------------------------------------------------
+
 sub _run_expectations {
 	my ($exps, $handles) = @_;
 
@@ -554,6 +662,31 @@ sub _run_expectations {
 		}
 	}
 }
+
+# ----------------------------------------------------------------------
+# NAME
+#     _normalize_target
+#
+# PURPOSE
+#     Convert a target specification into a canonical (package, method)
+#     pair. Accepts either "Package::method" or separate arguments.
+#
+# ENTRY CRITERIA
+#     - $pkg_or_full: String, either "Package::method" or a package name
+#     - $maybe_method: Optional string, method name if provided separately
+#
+# EXIT STATUS
+#     - Returns a two element list: ($package, $method)
+#     - Croaks if the target cannot be parsed
+#
+# SIDE EFFECTS
+#     - None
+#
+# NOTES
+#     - Internal helper, not part of the public API
+#     - Caller must ensure the returned package and method exist or will
+#       be created by mocking
+# ----------------------------------------------------------------------
 
 sub _normalize_target {
 	# ENTRY: $arg1 may be 'Package::method' or a package name

@@ -70,6 +70,33 @@ All contributions must pass:
 - **Test::Pod**
 - **Test::Pod::Coverage**
 
+### Helper Routines (routines that start with _)
+
+
+#### NAME
+_routine_name
+
+#### PURPOSE
+Brief description of what this helper does.
+
+#### ENTRY CRITERIA
+- List of required arguments
+- Expected types or shapes
+- Preconditions that must be true
+
+#### EXIT STATUS
+- What the routine returns
+- Whether it may croak
+
+#### SIDE EFFECTS
+- Any symbol table changes
+- Any global state changes
+- Any warnings or output
+
+#### NOTES
+- Internal only, not part of public API
+- Any assumptions or invariants
+
 ---
 
 ## Change Tracking
