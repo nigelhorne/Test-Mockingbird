@@ -4,7 +4,7 @@ Test::Mockingbird - Advanced mocking library for Perl with support for dependenc
 
 # VERSION
 
-Version 0.04
+Version 0.05
 
 # SYNOPSIS
 
@@ -202,6 +202,22 @@ testing retry logic, fallback behaviour, and state transitions.
 
 \- `target`: required, scalar, string; method target in shorthand or longhand form
 \- `code`: required, coderef; mock implementation to run once
+
+#### Output (Returns::Set schema)
+
+\- `return`: undef
+
+## restore
+
+Restore all mock layers for a single method target. This is similar to
+`restore_all`, but applies only to one method. If the method was never
+mocked, this routine has no effect.
+
+### API specification
+
+#### Input (Params::Validate::Strict schema)
+
+\- `target`: required, scalar, string; method target in shorthand or longhand form
 
 #### Output (Returns::Set schema)
 
