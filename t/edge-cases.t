@@ -177,4 +177,19 @@ subtest 'mock_once does not recurse' => sub {
     restore_all();
 };
 
+subtest 'restore on never-mocked method is safe' => sub {
+    {
+        package Edge::Restore;
+        sub d { return 'orig' }
+    }
+
+    lives_ok { restore 'Edge::Restore::d' } 'restore on untouched method is safe';
+    is Edge::Restore::d(), 'orig', 'method unchanged';
+};
+
+subtest 'restore on nonexistent method deletes nothing' => sub {
+    lives_ok { restore 'Edge::Restore::nope' } 'restore on nonexistent method is safe';
+};
+
+
 done_testing();

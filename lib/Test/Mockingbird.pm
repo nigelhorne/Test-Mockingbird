@@ -14,6 +14,7 @@ our @EXPORT = qw(
 	mock_scoped
 	spy
 	inject
+	restore
 	restore_all
 	mock_return
 	mock_exception
@@ -569,6 +570,66 @@ sub mock_once {
 
     # Install the wrapper as a mock layer
     return mock $target => $wrapper;
+}
+
+=head2 restore
+
+Restore all mock layers for a single method target. This is similar to
+C<restore_all>, but applies only to one method. If the method was never
+mocked, this routine has no effect.
+
+=head3 API specification
+
+=head4 Input (Params::Validate::Strict schema)
+
+- C<target>: required, scalar, string; method target in shorthand or longhand form
+
+=head4 Output (Returns::Set schema)
+
+- C<return>: undef
+
+=cut
+
+sub restore {
+	my $target = $_[0];
+
+	# Entry criteria:
+	# - target must be defined
+	croak 'restore requires a target' unless defined $target;
+
+	# Parse target using existing logic
+	my ($package, $method) = _parse_target($target);
+	my $full_method = "${package}::$method";
+
+	# Exit early if nothing to restore
+	return unless exists $mocked{$full_method};
+
+	# Restore all layers for this method
+	while (@{ $mocked{$full_method} }) {
+		my $prev = pop @{ $mocked{$full_method} };
+
+		if (defined $prev) {
+			# Restore previous coderef
+			no warnings 'redefine';
+			{
+				## no critic (ProhibitNoStrict)
+				no strict 'refs';
+				*{$full_method} = $prev;
+			}
+		} else {
+			# Original method did not exist — remove glob
+			{
+				## no critic (ProhibitNoStrict)
+				no strict 'refs';
+				delete ${"${package}::"}{$method};
+			}
+		}
+	}
+
+	# Clean up tracking
+	delete $mocked{$full_method};
+
+	return;
 }
 
 sub _parse_target {

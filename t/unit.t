@@ -319,4 +319,23 @@ subtest 'mock_once stacks correctly' => sub {
 	restore_all();
 };
 
+subtest 'restore unwinds stacked mocks' => sub {
+    {
+        package Edge::Restore;
+        sub b { return 'orig' }
+    }
+
+    mock_return 'Edge::Restore::b' => 'layer1';
+    mock_return 'Edge::Restore::b' => 'layer2';
+
+    is Edge::Restore::b(), 'layer2', 'top layer active';
+
+    restore 'Edge::Restore::b';
+
+    is Edge::Restore::b(), 'orig', 'all layers removed';
+
+    restore_all();
+};
+
+
 done_testing;

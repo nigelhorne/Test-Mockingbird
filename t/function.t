@@ -8,7 +8,6 @@ use Test::Vars;
 use lib 'lib';
 
 use Test::Mockingbird;
-
 use_ok('Test::Mockingbird::DeepMock');
 
 # ----------------------------------------------------------------------
@@ -240,6 +239,22 @@ subtest 'mock_once basic behaviour' => sub {
     restore_all();
 };
 
+subtest 'restore basic behaviour' => sub {
+    {
+        package Edge::Restore;
+        sub a { return 'orig' }
+    }
+
+    mock_return 'Edge::Restore::a' => 'mocked';
+
+    is Edge::Restore::a(), 'mocked', 'mock applied';
+
+    restore 'Edge::Restore::a';
+
+    is Edge::Restore::a(), 'orig', 'restore restored original';
+
+    restore_all();
+};
 
 # ----------------------------------------------------------------------
 done_testing();
