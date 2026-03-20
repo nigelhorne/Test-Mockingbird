@@ -24,6 +24,7 @@ our @EXPORT = qw(
 
 # Store mocked data
 my %mocked;  # becomes: method => [ stack of backups ]
+my %mock_meta;   # full_method => [ { type => ..., installed_at => ... }, ... ]
 
 =head1 NAME
 
@@ -112,6 +113,12 @@ sub mock {
 		no strict 'refs';
 		*{$full_method} = $replacement;
 	}
+	my $type = $Test::Mockingbird::TYPE // 'mock';
+
+	push @{ $mock_meta{$full_method} }, {
+		type         => $type,   # 'mock', 'spy', 'inject', etc.
+		installed_at => (caller)[1] . ' line ' . (caller)[2],
+	};
 }
 
 =head2 unmock($package, $method)
@@ -156,6 +163,7 @@ sub unmock {
 			*{$full_method} = $prev;
 		}
 		delete $mocked{$full_method} unless @{ $mocked{$full_method} };
+		delete $mock_meta{$full_method};
 	}
 }
 
@@ -198,6 +206,10 @@ sub mock_scoped {
 
 	my $full_method = "${package}::$method";
 
+	push @{ $mock_meta{$full_method} }, {
+		type         => 'mock_scoped',
+		installed_at => (caller)[1] . ' line ' . (caller)[2],
+	};
 	return Test::Mockingbird::Guard->new($full_method);
 }
 
@@ -252,6 +264,10 @@ sub spy {
 		*{$full_method} = $wrapper;
 	}
 
+	push @{ $mock_meta{$full_method} }, {
+		type         => 'spy',
+		installed_at => (caller)[1] . ' line ' . (caller)[2],
+	};
 	return sub { @calls };
 }
 
@@ -282,12 +298,11 @@ sub inject {
 		$package     = $1;
 		$dependency  = $2;
 		$mock_object = $arg2;
-	}
-	# ------------------------------------------------------------
-	# Original syntax:
-	#   inject('My::Module', 'Dependency', $mock_obj)
-	# ------------------------------------------------------------
-	else {
+	} else {
+		# ------------------------------------------------------------
+		# Original syntax:
+		#   inject('My::Module', 'Dependency', $mock_obj)
+		# ------------------------------------------------------------
 		($package, $dependency, $mock_object) = ($arg1, $arg2, $arg3);
 	}
 
@@ -315,6 +330,10 @@ sub inject {
 		no strict 'refs';
 		*{$full_dependency} = $wrapper;
 	}
+	push @{ $mock_meta{$full_dependency} }, {
+		type         => 'inject',
+		installed_at => (caller)[1] . ' line ' . (caller)[2],
+	};
 }
 
 =head2 restore_all()
@@ -361,6 +380,7 @@ sub restore_all {
 				}
 			}
 			delete $mocked{$full_method};
+			delete $mock_meta{$full_method};
 		}
 
 		return;
@@ -385,6 +405,7 @@ sub restore_all {
 
 	# Clear all tracking
 	%mocked = ();
+	%mock_meta = ();
 }
 
 =head2 mock_return
@@ -422,6 +443,8 @@ sub mock_return {
 	croak 'mock_return requires a target and a value' unless defined $target;
 
 	my $code = sub { $value };
+
+	local $Test::Mockingbird::TYPE = 'mock_return';
 
 	# MUST use the shorthand form:
 	return mock $target => $code;
@@ -463,6 +486,8 @@ sub mock_exception {
 	croak 'mock_exception requires a target and an exception message' unless defined $target && defined $message;
 
 	my $code = sub { croak $message };  # Throw on every call
+
+	local $Test::Mockingbird::TYPE = 'mock_exception';
 
 	return mock($target, $code);
 }
@@ -510,6 +535,8 @@ sub mock_sequence {
 		return shift @queue;
 	};
 
+	local $Test::Mockingbird::TYPE = 'mock_sequence';
+
 	return mock($target, $code);
 }
 
@@ -533,17 +560,16 @@ testing retry logic, fallback behaviour, and state transitions.
 =cut
 
 sub mock_once {
-    my ($target, $code) = @_;
+	my ($target, $code) = @_;
 
-    # Entry criteria:
-    # - target must be defined
-    # - code must be a coderef
-    croak 'mock_once requires a target and a coderef'
-        unless defined $target && ref($code) eq 'CODE';
+	# Entry criteria:
+	# - target must be defined
+	# - code must be a coderef
+	croak 'mock_once requires a target and a coderef' unless defined $target && ref($code) eq 'CODE';
 
-    # Parse target using existing logic
-    my ($package, $method) = _parse_target($target);
-    my $full_method = "${package}::$method";
+	# Parse target using existing logic
+	my ($package, $method) = _parse_target($target);
+	my $full_method = "${package}::$method";
 
     # Capture original implementation before installing the wrapper
     my $orig;
@@ -568,8 +594,10 @@ sub mock_once {
         return wantarray ? @result : $result[0];
     };
 
-    # Install the wrapper as a mock layer
-    return mock $target => $wrapper;
+	local $Test::Mockingbird::TYPE = 'mock_once';
+
+	# Install the wrapper as a mock layer
+	return mock $target => $wrapper;
 }
 
 =head2 restore
@@ -628,6 +656,7 @@ sub restore {
 
 	# Clean up tracking
 	delete $mocked{$full_method};
+	delete $mock_meta{$full_method};
 
 	return;
 }
