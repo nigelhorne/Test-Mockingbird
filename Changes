@@ -1,6 +1,6 @@
 Revision history for Test::Mockingbird - Advanced mocking library for Perl with support for dependency injection and spies
 
-0.06
+0.06	Fri Mar 20 08:13:40 EDT 2026
 	- Add restore(): restore all mock layers for a single method target.
 	- Added diagnose_mocks() and diagnose_mocks_pretty() for structured and
 		human-readable inspection of active mock layers,
