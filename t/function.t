@@ -256,5 +256,24 @@ subtest 'restore basic behaviour' => sub {
     restore_all();
 };
 
+subtest 'diagnose_mocks basic structure' => sub {
+    {
+        package DM::F1;
+        sub a { 1 }
+    }
+
+    mock_return 'DM::F1::a' => 42;
+
+    my $diag = diagnose_mocks();
+
+    ok exists $diag->{'DM::F1::a'}, 'entry exists';
+    is $diag->{'DM::F1::a'}{depth}, 1, 'depth correct';
+
+    is $diag->{'DM::F1::a'}{layers}[0]{type}, 'mock_return', 'type recorded';
+
+    restore_all();
+};
+
+
 # ----------------------------------------------------------------------
 done_testing();

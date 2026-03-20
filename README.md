@@ -31,6 +31,51 @@ Version 0.05
 
 Test::Mockingbird provides powerful mocking, spying, and dependency injection capabilities to streamline testing in Perl.
 
+# DIAGNOSTICS
+
+Test::Mockingbird provides optional, non-intrusive diagnostic routines
+that allow inspection of the current mocking state during test execution.
+These routines are purely observational. They do not modify any mocking
+behaviour, symbol table entries, or internal state.
+
+Diagnostics are useful when debugging complex test suites, verifying
+mock layering behaviour, or understanding interactions between multiple
+mocking primitives such as mock, spy, inject, and the sugar functions.
+
+## diagnose\_mocks
+
+Return a structured hashref describing all currently active mock layers.
+Each entry includes the fully qualified method name, the number of active
+layers, whether the original method existed, and metadata for each layer
+(type and installation location). See the diagnose\_mocks method for full
+API details.
+
+## diagnose\_mocks\_pretty
+
+Return a human-readable, multi-line string describing all active mock
+layers. This routine is intended for debugging and inspection during test
+development. The output format is stable for human consumption but is not
+guaranteed for machine parsing. See the diagnose\_mocks\_pretty method for
+full API details.
+
+## Diagnostic Metadata
+
+Diagnostic information is recorded automatically whenever a mock layer is
+successfully installed. Each layer records:
+
+    * type          The category of mock layer (for example: mock, spy,
+                    inject, mock_return, mock_exception, mock_sequence,
+                    mock_once, mock_scoped)
+
+    * installed_at  The file and line number where the layer was created
+
+This metadata is maintained in parallel with the internal mock stack and
+is automatically cleared when a method is fully restored via unmock or
+restore\_all.
+
+Diagnostics never alter the behaviour of the mocking engine and may be
+safely invoked at any point during a test run.
+
 # METHODS
 
 ## mock($package, $method, $replacement)
@@ -222,6 +267,77 @@ mocked, this routine has no effect.
 #### Output (Returns::Set schema)
 
 \- `return`: undef
+
+## diagnose\_mocks
+
+Return a structured hashref describing all currently active mock layers.
+This routine is purely observational and does not modify any state.
+
+### API specification
+
+#### Input
+
+Params::Validate::Strict schema:
+
+\- none
+
+#### Output
+
+Returns::Set schema:
+
+\- `return`: hashref; keys are fully qualified method names, values are
+  hashrefs containing:
+  - `depth`: integer; number of active mock layers
+  - `layers`: arrayref of hashrefs; each layer has:
+      - `type`: string
+      - `installed_at`: string
+  - `original_existed`: boolean
+
+## diagnose\_mocks\_pretty
+
+Return a human-readable string describing all currently active mock layers.
+This routine is purely observational and does not modify any state.
+
+### API specification
+
+#### Input
+
+Params::Validate::Strict schema:
+
+\- none
+
+#### Output
+
+Returns::Set schema:
+
+\- `return`: scalar string; formatted multi-line description of all active
+  mock layers, including:
+  - fully qualified method name
+  - depth (number of active layers)
+  - whether the original method existed
+  - each layer's type and installation location
+
+### Behaviour
+
+#### Entry
+
+\- No arguments are accepted.
+
+#### Exit
+
+\- Returns a formatted string describing the current mocking state.
+
+#### Side effects
+
+\- None. This routine does not modify `%mocked`, `%mock_meta`, or any
+  symbol table entries.
+
+#### Notes
+
+\- This routine is intended for debugging and diagnostics. It is safe to
+  call at any point during a test run.
+\- The output format is stable and suitable for human inspection, but not
+  guaranteed to remain fixed for machine parsing.
 
 # SUPPORT
 

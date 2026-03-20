@@ -9,17 +9,19 @@ use Carp qw(croak);
 use Exporter 'import';
 
 our @EXPORT = qw(
-	mock
-	unmock
-	mock_scoped
-	spy
-	inject
-	restore
-	restore_all
-	mock_return
-	mock_exception
-	mock_sequence
-	mock_once
+    mock
+    unmock
+    mock_scoped
+    spy
+    inject
+    restore
+    restore_all
+    mock_return
+    mock_exception
+    mock_sequence
+    mock_once
+    diagnose_mocks
+    diagnose_mocks_pretty
 );
 
 # Store mocked data
@@ -62,6 +64,51 @@ our $VERSION = '0.05';
 =head1 DESCRIPTION
 
 Test::Mockingbird provides powerful mocking, spying, and dependency injection capabilities to streamline testing in Perl.
+
+=head1 DIAGNOSTICS
+
+Test::Mockingbird provides optional, non-intrusive diagnostic routines
+that allow inspection of the current mocking state during test execution.
+These routines are purely observational. They do not modify any mocking
+behaviour, symbol table entries, or internal state.
+
+Diagnostics are useful when debugging complex test suites, verifying
+mock layering behaviour, or understanding interactions between multiple
+mocking primitives such as mock, spy, inject, and the sugar functions.
+
+=head2 diagnose_mocks
+
+Return a structured hashref describing all currently active mock layers.
+Each entry includes the fully qualified method name, the number of active
+layers, whether the original method existed, and metadata for each layer
+(type and installation location). See the diagnose_mocks method for full
+API details.
+
+=head2 diagnose_mocks_pretty
+
+Return a human-readable, multi-line string describing all active mock
+layers. This routine is intended for debugging and inspection during test
+development. The output format is stable for human consumption but is not
+guaranteed for machine parsing. See the diagnose_mocks_pretty method for
+full API details.
+
+=head2 Diagnostic Metadata
+
+Diagnostic information is recorded automatically whenever a mock layer is
+successfully installed. Each layer records:
+
+  * type          The category of mock layer (for example: mock, spy,
+                  inject, mock_return, mock_exception, mock_sequence,
+                  mock_once, mock_scoped)
+
+  * installed_at  The file and line number where the layer was created
+
+This metadata is maintained in parallel with the internal mock stack and
+is automatically cleared when a method is fully restored via unmock or
+restore_all.
+
+Diagnostics never alter the behaviour of the mocking engine and may be
+safely invoked at any point during a test run.
 
 =head1 METHODS
 
@@ -659,6 +706,132 @@ sub restore {
 	delete $mock_meta{$full_method};
 
 	return;
+}
+
+=head2 diagnose_mocks
+
+Return a structured hashref describing all currently active mock layers.
+This routine is purely observational and does not modify any state.
+
+=head3 API specification
+
+=head4 Input
+
+Params::Validate::Strict schema:
+
+- none
+
+=head4 Output
+
+Returns::Set schema:
+
+- C<return>: hashref; keys are fully qualified method names, values are
+  hashrefs containing:
+  - C<depth>: integer; number of active mock layers
+  - C<layers>: arrayref of hashrefs; each layer has:
+      - C<type>: string
+      - C<installed_at>: string
+  - C<original_existed>: boolean
+
+=cut
+
+sub diagnose_mocks {
+
+    # Entry: none
+    # Exit: structured hashref describing all active mocks
+    # Side effects: none
+    # Notes: purely observational
+
+    my %report;
+
+    for my $full_method (sort keys %mocked) {
+        $report{$full_method} = {
+            depth            => scalar @{ $mocked{$full_method} },
+            layers           => [ @{ $mock_meta{$full_method} // [] } ],
+            original_existed => defined $mocked{$full_method}[0] ? 1 : 0,
+        };
+    }
+
+    return \%report;
+}
+
+=head2 diagnose_mocks_pretty
+
+Return a human-readable string describing all currently active mock layers.
+This routine is purely observational and does not modify any state.
+
+=head3 API specification
+
+=head4 Input
+
+Params::Validate::Strict schema:
+
+- none
+
+=head4 Output
+
+Returns::Set schema:
+
+- C<return>: scalar string; formatted multi-line description of all active
+  mock layers, including:
+  - fully qualified method name
+  - depth (number of active layers)
+  - whether the original method existed
+  - each layer's type and installation location
+
+=head3 Behaviour
+
+=head4 Entry
+
+- No arguments are accepted.
+
+=head4 Exit
+
+- Returns a formatted string describing the current mocking state.
+
+=head4 Side effects
+
+- None. This routine does not modify C<%mocked>, C<%mock_meta>, or any
+  symbol table entries.
+
+=head4 Notes
+
+- This routine is intended for debugging and diagnostics. It is safe to
+  call at any point during a test run.
+- The output format is stable and suitable for human inspection, but not
+  guaranteed to remain fixed for machine parsing.
+
+=cut
+
+sub diagnose_mocks_pretty {
+
+    # Entry: none
+    # Exit: formatted string
+    # Side effects: none
+    # Notes: uses diagnose_mocks() internally
+
+    my $diag = diagnose_mocks();
+    my @out;
+
+    for my $full_method (sort keys %$diag) {
+        my $entry = $diag->{$full_method};
+
+        push @out, "$full_method:";
+        push @out, "  depth: $entry->{depth}";
+        push @out, "  original_existed: $entry->{original_existed}";
+
+        for my $layer (@{ $entry->{layers} }) {
+            push @out, sprintf(
+                "  - type: %-14s installed_at: %s",
+                $layer->{type},
+                $layer->{installed_at},
+            );
+        }
+
+        push @out, "";
+    }
+
+    return join "\n", @out;
 }
 
 sub _parse_target {

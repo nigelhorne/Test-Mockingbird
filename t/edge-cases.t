@@ -191,5 +191,22 @@ subtest 'restore on nonexistent method deletes nothing' => sub {
     lives_ok { restore 'Edge::Restore::nope' } 'restore on nonexistent method is safe';
 };
 
+subtest 'diagnose_mocks on empty state' => sub {
+    my $diag = diagnose_mocks();
+    is_deeply $diag, {}, 'empty diagnostics';
+};
+
+subtest 'diagnose_mocks survives restore_all' => sub {
+    {
+        package DM::E1;
+        sub d { 1 }
+    }
+
+    mock_return 'DM::E1::d' => 5;
+    restore_all();
+
+    my $diag = diagnose_mocks();
+    is_deeply $diag, {}, 'diagnostics cleared after restore_all';
+};
 
 done_testing();
