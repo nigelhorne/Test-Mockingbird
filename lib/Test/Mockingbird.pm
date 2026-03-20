@@ -110,6 +110,110 @@ restore_all.
 Diagnostics never alter the behaviour of the mocking engine and may be
 safely invoked at any point during a test run.
 
+=head1 DEBUGGING EXAMPLES
+
+This section provides practical examples of using the diagnostic routines
+to understand and debug complex mocking behaviour.
+All examples are safe to run inside test files and do not modify mocking semantics.
+
+=head2 Example 1: Inspecting a simple mock
+
+    {
+        package Demo::One;
+        sub value { 1 }
+    }
+
+    mock_return 'Demo::One::value' => 42;
+
+    my $diag = diagnose_mocks();
+    print diagnose_mocks_pretty();
+
+The output will resemble:
+
+    Demo::One::value:
+      depth: 1
+      original_existed: 1
+      - type: mock_return   installed_at: t/example.t line 12
+
+This confirms that the method has exactly one active mock layer and shows
+where it was installed.
+
+=head2 Example 2: Stacked mocks
+
+    {
+        package Demo::Two;
+        sub compute { 10 }
+    }
+
+    mock_return    'Demo::Two::compute' => 20;
+    mock_exception 'Demo::Two::compute' => 'fail';
+
+    print diagnose_mocks_pretty();
+
+Possible output:
+
+    Demo::Two::compute:
+      depth: 2
+      original_existed: 1
+      - type: mock_return   installed_at: t/example.t line 8
+      - type: mock_exception installed_at: t/example.t line 9
+
+This shows the order in which layers were applied. The most recent layer
+appears last.
+
+=head2 Example 3: Spies and injected dependencies
+
+    {
+        package Demo::Three;
+        sub action { 1 }
+        sub dep    { 2 }
+    }
+
+    spy 'Demo::Three::action';
+    inject 'Demo::Three::dep' => sub { 99 };
+
+    print diagnose_mocks_pretty();
+
+Example output:
+
+    Demo::Three::action:
+      depth: 1
+      original_existed: 1
+      - type: spy           installed_at: t/example.t line 7
+
+    Demo::Three::dep:
+      depth: 1
+      original_existed: 1
+      - type: inject        installed_at: t/example.t line 8
+
+This confirms that both the spy and the injected dependency are active.
+
+=head2 Example 4: After restore_all
+
+    mock_return 'Demo::Four::x' => 5;
+    restore_all();
+
+    print diagnose_mocks_pretty();
+
+Output:
+
+    (no output)
+
+After restore_all, all diagnostic metadata is cleared along with the
+mock layers.
+
+=head2 Example 5: Using diagnostics inside a failing test
+
+When a test fails unexpectedly, adding the following line can help
+identify the active mocks:
+
+    diag diagnose_mocks_pretty();
+
+This prints the current mocking state into the test output without
+affecting the test run.
+
+=cut
+
 =head1 METHODS
 
 =head2 mock($package, $method, $replacement)
