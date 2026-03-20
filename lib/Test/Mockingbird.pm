@@ -152,7 +152,7 @@ sub mock {
 
 	# Backup original if not already mocked
 	push @{ $mocked{$full_method} }, \&{$full_method};
-	
+
 	no warnings 'redefine';
 
 	{
@@ -163,7 +163,7 @@ sub mock {
 	my $type = $Test::Mockingbird::TYPE // 'mock';
 
 	push @{ $mock_meta{$full_method} }, {
-		type         => $type,   # 'mock', 'spy', 'inject', etc.
+		type => $type,   # 'mock', 'spy', 'inject', etc.
 		installed_at => (caller)[1] . ' line ' . (caller)[2],
 	};
 }
@@ -254,7 +254,7 @@ sub mock_scoped {
 	my $full_method = "${package}::$method";
 
 	push @{ $mock_meta{$full_method} }, {
-		type         => 'mock_scoped',
+		type => 'mock_scoped',
 		installed_at => (caller)[1] . ' line ' . (caller)[2],
 	};
 	return Test::Mockingbird::Guard->new($full_method);
@@ -312,7 +312,7 @@ sub spy {
 	}
 
 	push @{ $mock_meta{$full_method} }, {
-		type         => 'spy',
+		type     => 'spy',
 		installed_at => (caller)[1] . ' line ' . (caller)[2],
 	};
 	return sub { @calls };
@@ -342,8 +342,8 @@ sub inject {
 	#   inject 'My::Module::Dependency' => $mock_obj
 	# ------------------------------------------------------------
 	if (defined $arg1 && !defined $arg3 && $arg1 =~ /^(.*)::([^:]+)$/) {
-		$package     = $1;
-		$dependency  = $2;
+		$package = $1;
+		$dependency = $2;
 		$mock_object = $arg2;
 	} else {
 		# ------------------------------------------------------------
@@ -378,7 +378,7 @@ sub inject {
 		*{$full_dependency} = $wrapper;
 	}
 	push @{ $mock_meta{$full_dependency} }, {
-		type         => 'inject',
+		type     => 'inject',
 		installed_at => (caller)[1] . ' line ' . (caller)[2],
 	};
 }
@@ -736,23 +736,22 @@ Returns::Set schema:
 =cut
 
 sub diagnose_mocks {
+	# Entry: none
+	# Exit: structured hashref describing all active mocks
+	# Side effects: none
+	# Notes: purely observational
 
-    # Entry: none
-    # Exit: structured hashref describing all active mocks
-    # Side effects: none
-    # Notes: purely observational
+	my %report;
 
-    my %report;
+	for my $full_method (sort keys %mocked) {
+		$report{$full_method} = {
+			depth        => scalar @{ $mocked{$full_method} },
+			layers       => [ @{ $mock_meta{$full_method} // [] } ],
+			original_existed => defined $mocked{$full_method}[0] ? 1 : 0,
+		};
+	}
 
-    for my $full_method (sort keys %mocked) {
-        $report{$full_method} = {
-            depth            => scalar @{ $mocked{$full_method} },
-            layers           => [ @{ $mock_meta{$full_method} // [] } ],
-            original_existed => defined $mocked{$full_method}[0] ? 1 : 0,
-        };
-    }
-
-    return \%report;
+	return \%report;
 }
 
 =head2 diagnose_mocks_pretty
@@ -804,34 +803,33 @@ Returns::Set schema:
 =cut
 
 sub diagnose_mocks_pretty {
+	# Entry: none
+	# Exit: formatted string
+	# Side effects: none
+	# Notes: uses diagnose_mocks() internally
 
-    # Entry: none
-    # Exit: formatted string
-    # Side effects: none
-    # Notes: uses diagnose_mocks() internally
+	my $diag = diagnose_mocks();
+	my @out;
 
-    my $diag = diagnose_mocks();
-    my @out;
+	for my $full_method (sort keys %$diag) {
+		my $entry = $diag->{$full_method};
 
-    for my $full_method (sort keys %$diag) {
-        my $entry = $diag->{$full_method};
+		push @out, "$full_method:";
+		push @out, "  depth: $entry->{depth}";
+		push @out, "  original_existed: $entry->{original_existed}";
 
-        push @out, "$full_method:";
-        push @out, "  depth: $entry->{depth}";
-        push @out, "  original_existed: $entry->{original_existed}";
+		for my $layer (@{ $entry->{layers} }) {
+			push @out, sprintf(
+				"  - type: %-14s installed_at: %s",
+				$layer->{type},
+				$layer->{installed_at},
+			);
+		}
 
-        for my $layer (@{ $entry->{layers} }) {
-            push @out, sprintf(
-                "  - type: %-14s installed_at: %s",
-                $layer->{type},
-                $layer->{installed_at},
-            );
-        }
+		push @out, '';
+	}
 
-        push @out, "";
-    }
-
-    return join "\n", @out;
+	return join "\n", @out;
 }
 
 sub _parse_target {
