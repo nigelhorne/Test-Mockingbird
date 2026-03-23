@@ -455,4 +455,17 @@ subtest 'restore_all restores real time' => sub {
 	cmp_ok abs(now() - CORE::time()), '<', 3, 'restore_all restored real time';
 };
 
+subtest '_get_protoype' => sub {
+	{
+		package Foo::Bar;
+		sub baz ($$) { }
+	}
+
+	is(Test::Mockingbird::_get_prototype('Foo::Bar::baz'), '$$', 'prototype extracted correctly');
+
+	ok(!defined Test::Mockingbird::_get_prototype('Foo::Bar::nope'), 'undefined for missing sub');
+
+	throws_ok { Test::Mockingbird::_get_prototype('NotAName') } qr/Invalid fully-qualified name/, 'invalid name throws';
+};
+
 done_testing();
