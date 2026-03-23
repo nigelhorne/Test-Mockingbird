@@ -942,9 +942,15 @@ sub _parse_target {
 }
 
 sub _get_prototype {
-	my ($full) = @_;
-	no strict 'refs';
-	return prototype(\&{$full});
+	my $full = $_[0];
+
+	croak "Invalid fully-qualified name '$full'" unless $full =~ /^[A-Za-z_]\w*(?:::\w+)+$/;
+
+	my ($pkg, $sub) = $full =~ /^(.*)::([^:]+)$/;
+
+	my $code = $pkg->can($sub) or return;
+
+	return prototype($code);
 }
 
 =head1 SUPPORT

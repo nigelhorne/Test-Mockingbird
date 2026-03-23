@@ -974,11 +974,35 @@ sub with_frozen_time {
 }
 
 # ----------------------------------------------------------------------
-# Timestamp parsing
+# NAME
+#     _parse_timestamp
+#
+# PURPOSE
+#     Convert a timestamp string into an epoch value. Supports raw epoch
+#     integers, ISO8601 UTC (YYYY-MM-DDTHH:MM:SSZ), space-separated
+#     timestamps (YYYY-MM-DD HH:MM:SS), and date-only formats
+#     (YYYY-MM-DD, interpreted as midnight UTC).
+#
+# ENTRY CRITERIA
+#     - $ts: a defined, non-empty scalar containing a timestamp in one
+#       of the supported formats.
+#
+# EXIT STATUS
+#     - Returns an integer epoch value corresponding to the parsed
+#       timestamp.
+#     - Croaks if the input is undefined, empty, or not in a supported
+#       format.
+#
+# SIDE EFFECTS
+#     - None. This routine does not modify global or package state.
+#
+# NOTES
+#     - Leading and trailing whitespace is trimmed before parsing.
+#     - Raw epoch values are returned unchanged.
+#     - All parsed timestamps are interpreted as UTC.
 # ----------------------------------------------------------------------
-
 sub _parse_timestamp {
-	my ($ts) = @_;
+	my $ts = $_[0];
 
 	croak 'Invalid timestamp format for TimeTravel: (undef)' unless defined $ts && length $ts;
 
@@ -1013,9 +1037,34 @@ sub _parse_timestamp {
 sub _parse_datetime { _parse_timestamp(@_) }
 
 # ----------------------------------------------------------------------
-# Unit conversion
+# NAME
+#     _unit_to_seconds
+#
+# PURPOSE
+#     Convert a numeric amount and an optional time unit into a number
+#     of seconds. Supports seconds, minutes, hours, and days. Used by
+#     advance_time() and rewind_time() to normalize time deltas.
+#
+# ENTRY CRITERIA
+#     - $amount: integer magnitude of the time shift.
+#     - $unit: optional string naming the unit. If omitted, $amount is
+#       treated as raw seconds. Supported units:
+#           second, seconds
+#           minute, minutes
+#           hour, hours
+#           day, days
+#
+# EXIT STATUS
+#     - Returns an integer number of seconds.
+#     - Croaks if an unknown unit is provided.
+#
+# SIDE EFFECTS
+#     - None. Does not modify global or package state.
+#
+# NOTES
+#     - Unit matching is case-insensitive.
+#     - Negative amounts are allowed and simply produce negative deltas.
 # ----------------------------------------------------------------------
-
 sub _unit_to_seconds {
 	my ($amount, $unit) = @_;
 

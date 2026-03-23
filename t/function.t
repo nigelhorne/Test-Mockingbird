@@ -327,8 +327,7 @@ subtest 'freeze_time sets epoch and installs mocks' => sub {
 	my $epoch = freeze_time('2025-01-01T00:00:00Z');
 	ok $epoch =~ /^\d+$/, 'freeze_time returns epoch';
 
-is now(), $epoch, 'now() returns frozen time';
-	
+	is now(), $epoch, 'now() returns frozen time';
 
 	my @lt = localtime();
 	ok @lt == 9, 'localtime returns list';
