@@ -979,6 +979,8 @@ Nigel Horne, C<< <njh at nigelhorne.com> >>
 
 =item * L<Test::Mockingbird::DeepMock>
 
+=item * L<Test::Mockingbird::TimeTravel>
+
 =back
 
 =head1 REPOSITORY
