@@ -134,14 +134,843 @@ Restores real time and clears all frozen state.
 TimeTravel is fully compatible with L<Test::Mockingbird::DeepMock>, which
 can apply time-travel plans declaratively as part of a larger mocking scenario.
 
-=cut
+=head2 now
 
-# ----------------------------------------------------------------------
-# now()
-# ----------------------------------------------------------------------
+Return the current time according to the TimeTravel engine.
+
+=head3 Purpose
+
+C<now()> provides a deterministic replacement for Perl's built-in
+C<time()> when writing tests. If time is frozen (via C<freeze_time>,
+C<travel_to>, C<advance_time>, or C<rewind_time>), C<now()> returns the
+simulated epoch value. If time is not frozen, it returns the real system
+time.
+
+This allows test suites to avoid nondeterministic behaviour caused by
+wall-clock time, while still permitting explicit control over temporal
+flow.
+
+=head3 Arguments
+
+None. C<now()> takes no parameters.
+
+=head3 Returns
+
+An integer epoch timestamp:
+
+=over 4
+
+=item *
+
+the simulated time if TimeTravel is active
+
+=item *
+
+the real system time (C<CORE::time()>) if TimeTravel is inactive
+
+=back
+
+=head3 Side Effects
+
+None. C<now()> does not modify internal state; it only reads the current
+frozen or real time.
+
+=head3 Notes
+
+=over 4
+
+=item *
+
+C<now()> is intentionally separate from Perl's C<time()> to avoid global
+monkey-patching.
+
+=item *
+
+C<now()> is safe to call inside nested C<with_frozen_time> blocks.
+
+=item *
+
+When writing modules intended for testing, prefer calling C<now()> over
+C<time()> so that behaviour can be controlled deterministically.
+
+=back
+
+=head3 Example
+
+    use Test::Mockingbird::TimeTravel qw(now freeze_time restore_all);
+
+    freeze_time('2025-01-01T00:00:00Z');
+    my $t1 = now();   # deterministic epoch
+
+    advance_time(60);
+    my $t2 = now();   # exactly 60 seconds later
+
+    restore_all();
+    my $t3 = now();   # real system time again
+
+=head3 API
+
+=head4 Input (Params::Validate::Strict)
+
+    now()
+
+Input schema:
+
+    {
+        params => [],
+        named  => 0,
+    }
+
+=head4 Output (Returns::Set)
+
+    returns: Int
+
+Output schema:
+
+    {
+        returns => 'Int',   # epoch seconds
+    }
+
+=cut
 
 sub now () {
 	return $ACTIVE ? $CURRENT_EPOCH : CORE::time();
+}
+
+=head2 freeze_time
+
+Freeze the TimeTravel clock at a specific timestamp.
+
+=head3 Purpose
+
+C<freeze_time()> activates the TimeTravel engine and sets the simulated
+clock to a deterministic epoch value. Once frozen, all calls to C<now()>
+return the frozen time until it is changed by C<travel_to>,
+C<advance_time>, C<rewind_time>, or restored via C<restore_all>.
+
+This is the primary entry point for deterministic time control in tests.
+
+=head3 Arguments
+
+    freeze_time($timestamp)
+
+Takes a single required argument:
+
+=over 4
+
+=item * C<$timestamp> - a timestamp in any format supported by
+C<_parse_timestamp>, including:
+
+    YYYY-MM-DD
+    YYYY-MM-DD HH:MM:SS
+    YYYY-MM-DDTHH:MM:SSZ
+    raw epoch seconds
+
+=back
+
+=head3 Returns
+
+An integer epoch value representing the frozen time.
+
+=head3 Side Effects
+
+=over 4
+
+=item * Activates the TimeTravel engine (sets C<$ACTIVE> to 1)
+
+=item * Sets both C<$CURRENT_EPOCH> and C<$BASE_EPOCH> to the parsed
+timestamp
+
+=item * Causes all subsequent calls to C<now()> to return the frozen
+epoch
+
+=back
+
+=head3 Notes
+
+=over 4
+
+=item * Calling C<freeze_time()> when time is already frozen simply
+overwrites the current frozen value.
+
+=item * The frozen time persists until explicitly changed or restored.
+
+=item * Use C<restore_all()> to return to real system time.
+
+=back
+
+=head3 Example
+
+    use Test::Mockingbird::TimeTravel qw(now freeze_time restore_all);
+
+    my $t = freeze_time('2025-01-01T00:00:00Z');
+    is $t, 1735689600, 'freeze_time returns epoch';
+
+    is now(), 1735689600, 'now() returns frozen time';
+
+    advance_time(120);
+    is now(), 1735689720, 'time advanced deterministically';
+
+    restore_all();
+    isnt now(), 1735689720, 'real time restored';
+
+=head3 API
+
+=head4 Input (Params::Validate::Strict)
+
+    freeze_time($timestamp)
+
+Input schema:
+
+    {
+        params => [
+            { type => 'Str | Int' },   # timestamp in any supported format
+        ],
+        named => 0,
+    }
+
+=head4 Output (Returns::Set)
+
+    returns: Int
+
+Output schema:
+
+    {
+        returns => 'Int',   # epoch seconds
+    }
+
+=cut
+
+sub freeze_time {
+	my ($ts) = @_;
+
+	$CURRENT_EPOCH = _parse_timestamp($ts);
+	$BASE_EPOCH	= $CURRENT_EPOCH;
+	$ACTIVE		= 1;
+
+	return $CURRENT_EPOCH;
+}
+
+=head2 travel_to
+
+Move the frozen TimeTravel clock to a new timestamp.
+
+=head3 Purpose
+
+C<travel_to()> updates the simulated time to a specific timestamp while
+keeping the TimeTravel engine active. It is used to jump directly to a
+new moment without unfreezing time or altering the fact that time is
+currently frozen.
+
+This is useful for tests that need to simulate large jumps in time
+instantly, such as expiring sessions, rotating logs, or advancing
+scheduled events.
+
+=head3 Arguments
+
+    travel_to($timestamp)
+
+Takes a single required argument:
+
+=over 4
+
+=item * C<$timestamp> - a timestamp in any format supported by
+C<_parse_timestamp>, including:
+
+    YYYY-MM-DD
+    YYYY-MM-DD HH:MM:SS
+    YYYY-MM-DDTHH:MM:SSZ
+    raw epoch seconds
+
+=back
+
+=head3 Returns
+
+An integer epoch value representing the new simulated time.
+
+=head3 Side Effects
+
+=over 4
+
+=item * Croaks if called while TimeTravel is inactive.
+
+=item * Updates C<$CURRENT_EPOCH> to the parsed timestamp.
+
+=item * Leaves C<$ACTIVE> set to 1 (time remains frozen).
+
+=item * Does not modify C<$BASE_EPOCH>; only C<freeze_time()> sets the
+base.
+
+=back
+
+=head3 Notes
+
+=over 4
+
+=item * C<travel_to()> cannot be used unless time has already been
+frozen.
+
+=item * To temporarily override time inside a block, use
+C<with_frozen_time()> instead.
+
+=item * C<travel_to()> is deterministic and does not depend on real
+system time.
+
+=back
+
+=head3 Example
+
+    use Test::Mockingbird::TimeTravel qw(
+        now freeze_time travel_to restore_all
+    );
+
+    freeze_time('2025-01-01T00:00:00Z');
+    is now(), 1735689600, 'initial freeze';
+
+    travel_to('2025-01-03T12:34:56Z');
+    is now(), 1735907696, 'jumped to new timestamp';
+
+    restore_all();
+    isnt now(), 1735907696, 'real time restored';
+
+=head3 API
+
+=head4 Input (Params::Validate::Strict)
+
+    travel_to($timestamp)
+
+Input schema:
+
+    {
+        params => [
+            { type => 'Str | Int' },   # timestamp in any supported format
+        ],
+        named => 0,
+    }
+
+=head4 Output (Returns::Set)
+
+    returns: Int
+
+Output schema:
+
+    {
+        returns => 'Int',   # epoch seconds
+    }
+
+=cut
+
+sub travel_to {
+	croak "travel_to() called while TimeTravel is inactive"
+		unless $ACTIVE;
+
+	$CURRENT_EPOCH = _parse_timestamp($_[0]);
+	return $CURRENT_EPOCH;
+}
+
+=head2 advance_time
+
+Advance the frozen TimeTravel clock by a specified duration.
+
+=head3 Purpose
+
+C<advance_time()> moves the simulated clock forward by a given amount of
+time. It is used to model the passage of time in a deterministic way
+while the TimeTravel engine is active. This is especially useful for
+testing expiry windows, retry backoff, cache TTLs, and any logic that
+depends on elapsed time.
+
+=head3 Arguments
+
+    advance_time($amount, $unit)
+
+Takes two arguments:
+
+=over 4
+
+=item * C<$amount> - a positive or negative integer representing the
+magnitude of the time shift
+
+=item * C<$unit> - an optional unit string. Supported units:
+
+    second
+    seconds
+    minute
+    minutes
+    hour
+    hours
+    day
+    days
+
+If no unit is provided, the amount is interpreted as raw seconds.
+
+=back
+
+=head3 Returns
+
+An integer epoch value representing the new simulated time after the
+advance.
+
+=head3 Side Effects
+
+=over 4
+
+=item * Croaks if called while TimeTravel is inactive.
+
+=item * Converts the amount and unit into seconds.
+
+=item * Adds the computed delta to C<$CURRENT_EPOCH>.
+
+=item * Leaves C<$ACTIVE> set to 1 (time remains frozen).
+
+=back
+
+=head3 Notes
+
+=over 4
+
+=item * C<advance_time()> does not modify C<$BASE_EPOCH>; only
+C<freeze_time()> sets the base.
+
+=item * Negative amounts are allowed but uncommon; use C<rewind_time()>
+for clarity.
+
+=item * The operation is deterministic and independent of real system
+time.
+
+=back
+
+=head3 Example
+
+    use Test::Mockingbird::TimeTravel qw(
+        now freeze_time advance_time restore_all
+    );
+
+    freeze_time('2025-01-01T00:00:00Z');
+    is now(), 1735689600, 'initial freeze';
+
+    advance_time(30);
+    is now(), 1735689630, 'advanced 30 seconds';
+
+    advance_time(2 => 'minutes');
+    is now(), 1735689750, 'advanced 2 minutes';
+
+    restore_all();
+    isnt now(), 1735689750, 'real time restored';
+
+=head3 API
+
+=head4 Input (Params::Validate::Strict)
+
+    advance_time($amount, $unit)
+
+Input schema:
+
+    {
+        params => [
+            { type => 'Int' },          # amount
+            { type => 'Str', optional => 1 },   # unit
+        ],
+        named => 0,
+    }
+
+=head4 Output (Returns::Set)
+
+    returns: Int
+
+Output schema:
+
+    {
+        returns => 'Int',   # epoch seconds
+    }
+
+=cut
+
+sub advance_time {
+	croak 'advance_time() called while TimeTravel is inactive' unless $ACTIVE;
+
+	my ($amount, $unit) = @_;
+	my $delta = _unit_to_seconds($amount, $unit);
+
+	$CURRENT_EPOCH += $delta;
+	return $CURRENT_EPOCH;
+}
+
+=head2 rewind_time
+
+Rewind the frozen TimeTravel clock by a specified duration.
+
+=head3 Purpose
+
+C<rewind_time()> moves the simulated clock backward by a given amount of
+time. It is the inverse of C<advance_time()> and is used to test logic
+that depends on earlier timestamps, negative offsets, or rollback
+scenarios, all in a deterministic and controlled way.
+
+=head3 Arguments
+
+    rewind_time($amount, $unit)
+
+Takes two arguments:
+
+=over 4
+
+=item * C<$amount> - a positive or negative integer representing the
+magnitude of the time shift
+
+=item * C<$unit> - an optional unit string. Supported units:
+
+    second
+    seconds
+    minute
+    minutes
+    hour
+    hours
+    day
+    days
+
+If no unit is provided, the amount is interpreted as raw seconds.
+
+=back
+
+=head3 Returns
+
+An integer epoch value representing the new simulated time after the
+rewind.
+
+=head3 Side Effects
+
+=over 4
+
+=item * Croaks if called while TimeTravel is inactive.
+
+=item * Converts the amount and unit into seconds.
+
+=item * Subtracts the computed delta from C<$CURRENT_EPOCH>.
+
+=item * Leaves C<$ACTIVE> set to 1 (time remains frozen).
+
+=back
+
+=head3 Notes
+
+=over 4
+
+=item * C<rewind_time()> does not modify C<$BASE_EPOCH>; only
+C<freeze_time()> sets the base.
+
+=item * Negative amounts are allowed but uncommon; use C<advance_time()>
+for clarity when moving forward.
+
+=item * The operation is deterministic and independent of real system
+time.
+
+=back
+
+=head3 Example
+
+    use Test::Mockingbird::TimeTravel qw(
+        now freeze_time rewind_time restore_all
+    );
+
+    freeze_time('2025-01-01T00:00:00Z');
+    is now(), 1735689600, 'initial freeze';
+
+    rewind_time(30);
+    is now(), 1735689570, 'rewound 30 seconds';
+
+    rewind_time(1 => 'hour');
+    is now(), 1735685970, 'rewound 1 hour';
+
+    restore_all();
+    isnt now(), 1735685970, 'real time restored';
+
+=head3 API
+
+=head4 Input (Params::Validate::Strict)
+
+    rewind_time($amount, $unit)
+
+Input schema:
+
+    {
+        params => [
+            { type => 'Int' },          # amount
+            { type => 'Str', optional => 1 },   # unit
+        ],
+        named => 0,
+    }
+
+=head4 Output (Returns::Set)
+
+    returns: Int
+
+Output schema:
+
+    {
+        returns => 'Int',   # epoch seconds
+    }
+
+=cut
+
+sub rewind_time {
+	croak 'rewind_time() called while TimeTravel is inactive' unless $ACTIVE;
+
+	my ($amount, $unit) = @_;
+	my $delta = _unit_to_seconds($amount, $unit);
+
+	$CURRENT_EPOCH -= $delta;
+	return $CURRENT_EPOCH;
+}
+
+=head2 restore_all
+
+Restore real time and clear all TimeTravel state.
+
+=head3 Purpose
+
+C<restore_all()> deactivates the TimeTravel engine and returns the system
+to normal, non-frozen time.
+After calling this function, C<now()> once
+again returns the real system time from C<CORE::time()>.
+
+This is the canonical way to end a time-travel scenario in tests.
+
+=head3 Arguments
+
+None. C<restore_all()> takes no parameters.
+
+=head3 Returns
+
+Nothing. The function returns an undefined value.
+
+=head3 Side Effects
+
+=over 4
+
+=item * Sets C<$ACTIVE> to 0, disabling frozen time.
+
+=item * Clears C<$CURRENT_EPOCH>.
+
+=item * Clears C<$BASE_EPOCH>.
+
+=item * Causes all subsequent calls to C<now()> to return real system
+time.
+
+=back
+
+=head3 Notes
+
+=over 4
+
+=item * C<restore_all()> is idempotent; calling it multiple times is
+safe.
+
+=item * It is automatically invoked by L<Test::Mockingbird::DeepMock>
+when a time plan is used.
+
+=item * Use this function at the end of tests to ensure no frozen state
+leaks into later tests.
+
+=back
+
+=head3 Example
+
+    use Test::Mockingbird::TimeTravel qw(
+        now freeze_time advance_time restore_all
+    );
+
+    freeze_time('2025-01-01T00:00:00Z');
+    advance_time(60);
+    is now(), 1735689660, 'time is frozen and advanced';
+
+    restore_all();
+    isnt now(), 1735689660, 'real time restored';
+
+=head3 API
+
+=head4 Input (Params::Validate::Strict)
+
+    restore_all()
+
+Input schema:
+
+    {
+        params => [],
+        named  => 0,
+    }
+
+=head4 Output (Returns::Set)
+
+    returns: Undef
+
+Output schema:
+
+    {
+        returns => 'Undef',
+    }
+
+=cut
+
+sub restore_all {
+	$ACTIVE		= 0;
+	$CURRENT_EPOCH = undef;
+	$BASE_EPOCH	= undef;
+}
+
+=head2 with_frozen_time
+
+Temporarily override the TimeTravel clock inside a code block.
+
+=head3 Purpose
+
+C<with_frozen_time()> runs a block of code under a temporary frozen
+timestamp, restoring the previous time state afterward. This allows tests
+to simulate nested or scoped time overrides without permanently altering
+the global TimeTravel state.
+
+It is the safest way to test code that depends on time within a limited
+scope, especially when combined with C<freeze_time()>, C<travel_to()>,
+C<advance_time()>, or C<rewind_time()>.
+
+=head3 Arguments
+
+    with_frozen_time($timestamp, $code)
+
+Takes two required arguments:
+
+=over 4
+
+=item * C<$timestamp> - a timestamp in any format supported by
+C<_parse_timestamp>, including:
+
+    YYYY-MM-DD
+    YYYY-MM-DD HH:MM:SS
+    YYYY-MM-DDTHH:MM:SSZ
+    raw epoch seconds
+
+=item * C<$code> - a coderef to execute while the override is active
+
+=back
+
+=head3 Returns
+
+Returns whatever the code block returns. In list context, returns a list.
+In scalar context, returns the block's scalar result. In void context,
+returns nothing.
+
+=head3 Side Effects
+
+=over 4
+
+=item * Saves the current TimeTravel state (active flag, current epoch,
+base epoch).
+
+=item * Activates frozen time using the provided timestamp.
+
+=item * Executes the code block under the overridden time.
+
+=item * Restores the previous TimeTravel state after the block completes,
+even if the block throws an exception.
+
+=item * Rethrows any exception from inside the block.
+
+=back
+
+=head3 Notes
+
+=over 4
+
+=item * C<with_frozen_time()> is fully nestable; each invocation restores
+its own state.
+
+=item * It does not require time to be frozen beforehand.
+
+=item * It is ideal for testing code that performs multiple time-based
+operations in different scopes.
+
+=back
+
+=head3 Example
+
+    use Test::Mockingbird::TimeTravel qw(
+        now freeze_time with_frozen_time restore_all
+    );
+
+    freeze_time('2025-01-01T00:00:00Z');
+    my $outer = now();   # 1735689600
+
+    my $inner;
+    with_frozen_time '2025-01-02T00:00:00Z' => sub {
+        $inner = now();  # 1735776000
+    };
+
+    is $inner, 1735776000, 'inner block saw overridden time';
+    is now(), $outer, 'outer frozen time restored';
+
+    restore_all();
+
+=head3 API
+
+=head4 Input (Params::Validate::Strict)
+
+    with_frozen_time($timestamp, $code)
+
+Input schema:
+
+    {
+        params => [
+            { type => 'Str | Int' },   # timestamp
+            { type => 'CodeRef' },     # block to execute
+        ],
+        named => 0,
+    }
+
+=head4 Output (Returns::Set)
+
+    returns: Any
+
+Output schema:
+
+    {
+        returns => 'Any',   # whatever the block returns
+    }
+
+=cut
+
+sub with_frozen_time {
+	my ($ts, $code) = @_;
+
+	croak "with_frozen_time() requires a coderef"
+		unless ref($code) eq 'CODE';
+
+	croak "with_frozen_time() requires a timestamp"
+		unless defined $ts;
+
+	my $prev_active = $ACTIVE;
+	my $prev_epoch  = $CURRENT_EPOCH;
+	my $prev_base   = $BASE_EPOCH;
+
+	$CURRENT_EPOCH = _parse_timestamp($ts);
+	$BASE_EPOCH	= $CURRENT_EPOCH;
+	$ACTIVE		= 1;
+
+	my @ret;
+	my $err;
+
+	{
+		local $@;
+		@ret = eval { $code->() };
+		$err = $@;
+	}
+
+	$ACTIVE		= $prev_active;
+	$CURRENT_EPOCH = $prev_epoch;
+	$BASE_EPOCH	= $prev_base;
+
+	die $err if $err;
+
+	return wantarray ? @ret : $ret[0];
 }
 
 # ----------------------------------------------------------------------
@@ -209,111 +1038,6 @@ sub _unit_to_seconds {
 	croak "Unknown time unit '$unit'" unless exists $factor{$unit};
 
 	return $amount * $factor{$unit};
-}
-
-# ----------------------------------------------------------------------
-# freeze_time()
-# ----------------------------------------------------------------------
-
-sub freeze_time {
-	my ($ts) = @_;
-
-	$CURRENT_EPOCH = _parse_timestamp($ts);
-	$BASE_EPOCH	= $CURRENT_EPOCH;
-	$ACTIVE		= 1;
-
-	return $CURRENT_EPOCH;
-}
-
-# ----------------------------------------------------------------------
-# travel_to()
-# ----------------------------------------------------------------------
-
-sub travel_to {
-	croak "travel_to() called while TimeTravel is inactive"
-		unless $ACTIVE;
-
-	$CURRENT_EPOCH = _parse_timestamp($_[0]);
-	return $CURRENT_EPOCH;
-}
-
-# ----------------------------------------------------------------------
-# advance_time()
-# ----------------------------------------------------------------------
-
-sub advance_time {
-	croak "advance_time() called while TimeTravel is inactive"
-		unless $ACTIVE;
-
-	my ($amount, $unit) = @_;
-	my $delta = _unit_to_seconds($amount, $unit);
-
-	$CURRENT_EPOCH += $delta;
-	return $CURRENT_EPOCH;
-}
-
-# ----------------------------------------------------------------------
-# rewind_time()
-# ----------------------------------------------------------------------
-
-sub rewind_time {
-	croak "rewind_time() called while TimeTravel is inactive"
-		unless $ACTIVE;
-
-	my ($amount, $unit) = @_;
-	my $delta = _unit_to_seconds($amount, $unit);
-
-	$CURRENT_EPOCH -= $delta;
-	return $CURRENT_EPOCH;
-}
-
-# ----------------------------------------------------------------------
-# restore_all()
-# ----------------------------------------------------------------------
-
-sub restore_all {
-	$ACTIVE		= 0;
-	$CURRENT_EPOCH = undef;
-	$BASE_EPOCH	= undef;
-}
-
-# ----------------------------------------------------------------------
-# with_frozen_time()
-# ----------------------------------------------------------------------
-
-sub with_frozen_time {
-	my ($ts, $code) = @_;
-
-	croak "with_frozen_time() requires a coderef"
-		unless ref($code) eq 'CODE';
-
-	croak "with_frozen_time() requires a timestamp"
-		unless defined $ts;
-
-	my $prev_active = $ACTIVE;
-	my $prev_epoch  = $CURRENT_EPOCH;
-	my $prev_base   = $BASE_EPOCH;
-
-	$CURRENT_EPOCH = _parse_timestamp($ts);
-	$BASE_EPOCH	= $CURRENT_EPOCH;
-	$ACTIVE		= 1;
-
-	my @ret;
-	my $err;
-
-	{
-		local $@;
-		@ret = eval { $code->() };
-		$err = $@;
-	}
-
-	$ACTIVE		= $prev_active;
-	$CURRENT_EPOCH = $prev_epoch;
-	$BASE_EPOCH	= $prev_base;
-
-	die $err if $err;
-
-	return wantarray ? @ret : $ret[0];
 }
 
 1;
