@@ -230,46 +230,39 @@ or the shorthand:
 =cut
 
 sub mock {
-	my ($arg1, $arg2, $arg3) = @_;
+    my ($arg1, $arg2, $arg3) = @_;
 
-	my ($package, $method, $replacement);
+    my ($package, $method, $replacement);
 
-	# ------------------------------------------------------------
-	# New syntax:
-	#   mock 'My::Module::method' => sub { ... }
-	# ------------------------------------------------------------
-	if (defined $arg1 && !defined $arg3 && $arg1 =~ /^(.*)::([^:]+)$/) {
-		$package = $1;
-		$method = $2;
-		$replacement = $arg2;
-	} else {
-		# ------------------------------------------------------------
-		# Original syntax:
-		#   mock('My::Module', 'method', sub { ... })
-		# ------------------------------------------------------------
-		($package, $method, $replacement) = ($arg1, $arg2, $arg3);
-	}
+    if (defined $arg1 && !defined $arg3 && $arg1 =~ /^(.*)::([^:]+)$/) {
+        $package     = $1;
+        $method      = $2;
+        $replacement = $arg2;
+    } else {
+        ($package, $method, $replacement) = ($arg1, $arg2, $arg3);
+    }
 
-	croak 'Package, method and replacement are required for mocking' unless $package && $method && $replacement;
+    croak 'Package, method and replacement are required for mocking'
+        unless $package && $method && $replacement;
 
-	my $full_method = "${package}::$method";
+    my $full_method = "${package}::$method";
 
-	# Backup original if not already mocked
-	push @{ $mocked{$full_method} }, \&{$full_method};
+    # Backup original if not already mocked
+    push @{ $mocked{$full_method} }, \&{$full_method};
 
-	no warnings 'redefine';
+    no warnings 'redefine';
+    {
+        ## no critic (ProhibitNoStrict)
+        no strict 'refs';
+        *{$full_method} = $replacement;
+    }
 
-	{
-		## no critic (ProhibitNoStrict)  # symbolic reference required for mocking
-		no strict 'refs';
-		*{$full_method} = $replacement;
-	}
-	my $type = $Test::Mockingbird::TYPE // 'mock';
+    my $type = $Test::Mockingbird::TYPE // 'mock';
 
-	push @{ $mock_meta{$full_method} }, {
-		type => $type,   # 'mock', 'spy', 'inject', etc.
-		installed_at => (caller)[1] . ' line ' . (caller)[2],
-	};
+    push @{ $mock_meta{$full_method} }, {
+        type         => $type,
+        installed_at => (caller)[1] . ' line ' . (caller)[2],
+    };
 }
 
 =head2 unmock($package, $method)
@@ -946,6 +939,12 @@ sub _parse_target {
 
 	# Longhand: ('Pkg','method')
 	return ($arg1, $arg2);
+}
+
+sub _get_prototype {
+	my ($full) = @_;
+	no strict 'refs';
+	return prototype(\&{$full});
 }
 
 =head1 SUPPORT

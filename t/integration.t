@@ -171,7 +171,7 @@ subtest 'unknown mock type throws error' => sub {
 				mocks => [
 					{
 						target => 'DMTest::greet',
-						type   => 'wut',   # invalid
+						type   => 'wut',	# invalid
 					},
 				],
 			},
@@ -260,93 +260,92 @@ subtest 'args_deeply works' => sub {
 
 subtest 'never works' => sub {
 
-    {
-        package DM_NEVER;
-        sub foo { $_[1] }
-    }
+	{
+		package DM_NEVER;
+		sub foo { $_[1] }
+	}
 
-    deep_mock(
-        {
-            mocks => [
-                { target => 'DM_NEVER::foo', type => 'spy', tag => 's' },
-            ],
-            expectations => [
-                { tag => 's', never => 1 },
-            ],
-        },
-        sub {
-            # Intentionally do NOT call DM_NEVER::foo
-        }
-    );
+	deep_mock(
+		{
+			mocks => [
+				{ target => 'DM_NEVER::foo', type => 'spy', tag => 's' },
+			],
+			expectations => [
+				{ tag => 's', never => 1 },
+			],
+		},
+		sub {
+			# Intentionally do NOT call DM_NEVER::foo
+		}
+	);
 };
 
 subtest 'combined mock_return + mock_exception + mock_sequence' => sub {
-    {
-        package Edge::Service;
-        sub status { return 'ok' }
-    }
+	{
+		package Edge::Service;
+		sub status { return 'ok' }
+	}
 
-    mock_return    'Edge::Service::status' => 'warmup';
-    mock_sequence  'Edge::Service::status' => ('retry1', 'retry2', 'steady');
-    mock_exception 'Edge::Service::status' => 'fatal';
+	mock_return	'Edge::Service::status' => 'warmup';
+	mock_sequence  'Edge::Service::status' => ('retry1', 'retry2', 'steady');
+	mock_exception 'Edge::Service::status' => 'fatal';
 
-    dies_ok { Edge::Service::status() } 'topmost mock_exception wins';
-    like $@, qr/fatal/, 'fatal error seen';
+	dies_ok { Edge::Service::status() } 'topmost mock_exception wins';
+	like $@, qr/fatal/, 'fatal error seen';
 
-    restore_all();
+	restore_all();
 
-    is Edge::Service::status(), 'ok', 'original restored';
+	is Edge::Service::status(), 'ok', 'original restored';
 };
 
 subtest 'mock_once with retry logic' => sub {
-    {
-        package Edge::Service;
-        sub ping { return 'ok' }
-    }
+	{
+		package Edge::Service;
+		sub ping { return 'ok' }
+	}
 
-    mock_once 'Edge::Service::ping' => sub { 'fail' };
+	mock_once 'Edge::Service::ping' => sub { 'fail' };
 
-    is Edge::Service::ping(), 'fail', 'first call fails';
-    is Edge::Service::ping(), 'ok',   'second call succeeds';
+	is Edge::Service::ping(), 'fail', 'first call fails';
+	is Edge::Service::ping(), 'ok', 'second call succeeds';
 
-    restore_all();
+	restore_all();
 };
 
 subtest 'restore interacts correctly with mock_once and mock_sequence' => sub {
-    {
-        package Edge::Restore;
-        sub c { return 'orig' }
-    }
+	{
+		package Edge::Restore;
+		sub c { return 'orig' }
+	}
 
-    mock_sequence 'Edge::Restore::c' => (10, 20);
-    mock_once     'Edge::Restore::c' => sub { 99 };
+	mock_sequence 'Edge::Restore::c' => (10, 20);
+	mock_once	 'Edge::Restore::c' => sub { 99 };
 
-    is Edge::Restore::c(), 99, 'mock_once fires first';
+	is Edge::Restore::c(), 99, 'mock_once fires first';
 
-    restore 'Edge::Restore::c';
+	restore 'Edge::Restore::c';
 
-    is Edge::Restore::c(), 'orig', 'restore removes all layers';
+	is Edge::Restore::c(), 'orig', 'restore removes all layers';
 
-    restore_all();
+	restore_all();
 };
 
 subtest 'diagnose_mocks integrates with spy and inject' => sub {
-    {
-        package DM::I1;
-        sub c { 1 }
-        sub dep { 2 }
-    }
+	{
+		package DM::I1;
+		sub c { 1 }
+		sub dep { 2 }
+	}
 
-    spy 'DM::I1::c';
-    inject 'DM::I1::dep' => sub { 99 };
+	spy 'DM::I1::c';
+	inject 'DM::I1::dep' => sub { 99 };
 
-    my $diag = diagnose_mocks();
+	my $diag = diagnose_mocks();
 
-    ok exists $diag->{'DM::I1::c'}, 'spy recorded';
-    ok exists $diag->{'DM::I1::dep'}, 'inject recorded';
+	ok exists $diag->{'DM::I1::c'}, 'spy recorded';
+	ok exists $diag->{'DM::I1::dep'}, 'inject recorded';
 
-    restore_all();
+	restore_all();
 };
-
 
 done_testing();
