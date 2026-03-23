@@ -25,6 +25,117 @@ our $ACTIVE		= 0;	  # whether time is frozen
 our $CURRENT_EPOCH = undef;  # current simulated time
 our $BASE_EPOCH	= undef;  # epoch at moment of freeze
 
+=head1 NAME
+
+Test::Mockingbird::TimeTravel - Deterministic, controllable time for Perl tests
+
+=head1 SYNOPSIS
+
+    use Test::Mockingbird::TimeTravel qw(
+        now
+        freeze_time
+        travel_to
+        advance_time
+        rewind_time
+        restore_all
+        with_frozen_time
+    );
+
+    # Freeze time at a known point
+    freeze_time('2025-01-01T00:00:00Z');
+    is now(), 1735689600, 'time is frozen';
+
+    # Move the frozen clock forward
+    advance_time(2 => 'minutes');
+    is now(), 1735689720, 'time advanced deterministically';
+
+    # Temporarily override time inside a block
+    with_frozen_time '2025-01-02T12:00:00Z' => sub {
+        is now(), 1735819200, 'block sees overridden time';
+    };
+
+    # After the block, the previous frozen time is restored
+    is now(), 1735689720, 'outer time restored';
+
+    # Return to real system time
+    restore_all();
+    isnt now(), 1735689720, 'real time restored';
+
+=head1 DESCRIPTION
+
+C<Test::Mockingbird::TimeTravel> provides a lightweight, deterministic
+time-control layer for Perl tests. It allows you to freeze time, move it
+forward or backward, jump to specific timestamps, and run code under a
+temporary time override - all without touching Perl's built-in C<time()>
+or relying on global monkey-patching.
+
+The module is designed for test suites that need:
+
+=over 4
+
+=item *
+
+predictable timestamps
+
+=item *
+
+repeatable behaviour across runs
+
+=item *
+
+clean separation between real time and simulated time
+
+=item *
+
+safe, nestable time overrides
+
+=back
+
+Unlike traditional mocking of C<time()>, TimeTravel does not replace Perl's core functions.
+Instead, it provides a dedicated C<now()> function
+and a small set of declarative operations that manipulate an internal,
+frozen clock. This avoids global side effects and makes time behaviour
+explicit in your tests.
+
+=head2 Core Concepts
+
+=over 4
+
+=item * C<now()>
+
+Returns the current simulated time if time is frozen, or the real system
+time otherwise.
+
+=item * C<freeze_time>
+
+Freezes time at a specific timestamp. All subsequent calls to C<now()>
+return the frozen value until time is restored.
+
+=item * C<travel_to>
+
+Moves the frozen clock to a new timestamp.
+
+=item * C<advance_time> / C<rewind_time>
+
+Moves the frozen clock forward or backward by a duration, expressed in
+seconds, minutes, hours, or days.
+
+=item * C<with_frozen_time>
+
+Temporarily overrides time inside a code block, restoring the previous
+state afterward - even if the block dies.
+
+=item * C<restore_all>
+
+Restores real time and clears all frozen state.
+
+=back
+
+TimeTravel is fully compatible with L<Test::Mockingbird::DeepMock>, which
+can apply time-travel plans declaratively as part of a larger mocking scenario.
+
+=cut
+
 # ----------------------------------------------------------------------
 # now()
 # ----------------------------------------------------------------------
@@ -40,8 +151,7 @@ sub now () {
 sub _parse_timestamp {
 	my ($ts) = @_;
 
-	croak "Invalid timestamp format for TimeTravel: (undef)"
-		unless defined $ts && length $ts;
+	croak 'Invalid timestamp format for TimeTravel: (undef)' unless defined $ts && length $ts;
 
 	# Trim whitespace
 	$ts =~ s/^\s+|\s+$//g;
