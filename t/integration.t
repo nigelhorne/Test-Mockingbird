@@ -8,6 +8,15 @@ use lib 'lib';
 use Test::Most;
 use Test::Mockingbird;
 use Test::Mockingbird::DeepMock qw(deep_mock);
+use Test::Mockingbird::TimeTravel qw(
+    now
+    freeze_time
+    travel_to
+    advance_time
+    rewind_time
+    restore_all
+    with_frozen_time
+);
 
 # A simple test package we can safely mutate
 {
@@ -293,7 +302,7 @@ subtest 'combined mock_return + mock_exception + mock_sequence' => sub {
 	dies_ok { Edge::Service::status() } 'topmost mock_exception wins';
 	like $@, qr/fatal/, 'fatal error seen';
 
-	restore_all();
+	Test::Mockingbird::restore_all();
 
 	is Edge::Service::status(), 'ok', 'original restored';
 };
@@ -346,6 +355,139 @@ subtest 'diagnose_mocks integrates with spy and inject' => sub {
 	ok exists $diag->{'DM::I1::dep'}, 'inject recorded';
 
 	restore_all();
+};
+
+# Helper for parsing timestamps via the public API
+my $parse = sub {
+    Test::Mockingbird::TimeTravel::_parse_datetime($_[0]);
+};
+
+subtest 'freeze_time + now + restore_all (end-to-end)' => sub {
+    restore_all();
+
+    my $epoch = freeze_time('2025-01-01T00:00:00Z');
+    is now(), $epoch, 'now() returns frozen epoch';
+
+    restore_all();
+    isnt now(), $epoch, 'restore_all() returns real time';
+};
+
+subtest 'advance_time + rewind_time across multiple units' => sub {
+    restore_all();
+    freeze_time('2025-01-01T00:00:00Z');
+
+    my $t0 = now();
+
+    advance_time(30);
+    is now(), $t0 + 30, 'advance_time +30 seconds';
+
+    advance_time(2 => 'minutes');
+    is now(), $t0 + 30 + 120, 'advance_time +2 minutes';
+
+    advance_time(1 => 'hour');
+    is now(), $t0 + 30 + 120 + 3600, 'advance_time +1 hour';
+
+    rewind_time(90);
+    is now(), $t0 + 30 + 120 + 3600 - 90, 'rewind_time -90 seconds';
+
+    rewind_time(1 => 'minute');
+    is now(), $t0 + 30 + 120 + 3600 - 90 - 60, 'rewind_time -1 minute';
+
+    restore_all();
+};
+
+subtest 'travel_to overrides frozen time' => sub {
+    restore_all();
+    freeze_time('2025-01-01T00:00:00Z');
+
+    travel_to('2025-01-03T12:34:56Z');
+    is now(), $parse->('2025-01-03T12:34:56Z'),
+        'travel_to sets new frozen epoch';
+
+    restore_all();
+};
+
+subtest 'with_frozen_time temporarily overrides time' => sub {
+    restore_all();
+
+    my $outer = freeze_time('2025-01-01T00:00:00Z');
+    my $inner;
+
+    with_frozen_time '2025-01-02T00:00:00Z' => sub {
+        $inner = now();
+    };
+
+    is $inner, $parse->('2025-01-02T00:00:00Z'),
+        'inner block sees overridden time';
+
+    is now(), $outer, 'outer time restored after block';
+
+    restore_all();
+};
+
+subtest 'nested with_frozen_time blocks restore correctly' => sub {
+    restore_all();
+    freeze_time('2025-01-01T00:00:00Z');
+
+    my ($inner1, $inner2);
+
+    with_frozen_time '2025-01-02T00:00:00Z' => sub {
+        $inner1 = now();
+
+        with_frozen_time '2025-01-03T00:00:00Z' => sub {
+            $inner2 = now();
+        };
+
+        is now(), $parse->('2025-01-02T00:00:00Z'),
+            'after inner block, outer block time restored';
+    };
+
+    is $inner1, $parse->('2025-01-02T00:00:00Z'),
+        'first-level block saw correct time';
+
+    is $inner2, $parse->('2025-01-03T00:00:00Z'),
+        'nested block saw correct time';
+
+    is now(), $parse->('2025-01-01T00:00:00Z'),
+        'after all blocks, original time restored';
+
+    restore_all();
+};
+
+subtest 'with_frozen_time propagates exceptions and restores state' => sub {
+    restore_all();
+    freeze_time('2025-01-01T00:00:00Z');
+
+    eval {
+        with_frozen_time '2025-01-02T00:00:00Z' => sub {
+            die "boom";
+        };
+    };
+
+    like $@, qr/boom/, 'exception propagated from block';
+
+    is now(), $parse->('2025-01-01T00:00:00Z'),
+        'state restored after exception';
+
+    restore_all();
+};
+
+subtest 'timestamp formats accepted end-to-end' => sub {
+    restore_all();
+
+    my @formats = (
+        '2025-01-01T00:00:00Z',
+        '2025-01-01 00:00:00',
+        '2025-01-01',
+        $parse->('2025-01-01T00:00:00Z'),
+    );
+
+    for my $ts (@formats) {
+        freeze_time($ts);
+        is now(), $parse->('2025-01-01T00:00:00Z'),
+            "format '$ts' parsed correctly";
+        restore_all();
+    }
 };
 
 done_testing();
