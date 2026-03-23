@@ -490,4 +490,48 @@ subtest 'timestamp formats accepted end-to-end' => sub {
     }
 };
 
+subtest 'deep_mock integrates time plan + mocks end-to-end' => sub {
+    restore_all();
+    Test::Mockingbird::restore_all();
+
+    {
+        package DM_TIME;
+        sub stamp { 0 }   # predictable original behaviour
+    }
+
+    my $seen;
+
+    deep_mock(
+        {
+            time  => {
+                freeze  => '2025-01-01T00:00:00Z',
+                advance => [ 2 => 'minutes' ],
+            },
+            mocks => [
+                {
+                    target => 'DM_TIME::stamp',
+                    type   => 'mock',
+                    with   => sub { Test::Mockingbird::TimeTravel::now() },
+                },
+            ],
+        },
+        sub {
+            $seen = DM_TIME::stamp();
+        }
+    );
+
+    is $seen, $parse->('2025-01-01T00:02:00Z'),
+        'deep_mock time plan applied to mocked method';
+
+    # After deep_mock, both mocks and time must be restored
+    isnt now(), $parse->('2025-01-01T00:02:00Z'),
+        'time restored after deep_mock';
+
+    is DM_TIME::stamp(), 0, 'original DM_TIME::stamp restored';
+
+    restore_all();
+    Test::Mockingbird::restore_all();
+};
+
+
 done_testing();

@@ -6,6 +6,7 @@ use warnings;
 use Exporter 'import';
 use Carp qw(croak);
 use Test::Mockingbird ();
+use Test::Mockingbird::TimeTravel ();
 use Test::More ();
 
 our @EXPORT_OK = qw(deep_mock);
@@ -431,6 +432,9 @@ sub deep_mock
 
 	my %handles;
 
+	# Apply time travel plan
+	_apply_time_plan($plan->{time});
+
 	# Install mocks for this scope and capture restore handles
 	my @installed = _install_mocks($plan->{mocks} || [], \%handles);
 
@@ -454,6 +458,9 @@ sub deep_mock
 		|| $plan->{globals}{restore_on_scope_exit};
 
 	Test::Mockingbird::restore_all() if $auto_restore;
+
+	# Restore time travel state
+	Test::Mockingbird::TimeTravel::restore_all();
 
 	croak $err if $err;
 
@@ -705,6 +712,30 @@ sub _normalize_target {
 
 	# EXIT: always returns ($pkg, $method)
 }
+
+sub _apply_time_plan {
+    my ($time) = @_;
+    return unless $time && ref $time eq 'HASH';
+
+    if (exists $time->{freeze}) {
+        Test::Mockingbird::TimeTravel::freeze_time($time->{freeze});
+    }
+
+    if (exists $time->{travel}) {
+        Test::Mockingbird::TimeTravel::travel_to($time->{travel});
+    }
+
+    if (exists $time->{advance}) {
+        my ($amount, $unit) = @{ $time->{advance} };
+        Test::Mockingbird::TimeTravel::advance_time($amount, $unit);
+    }
+
+    if (exists $time->{rewind}) {
+        my ($amount, $unit) = @{ $time->{rewind} };
+        Test::Mockingbird::TimeTravel::rewind_time($amount, $unit);
+    }
+}
+
 
 =head1 SUPPORT
 
