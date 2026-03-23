@@ -880,28 +880,27 @@ sub _normalize_target {
 }
 
 sub _apply_time_plan {
-    my ($time) = @_;
-    return unless $time && ref $time eq 'HASH';
+	my $time = $_[0];
+	return unless $time && ref $time eq 'HASH';
 
-    if (exists $time->{freeze}) {
-        Test::Mockingbird::TimeTravel::freeze_time($time->{freeze});
-    }
+	if (exists $time->{freeze}) {
+		Test::Mockingbird::TimeTravel::freeze_time($time->{freeze});
+	}
 
-    if (exists $time->{travel}) {
-        Test::Mockingbird::TimeTravel::travel_to($time->{travel});
-    }
+	if (exists $time->{travel}) {
+		Test::Mockingbird::TimeTravel::travel_to($time->{travel});
+	}
 
-    if (exists $time->{advance}) {
-        my ($amount, $unit) = @{ $time->{advance} };
-        Test::Mockingbird::TimeTravel::advance_time($amount, $unit);
-    }
+	if (exists $time->{advance}) {
+		my ($amount, $unit) = @{ $time->{advance} };
+		Test::Mockingbird::TimeTravel::advance_time($amount, $unit);
+	}
 
-    if (exists $time->{rewind}) {
-        my ($amount, $unit) = @{ $time->{rewind} };
-        Test::Mockingbird::TimeTravel::rewind_time($amount, $unit);
-    }
+	if (exists $time->{rewind}) {
+		my ($amount, $unit) = @{ $time->{rewind} };
+		Test::Mockingbird::TimeTravel::rewind_time($amount, $unit);
+	}
 }
-
 
 =head1 SUPPORT
 
