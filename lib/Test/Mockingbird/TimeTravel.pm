@@ -29,6 +29,14 @@ our $BASE_EPOCH	= undef;  # epoch at moment of freeze
 
 Test::Mockingbird::TimeTravel - Deterministic, controllable time for Perl tests
 
+=head1 VERSION
+
+Version 0.07
+
+=cut
+
+our $VERSION = '0.07';
+
 =head1 SYNOPSIS
 
     use Test::Mockingbird::TimeTravel qw(
@@ -1088,5 +1096,63 @@ sub _unit_to_seconds {
 
 	return $amount * $factor{$unit};
 }
+
+=head1 SUPPORT
+
+This module is provided as-is without any warranty.
+
+Please report any bugs or feature requests to C<bug-test-mockingbird at rt.cpan.org>,
+or through the web interface at
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Mockingbird>.
+I will be notified, and then you'll
+automatically be notified of progress on your bug as I make changes.
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc Test::Mockingbird::TimeTravel
+
+=head1 AUTHOR
+
+Nigel Horne, C<< <njh at nigelhorne.com> >>
+
+=head1 BUGS
+
+=head1 SEE ALSO
+
+=over 4
+
+=item * L<Test::Mockingbird>
+
+=item * L<Test::Mockingbird::DeepMock>
+
+=back
+
+=head1 REPOSITORY
+
+L<https://github.com/nigelhorne/Test-Mockingbird>
+
+=head1 SUPPORT
+
+This module is provided as-is without any warranty.
+
+=head1 LICENCE AND COPYRIGHT
+
+Copyright 2026 Nigel Horne.
+
+Usage is subject to licence terms.
+
+The licence terms of this software are as follows:
+
+=over 4
+
+=item * Personal single user, single computer use: GPL2
+
+=item * All other users (including Commercial, Charity, Educational, Government)
+  must apply in writing for a licence for use from Nigel Horne at the
+  above e-mail.
+
+=back
+
+=cut
 
 1;
