@@ -441,6 +441,10 @@ Returns::Set schema:
 \- The output format is stable and suitable for human inspection, but not
   guaranteed to remain fixed for machine parsing.
 
+## DESTROY
+
+If `Test::Mockingbird` goes out of scope, restore everything.
+
 # SUPPORT
 
 This module is provided as-is without any warranty.

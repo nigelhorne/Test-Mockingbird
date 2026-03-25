@@ -953,6 +953,17 @@ sub _get_prototype {
 	return prototype($code);
 }
 
+=head2 DESTROY
+
+If C<Test::Mockingbird> goes out of scope, restore everything.
+
+=cut
+
+sub DESTROY
+{
+	restore_all();
+}
+
 =head1 SUPPORT
 
 This module is provided as-is without any warranty.
