@@ -5,6 +5,7 @@ requires 'Exporter';
 requires 'ExtUtils::MakeMaker', '6.64';
 
 on 'test' => sub {
+	requires 'Class::Simple';
 	requires 'Test::DescribeMe';
 	requires 'Test::Most';
 	requires 'Test::Needs';
