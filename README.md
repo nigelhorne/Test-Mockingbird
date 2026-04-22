@@ -227,6 +227,43 @@ Supports both the longhand and shorthand forms:
 
 Returns a guard object whose destruction triggers automatic unmocking.
 
+### Interaction with spy
+
+A `spy` is not automatically restored when a `mock_scoped` guard
+goes out of scope. `mock_scoped` only manages the specific mock
+layer it installs. If you install a spy inside a scoped block, you
+must restore it explicitly:
+
+    {
+        my $g   = mock_scoped 'My::Module::method' => sub { 1 };
+        my $spy = spy 'My::Module::method';
+
+        My::Module->method('arg');
+    }
+    # $g is destroyed here -- the mock_scoped layer is restored
+    # but the spy layer is still active
+
+    restore_all();    # needed to fully restore method
+
+The safe pattern when combining `mock_scoped` and `spy` is to
+call `restore_all` at the end of the block, or to avoid combining
+them and use `mock` with an explicit `restore_all` instead:
+
+    spy 'My::Module::method';
+    My::Module->method('arg');
+    my @calls = $spy->();
+    restore_all();
+
+### Notes
+
+If you need both a modified implementation and call recording in
+the same test, install the spy first and then the mock. The spy
+will still capture calls even when the implementation is replaced
+by the mock layer above it, because the spy wraps the layer below
+it at installation time, not the current top of the stack. To avoid
+confusion, prefer explicit `restore_all` over `mock_scoped` when
+combining with spies.
+
 ## spy($package, $method)
 
 Wraps a method so that all calls and arguments are recorded.
@@ -241,6 +278,39 @@ or the shorthand:
 Returns a coderef which, when invoked, returns the list of captured calls.
 The original method is preserved and still executed.
 
+### Call record format
+
+Each captured call is an arrayref with the following structure:
+
+    [ $method_name, $invocant, @arguments ]
+
+where:
+
+- `$method_name` - the fully qualified method name as a string
+(e.g. `'My::Module::method'`)
+- `$invocant` - the first argument to the call, typically `$self`
+for method calls or the first positional argument for function calls
+- `@arguments` - the remaining arguments passed to the method,
+in the order they were supplied. For named-parameter calls these will
+be alternating key/value pairs suitable for assignment to a hash:
+`my %args = @{$call}[2..$#{$call}]`
+
+### Example
+
+    spy 'My::Module::process';
+    My::Module->process(name => 'foo', value => 42);
+
+    my @calls = $spy->();
+    my $call  = $calls[0];
+
+    # $call->[0] eq 'My::Module::process'
+    # $call->[1] is the My::Module object
+    # @{$call}[2..$#{$call}] gives (name => 'foo', value => 42)
+
+    my %args = @{$call}[2..$#{$call}];
+    is($args{name},  'foo', 'name arg captured');
+    is($args{value}, 42,    'value arg captured');
+
 ## inject($package, $dependency, $mock\_object)
 
 Injects a mock dependency. Supports two forms:
@@ -253,20 +323,37 @@ or the shorthand:
 
 The injected dependency can be restored with `restore_all` or `unmock`.
 
-## restore\_all()
+## restore\_all
 
-Restores mocked methods and injected dependencies.
+Restores all mocked methods and injected dependencies.
 
-Called with no arguments, it restores everything:
+Called with no arguments, restores everything that has been mocked
+in the current test run:
 
     restore_all();
 
-You may also restore only a specific package:
+Called with a package name, restores only the mocks whose fully
+qualified names begin with that package:
 
     restore_all 'My::Module';
 
-This restores all mocked methods whose fully qualified names begin with
-`My::Module::`.
+This is useful when a test installs mocks across multiple packages
+and needs to tear down only one package's mocks without disturbing
+the others:
+
+    mock 'My::Module::fetch'   => sub { 'mocked_fetch' };
+    mock 'Other::Module::save' => sub { 'mocked_save'  };
+
+    # Tear down only My::Module mocks
+    restore_all 'My::Module';
+
+    # Other::Module::save is still mocked here
+    restore_all();    # now everything is restored
+
+### Notes
+
+Restoring a package that was never mocked is a no-op and does not
+warn or croak.
 
 ## mock\_return
 
@@ -482,11 +569,6 @@ This module is provided as-is without any warranty.
 
 Copyright 2025-2026 Nigel Horne.
 
-Usage is subject to licence terms.
-
-The licence terms of this software are as follows:
-
-- Personal single user, single computer use: GPL2
-- All other users (including Commercial, Charity, Educational, Government)
-  must apply in writing for a licence for use from Nigel Horne at the
-  above e-mail.
+Usage is subject to GPL2 licence terms.
+If you use it,
+please let me know.

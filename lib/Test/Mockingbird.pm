@@ -336,6 +336,43 @@ Supports both the longhand and shorthand forms:
 
 Returns a guard object whose destruction triggers automatic unmocking.
 
+=head3 Interaction with spy
+
+A C<spy> is not automatically restored when a C<mock_scoped> guard
+goes out of scope. C<mock_scoped> only manages the specific mock
+layer it installs. If you install a spy inside a scoped block, you
+must restore it explicitly:
+
+    {
+        my $g   = mock_scoped 'My::Module::method' => sub { 1 };
+        my $spy = spy 'My::Module::method';
+
+        My::Module->method('arg');
+    }
+    # $g is destroyed here -- the mock_scoped layer is restored
+    # but the spy layer is still active
+
+    restore_all();    # needed to fully restore method
+
+The safe pattern when combining C<mock_scoped> and C<spy> is to
+call C<restore_all> at the end of the block, or to avoid combining
+them and use C<mock> with an explicit C<restore_all> instead:
+
+    spy 'My::Module::method';
+    My::Module->method('arg');
+    my @calls = $spy->();
+    restore_all();
+
+=head3 Notes
+
+If you need both a modified implementation and call recording in
+the same test, install the spy first and then the mock. The spy
+will still capture calls even when the implementation is replaced
+by the mock layer above it, because the spy wraps the layer below
+it at installation time, not the current top of the stack. To avoid
+confusion, prefer explicit C<restore_all> over C<mock_scoped> when
+combining with spies.
+
 =cut
 
 sub mock_scoped {
@@ -370,6 +407,45 @@ or the shorthand:
 
 Returns a coderef which, when invoked, returns the list of captured calls.
 The original method is preserved and still executed.
+
+=head3 Call record format
+
+Each captured call is an arrayref with the following structure:
+
+    [ $method_name, $invocant, @arguments ]
+
+where:
+
+=over 4
+
+=item * C<$method_name> - the fully qualified method name as a string
+(e.g. C<'My::Module::method'>)
+
+=item * C<$invocant> - the first argument to the call, typically C<$self>
+for method calls or the first positional argument for function calls
+
+=item * C<@arguments> - the remaining arguments passed to the method,
+in the order they were supplied. For named-parameter calls these will
+be alternating key/value pairs suitable for assignment to a hash:
+C<my %args = @{$call}[2..$#{$call}]>
+
+=back
+
+=head3 Example
+
+    spy 'My::Module::process';
+    My::Module->process(name => 'foo', value => 42);
+
+    my @calls = $spy->();
+    my $call  = $calls[0];
+
+    # $call->[0] eq 'My::Module::process'
+    # $call->[1] is the My::Module object
+    # @{$call}[2..$#{$call}] gives (name => 'foo', value => 42)
+
+    my %args = @{$call}[2..$#{$call}];
+    is($args{name},  'foo', 'name arg captured');
+    is($args{value}, 42,    'value arg captured');
 
 =cut
 
@@ -480,20 +556,37 @@ sub inject {
 	};
 }
 
-=head2 restore_all()
+=head2 restore_all
 
-Restores mocked methods and injected dependencies.
+Restores all mocked methods and injected dependencies.
 
-Called with no arguments, it restores everything:
+Called with no arguments, restores everything that has been mocked
+in the current test run:
 
     restore_all();
 
-You may also restore only a specific package:
+Called with a package name, restores only the mocks whose fully
+qualified names begin with that package:
 
     restore_all 'My::Module';
 
-This restores all mocked methods whose fully qualified names begin with
-C<My::Module::>.
+This is useful when a test installs mocks across multiple packages
+and needs to tear down only one package's mocks without disturbing
+the others:
+
+    mock 'My::Module::fetch'   => sub { 'mocked_fetch' };
+    mock 'Other::Module::save' => sub { 'mocked_save'  };
+
+    # Tear down only My::Module mocks
+    restore_all 'My::Module';
+
+    # Other::Module::save is still mocked here
+    restore_all();    # now everything is restored
+
+=head3 Notes
+
+Restoring a package that was never mocked is a no-op and does not
+warn or croak.
 
 =cut
 
@@ -1006,19 +1099,9 @@ This module is provided as-is without any warranty.
 
 Copyright 2025-2026 Nigel Horne.
 
-Usage is subject to licence terms.
-
-The licence terms of this software are as follows:
-
-=over 4
-
-=item * Personal single user, single computer use: GPL2
-
-=item * All other users (including Commercial, Charity, Educational, Government)
-  must apply in writing for a licence for use from Nigel Horne at the
-  above e-mail.
-
-=back
+Usage is subject to GPL2 licence terms.
+If you use it,
+please let me know.
 
 =cut
 
