@@ -1,7 +1,57 @@
 Revision history for Test::Mockingbird - Advanced mocking library for Perl with support for dependency injection and spies
 
-0.09
-	Fleshed out some of the documentation
+0.09	Mon May  4 20:22:49 EDT 2026
+
+  Bug fixes
+
+  - mock_scoped was recording two diagnostic meta layers per call: one of
+    type 'mock' (emitted by the internal mock() call) and a second of type
+    'mock_scoped' (pushed explicitly afterwards).  diagnose_mocks() therefore
+    reported depth 2 and a misleading 'mock' entry for every mock_scoped
+    installation.  Fixed by setting local $TYPE = 'mock_scoped' before
+    delegating to mock(), matching the pattern already used by mock_return,
+    mock_exception, mock_sequence, and mock_once.  Each mock_scoped call now
+    records exactly one layer of the correct type.
+
+  New features
+
+  - mock_scoped now accepts multiple method/coderef pairs in a single call,
+    returning one guard that restores all of them on destruction.  Four
+    argument forms are supported:
+
+      Single shorthand (unchanged):
+        my $g = mock_scoped 'Pkg::method' => sub { ... };
+
+      Single longhand (unchanged):
+        my $g = mock_scoped('Pkg', 'method', sub { ... });
+
+      Multi shorthand -- pairs of fully-qualified-name, coderef:
+        my $g = mock_scoped(
+            'Pkg::fetch'  => sub { ... },
+            'Other::save' => sub { ... },
+        );
+
+      Multi longhand -- package followed by method/coderef pairs:
+        my $g = mock_scoped('Pkg',
+            fetch  => sub { ... },
+            save   => sub { ... },
+            remove => sub { ... },
+        );
+
+    All methods covered by a multi-method guard are restored atomically when
+    the guard goes out of scope or is explicitly undefed.
+
+  - Test::Mockingbird::Guard updated to store a list of fully-qualified
+    method names rather than a single name, enabling the multi-method
+    mock_scoped forms above.  Single-method behaviour is unchanged.
+
+  Tests
+
+  - Added t/mock_scoped_multi.t (39 assertions) covering: the meta-layer
+    bug fix; no-regression checks on both single-method forms; all three
+    new multi-method forms (multi shorthand, multi longhand two methods,
+    multi longhand three methods); explicit guard undef; and
+    diagnose_mocks() state before and after guard destruction.
 
 0.08	Tue Apr  7 18:49:17 EDT 2026
 	Test::Mockingbird::DESTROY now calls restore_all
