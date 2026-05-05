@@ -28,6 +28,7 @@ t/kwalitee.t
 t/manifest.t
 t/mock.t
 t/mock_scoped.t
+t/mock_scoped_multi.t
 t/object.t
 t/pod-cm.t
 t/pod-coverage.t

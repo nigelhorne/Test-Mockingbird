@@ -204,13 +204,44 @@ or the shorthand:
 
 ## mock\_scoped
 
-Creates a scoped mock that is automatically restored when it goes out of scope.
+Creates a scoped mock that is automatically restored when the returned guard
+goes out of scope.
 
 This behaves like `mock`, but instead of requiring an explicit call to
-`unmock` or `restore_all`, the mock is reverted automatically when the
-returned guard object is destroyed.
+`unmock` or `restore_all`, all mocked methods are reverted automatically
+when the guard object is destroyed.
 
-This is useful when you want a mock to apply only within a lexical block:
+### Single-method forms
+
+Shorthand:
+
+    my $g = mock_scoped 'My::Module::method' => sub { 'mocked' };
+
+Longhand:
+
+    my $g = mock_scoped('My::Module', 'method', sub { ... });
+
+### Multi-method forms
+
+Mock several methods on one package with a single guard:
+
+    my $g = mock_scoped('My::Module',
+        fetch  => sub { 'mocked_fetch'  },
+        save   => sub { 'mocked_save'   },
+        delete => sub { 'mocked_delete' },
+    );
+
+Mock methods across different packages in one call (shorthand pairs):
+
+    my $g = mock_scoped(
+        'My::Module::fetch'  => sub { 'mocked_fetch'  },
+        'Other::Module::save' => sub { 'mocked_save'  },
+    );
+
+In both multi-method forms, every mocked method is restored when `$g`
+goes out of scope or is explicitly undefed.
+
+### Scoped lifecycle
 
     {
         my $g = mock_scoped 'My::Module::method' => sub { 'mocked' };
@@ -218,14 +249,6 @@ This is useful when you want a mock to apply only within a lexical block:
     }
 
     My::Module::method();       # original behaviour restored
-
-Supports both the longhand and shorthand forms:
-
-    my $g = mock_scoped('My::Module', 'method', sub { ... });
-
-    my $g = mock_scoped 'My::Module::method' => sub { ... };
-
-Returns a guard object whose destruction triggers automatic unmocking.
 
 ### Interaction with spy
 
