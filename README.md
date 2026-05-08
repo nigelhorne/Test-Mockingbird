@@ -191,6 +191,18 @@ or the shorthand:
 
     mock 'My::Module::method' => sub { ... };
 
+If the original function carries a Perl prototype, the same prototype is
+automatically applied to the replacement coderef before it is installed.
+This prevents Perl from emitting `Prototype mismatch` warnings at call
+sites that were compiled against the original signature. The canonical
+case is functions declared with a `()` no-args prototype, such as
+`I18N::LangTags::Detect::detect`. The replacement is almost always an
+anonymous `sub {}` created for the mock, so mutating its prototype
+in-place is safe.
+
+If the original has no prototype, no prototype is imposed on the
+replacement.
+
 ## unmock($package, $method)
 
 Restores the original method for a mocked method.
@@ -201,6 +213,10 @@ Supports two forms:
 or the shorthand:
 
     unmock 'My::Module::method';
+
+Because `mock` stores the original coderef (not a copy), reinstating it
+via glob assignment also restores its prototype automatically. No explicit
+prototype handling is required in `unmock`.
 
 ## mock\_scoped
 
@@ -334,6 +350,26 @@ be alternating key/value pairs suitable for assignment to a hash:
     is($args{name},  'foo', 'name arg captured');
     is($args{value}, 42,    'value arg captured');
 
+### Limitations
+
+`spy` installs its wrapper coderef directly into the glob without going
+through `mock`, so the prototype-preservation logic in `mock` does not
+apply. If the target function carries a Perl prototype (for example a
+`()` no-args prototype), installing a spy will emit a
+`Prototype mismatch` warning.
+
+If you need warning-free wrapping of a prototyped function, install the
+spy on a non-prototyped alias, or use `mock` with a wrapper that records
+calls and delegates to the original:
+
+    my @calls;
+    mock 'My::Module::detect' => sub {
+        push @calls, [@_];
+        return My::Module::_real_detect(@_);   # delegate manually
+    };
+
+This limitation will be addressed in a future release.
+
 ## inject($package, $dependency, $mock\_object)
 
 Injects a mock dependency. Supports two forms:
@@ -384,7 +420,7 @@ Mock a method so that it always returns a fixed value.
 
 Takes a single target (either `'Pkg::method'` or `('Pkg','method')`) and
 a value to return. Returns nothing. Side effects: installs a mock layer
-using ["mock"](#mock).
+using `mock`.
 
 ### API specification
 
@@ -407,7 +443,7 @@ Mock a method so that it always throws an exception.
 
 Takes a single target (either `'Pkg::method'` or `('Pkg','method')`) and
 an exception message. Returns nothing. Side effects: installs a mock layer
-using ["mock"](#mock).
+using `mock`.
 
 ### API specification
 
@@ -430,7 +466,7 @@ Mock a method so that it returns a sequence of values over successive calls.
 
 Takes a single target (either `'Pkg::method'` or `('Pkg','method')`) and
 one or more values. Returns nothing. Side effects: installs a mock layer
-using ["mock"](#mock). When the sequence is exhausted, the last value is repeated.
+using `mock`. When the sequence is exhausted, the last value is repeated.
 
 ### API specification
 

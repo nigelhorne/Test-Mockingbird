@@ -7,6 +7,7 @@ use warnings;
 
 use Carp qw(croak);
 use Exporter 'import';
+use Scalar::Util ();
 
 our @EXPORT = qw(
 	mock
@@ -227,6 +228,18 @@ or the shorthand:
 
     mock 'My::Module::method' => sub { ... };
 
+If the original function carries a Perl prototype, the same prototype is
+automatically applied to the replacement coderef before it is installed.
+This prevents Perl from emitting C<Prototype mismatch> warnings at call
+sites that were compiled against the original signature. The canonical
+case is functions declared with a C<()> no-args prototype, such as
+C<I18N::LangTags::Detect::detect>. The replacement is almost always an
+anonymous C<sub {}> created for the mock, so mutating its prototype
+in-place is safe.
+
+If the original has no prototype, no prototype is imposed on the
+replacement.
+
 =cut
 
 sub mock {
@@ -247,8 +260,20 @@ sub mock {
 
 	my $full_method = "${package}::$method";
 
-	# Backup original if not already mocked
-	push @{ $mocked{$full_method} }, \&{$full_method};
+	# Capture the original coderef before replacing it.  A named variable
+	# is required here so we can inspect its prototype in the next step.
+	my $original = \&{$full_method};
+	push @{ $mocked{$full_method} }, $original;
+
+	# If the original carries a prototype, stamp the same prototype onto
+	# the replacement.  This prevents Perl emitting prototype-mismatch
+	# warnings at call sites that were compiled against the original
+	# signature (e.g. functions with a () no-args prototype such as
+	# I18N::LangTags::Detect::detect).  The replacement is almost always
+	# an anonymous sub created for this mock, so mutating its prototype
+	# in-place is safe.
+	my $proto = prototype($original);
+	&Scalar::Util::set_prototype($replacement, $proto) if defined $proto;
 
 	no warnings 'redefine';
 	{
@@ -275,6 +300,10 @@ Supports two forms:
 or the shorthand:
 
     unmock 'My::Module::method';
+
+Because C<mock> stores the original coderef (not a copy), reinstating it
+via glob assignment also restores its prototype automatically. No explicit
+prototype handling is required in C<unmock>.
 
 =cut
 
@@ -530,6 +559,26 @@ C<my %args = @{$call}[2..$#{$call}]>
     is($args{name},  'foo', 'name arg captured');
     is($args{value}, 42,    'value arg captured');
 
+=head3 Limitations
+
+C<spy> installs its wrapper coderef directly into the glob without going
+through C<mock>, so the prototype-preservation logic in C<mock> does not
+apply. If the target function carries a Perl prototype (for example a
+C<()> no-args prototype), installing a spy will emit a
+C<Prototype mismatch> warning.
+
+If you need warning-free wrapping of a prototyped function, install the
+spy on a non-prototyped alias, or use C<mock> with a wrapper that records
+calls and delegates to the original:
+
+    my @calls;
+    mock 'My::Module::detect' => sub {
+        push @calls, [@_];
+        return My::Module::_real_detect(@_);   # delegate manually
+    };
+
+This limitation will be addressed in a future release.
+
 =cut
 
 sub spy {
@@ -734,7 +783,7 @@ Mock a method so that it always returns a fixed value.
 
 Takes a single target (either C<'Pkg::method'> or C<('Pkg','method')>) and
 a value to return. Returns nothing. Side effects: installs a mock layer
-using L</mock>.
+using C<mock>.
 
 =head3 API specification
 
@@ -776,7 +825,7 @@ Mock a method so that it always throws an exception.
 
 Takes a single target (either C<'Pkg::method'> or C<('Pkg','method')>) and
 an exception message. Returns nothing. Side effects: installs a mock layer
-using L</mock>.
+using C<mock>.
 
 =head3 API specification
 
@@ -819,7 +868,7 @@ Mock a method so that it returns a sequence of values over successive calls.
 
 Takes a single target (either C<'Pkg::method'> or C<('Pkg','method')>) and
 one or more values. Returns nothing. Side effects: installs a mock layer
-using L</mock>. When the sequence is exhausted, the last value is repeated.
+using C<mock>. When the sequence is exhausted, the last value is repeated.
 
 =head3 API specification
 
@@ -1111,12 +1160,15 @@ sub diagnose_mocks_pretty {
 sub _parse_target {
 	my ($arg1, $arg2, $arg3) = @_;
 
-	# Shorthand: 'Pkg::method'
-	if (defined $arg1 && !defined $arg3 && $arg1 =~ /^(.*)::([^:]+)$/) {
+	# Shorthand: a single 'Pkg::method' string with no second argument.
+	# The original check used !defined $arg3, which was too permissive:
+	# spy('A::B','method') has arg3 undef but arg2 defined, and must NOT
+	# be treated as shorthand.  The correct discriminator is !defined $arg2.
+	if (defined $arg1 && !defined $arg2 && $arg1 =~ /^(.*)::([^:]+)$/) {
 		return ($1, $2);
 	}
 
-	# Longhand: ('Pkg','method')
+	# Longhand: ('Pkg','method') or any other multi-argument form
 	return ($arg1, $arg2);
 }
 
