@@ -1220,6 +1220,8 @@ Nigel Horne, C<< <njh at nigelhorne.com> >>
 
 =over 4
 
+=item * L<Test Dashboard|https://nigelhorne.github.io/Test-Mockingbird/coverage/>
+
 =item * L<Test::Mockingbird::DeepMock>
 
 =item * L<Test::Mockingbird::TimeTravel>
