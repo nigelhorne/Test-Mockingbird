@@ -29,9 +29,8 @@ WriteMakefile(
 				web => 'https://github.com/nigelhorne/Test-Mockingbird'
 			}, bugtracker => {
 				mailto => 'bug-Test-Mockingbird@rt.cpan.org',
-				url => 'https://github.com/nigelhorne/Test-Mockingbird/issues',
-				# web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Test-Mockingbird',
-				web => 'https://github.com/nigelhorne/Test-Mockingbird/issues'
+				url => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Test-Mockingbird',
+				web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Test-Mockingbird',
 			}
 		},
 	},
@@ -52,4 +51,5 @@ WriteMakefile(
 		clean	 => {
 		FILES => 'Test-Mockingbird-*',
 	},
+	MIN_PERL_VERSION	=> '5.0163'
 );

@@ -1,5 +1,11 @@
 Revision history for Test::Mockingbird - Advanced mocking library for Perl with support for dependency injection and spies
 
+0.11
+
+  Bug fixes
+
+  -  Bump minimum version: Fixes https://github.com/nigelhorne/Test-Mockingbird/issues/6
+
 0.10	Fri May  8 15:11:42 EDT 2026
 
   Bug fixes

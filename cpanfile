@@ -1,5 +1,7 @@
 # Generated from Makefile.PL using makefilepl2cpanfile
 
+requires 'perl', '5.0163';
+
 requires 'Carp';
 requires 'Exporter';
 requires 'ExtUtils::MakeMaker', '6.64';

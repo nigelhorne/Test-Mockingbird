@@ -2,6 +2,7 @@ package Test::Mockingbird;
 
 use strict;
 use warnings;
+use 5.0163;
 
 # TODO: Look into Sub::Install
 
