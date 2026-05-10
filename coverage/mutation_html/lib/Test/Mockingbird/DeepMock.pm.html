@@ -1,0 +1,1365 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+
+/* --------------------------------------------------
+   CSS Variables (Light Mode Default)
+-------------------------------------------------- */
+
+:root {
+    --bg: #ffffff;
+    --text: #000000;
+    --table-header: #333;
+    --table-header-text: #ffffff;
+
+    --survived-1: #f8d7da;
+    --survived-2: #f5b7b1;
+    --survived-3: #ec7063;
+
+    --killed: #d4edda;
+    --border: #cccccc;
+}
+
+/* --------------------------------------------------
+   Dark Mode Overrides
+-------------------------------------------------- */
+
+html[data-theme='dark'] {
+    --bg: #1e1e1e;
+    --text: #dddddd;
+    --table-header: #222;
+    --table-header-text: #ffffff;
+
+    --survived-1: #5c2b2e;
+    --survived-2: #7b2c2f;
+    --survived-3: #a93226;
+
+    --killed: #1e4620;
+    --border: #555;
+}
+
+/* --------------------------------------------------
+   Global Styles
+-------------------------------------------------- */
+
+body {
+	font-family: sans-serif;
+	background: var(--bg);
+	color: var(--text);
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th {
+    background: var(--table-header);
+    color: var(--table-header-text);
+}
+
+.survived-1 { background-color: var(--survived-1); }
+.survived-2 { background-color: var(--survived-2); }
+.survived-3 { background-color: var(--survived-3); }
+
+.killed { background-color: var(--killed); }
+
+.legend {
+    border: 1px solid #ccc;
+    background: #fafafa;
+    padding: 10px;
+    margin: 15px 0;
+    font-size: 0.9em;
+}
+
+.legend pre {
+    background: #f4f4f4;
+    padding: 5px;
+}
+
+.legend-box {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin: 0 6px 0 20px;
+    vertical-align: middle;
+    border: 1px solid var(--border);
+}
+
+/* White box for non-mutated lines */
+.legend-box.none {
+	background-color: var(--bg);
+}
+
+/* --------------------------------------------------
+   Suggested Test Box Styling
+   Theme-aware and readable in light & dark modes
+-------------------------------------------------- */
+
+.suggested-test {
+    margin-top: 6px;
+    margin-bottom: 12px;
+
+    /* Use theme variables instead of hardcoded colors */
+    background: var(--bg);
+    color: var(--text);
+
+    padding: 8px;
+    border-radius: 4px;
+
+    /* Subtle border for visual separation */
+    border: 1px solid var(--border);
+}
+
+/* Label styling */
+.suggest-label {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+/* Ensure the test code block inherits readable colors */
+.suggested-test pre {
+    background: transparent;   /* Prevent nested dark blocks */
+    color: inherit;            /* Match theme text color */
+    margin: 0;
+    font-family: monospace;
+}
+
+pre { line-height: 1.4; }
+
+pre > details {
+    margin: 0.2em 0;
+}
+
+pre > details:first-child {
+    margin-top: 0;
+}
+
+pre > details:last-child {
+    margin-bottom: 0;
+}
+
+pre details,
+pre summary,
+pre ul,
+pre li {
+    white-space: normal;
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+}
+
+.nav { margin-bottom: 1em; }
+
+.toggle {
+    float: right;
+    cursor: pointer;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+/* Tooltip container */
+.tooltip {
+	position: relative;
+	cursor: help;
+}
+
+/* Tooltip bubble */
+.tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background: var(--table-header);
+    color: var(--table-header-text);
+    padding: 6px 10px;
+    white-space: normal;
+    max-width: 300px;
+    min-width: 30ch;
+    font-size: 12px;
+    border-radius: 6px;
+    z-index: 1000;
+    margin-left: 10ch;   /* move tooltip ~10 characters to the right */
+}
+
+.mutant-details {
+	margin-left: 2em;
+	font-size: 0.9em;
+}
+
+/* Indent the list of mutations that displays when expanding by 8 characters */
+pre details.mutant-details ul {
+	padding-left: 8ch;
+	margin: 0.2em 0;
+}
+
+.mutant-details summary {
+	cursor: pointer;
+	font-weight: bold;
+}
+
+.lcsaj-dot {
+    color: #5555ff;
+    font-size: 10px;
+    margin-right: 3px;
+}
+
+.lcsaj-dot-uncovered {
+    color: #cc4444;
+    font-size: 10px;
+    margin-right: 3px;
+}
+
+.lcsaj-tip {
+	position: relative;
+	display: inline-block;
+}
+
+.lcsaj-tip .lcsaj-tip-text {
+	visibility: hidden;
+	background-color: #333;
+	color: #fff;
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 11px;
+	white-space: nowrap;
+	position: fixed;
+	z-index: 9999;
+	pointer-events: none;
+}
+
+.lcsaj-tip:hover .lcsaj-tip-text {
+	visibility: visible;
+}
+
+</style>
+</head>
+<body>
+<button class="toggle" onclick="toggleTheme()">🌙 Toggle Theme</button>
+<h1>lib/Test/Mockingbird/DeepMock.pm</h1>
+<div class="nav"><a href="../../../../index.html">Index</a>
+ <a href="TimeTravel.pm.html">Next ➡</a></div><div class='summary'>
+<strong>Structural Coverage (Approximate)</strong><p>
+TER1 (Statement): 100.00%<br>
+TER2 (Branch): 98.21%<br>
+TER3 (LCSAJ): 100.0% (17/17)<br>
+Approximate LCSAJ segments: 57<br>
+</div>
+
+    <div class="legend">
+        <h3>LCSAJ Legend</h3>
+
+        <p>
+        <span class="lcsaj-dot">●</span>
+        <b>Covered</b> — this LCSAJ path was executed during testing.
+        </p>
+
+        <p>
+        <span class="lcsaj-dot-uncovered">●</span>
+        <b>Not covered</b> — this LCSAJ path was never executed. These are the paths to focus on.
+        </p>
+
+        <p>
+        Multiple dots on a line indicate that multiple control-flow paths begin at that line.
+        Hovering over any dot shows:
+        </p>
+
+        <pre>
+        start → end → jump
+        </pre>
+
+        <ul>
+        <li><b>start</b> – first line of the linear sequence</li>
+        <li><b>end</b> – last line before control flow changes</li>
+        <li><b>jump</b> – line execution jumps to next</li>
+        </ul>
+
+        <p>
+        Uncovered paths show <b>[NOT COVERED]</b> in the tooltip.
+	</p>
+    </div>
+
+		<div class="legend">
+			<h3>Mutant Testing Legend</h3>
+			<span class="legend-box survived-1"></span> Survived (tests missed this)
+			<span class="legend-box killed"></span> Killed (tests detected this)
+			<span class="legend-box none"></span> No mutation
+		</div>
+	<pre>
+<span class="">    1: package Test::Mockingbird::DeepMock;
+</span><span class="">    2: 
+</span><span class="">    3: use strict;
+</span><span class="">    4: use warnings;
+</span><span class="">    5: 
+</span><span class="">    6: use Exporter &#39;import&#39;;
+</span><span class="">    7: use Carp qw(croak);
+</span><span class="">    8: use Test::Mockingbird ();
+</span><span class="">    9: use Test::Mockingbird::TimeTravel ();
+</span><span class="">   10: use Test::More ();
+</span><span class="">   11: 
+</span><span class="">   12: our @EXPORT_OK = qw(deep_mock);
+</span><span class="">   13: 
+</span><span class="">   14: =head1 NAME
+</span><span class="">   15: 
+</span><span class="">   16: Test::Mockingbird::DeepMock - Declarative, structured mocking and spying for Perl tests
+</span><span class="">   17: 
+</span><span class="">   18: =head1 VERSION
+</span><span class="">   19: 
+</span><span class="">   20: Version 0.10
+</span><span class="">   21: 
+</span><span class="">   22: =cut
+</span><span class="">   23: 
+</span><span class="">   24: our $VERSION = &#39;0.10&#39;;
+</span><span class="">   25: 
+</span><span class="">   26: =head1 SYNOPSIS
+</span><span class="">   27: 
+</span><span class="">   28:     use Test::Mockingbird::DeepMock qw(deep_mock);
+</span><span class="">   29: 
+</span><span class="">   30:     {
+</span><span class="">   31:         package MyApp;
+</span><span class="">   32:         sub greet  { &quot;hello&quot; }
+</span><span class="">   33:         sub double { $_[1] * 2 }
+</span><span class="">   34:     }
+</span><span class="">   35: 
+</span><span class="">   36:     deep_mock(
+</span><span class="">   37:         {
+</span><span class="">   38:             mocks =&gt; [
+</span><span class="">   39:                 {
+</span><span class="">   40:                     target =&gt; &#39;MyApp::greet&#39;,
+</span><span class="">   41:                     type   =&gt; &#39;mock&#39;,
+</span><span class="">   42:                     with   =&gt; sub { &quot;mocked&quot; },
+</span><span class="">   43:                 }, {
+</span><span class="">   44:                     target =&gt; &#39;MyApp::double&#39;,
+</span><span class="">   45:                     type   =&gt; &#39;spy&#39;,
+</span><span class="">   46:                     tag    =&gt; &#39;double_spy&#39;,
+</span><span class="">   47:                 },
+</span><span class="">   48:             ], expectations =&gt; [
+</span><span class="">   49:                 {
+</span><span class="">   50:                     tag   =&gt; &#39;double_spy&#39;,
+</span><span class="">   51:                     calls =&gt; 2,
+</span><span class="">   52:                 },
+</span><span class="">   53:             ],
+</span><span class="">   54:         },
+</span><span class="">   55:         sub {
+</span><span class="">   56:             is MyApp::greet(), &#39;mocked&#39;, &#39;greet() was mocked&#39;;
+</span><span class="">   57: 
+</span><span class="">   58:             MyApp::double(2);
+</span><span class="">   59:             MyApp::double(3);
+</span><span class="">   60:         }
+</span><span class="">   61:     );
+</span><span class="">   62: 
+</span><span class="">   63: =head1 DESCRIPTION
+</span><span class="">   64: 
+</span><span class="">   65: C&lt;Test::Mockingbird::DeepMock&gt; provides a declarative, data-driven way to
+</span><span class="">   66: describe mocking, spying, injection, and expectations in Perl tests.
+</span><span class="">   67: 
+</span><span class="">   68: Instead of scattering C&lt;mock&gt;, C&lt;spy&gt;, and C&lt;restore_all&gt; calls throughout
+</span><span class="">   69: your test code, DeepMock lets you define a complete mocking plan in a single
+</span><span class="">   70: hashref, then executes your test code under that plan.
+</span><span class="">   71: 
+</span><span class="">   72: This produces tests that are:
+</span><span class="">   73: 
+</span><span class="">   74: =over 4
+</span><span class="">   75: 
+</span><span class="">   76: =item * easier to read
+</span><span class="">   77: 
+</span><span class="">   78: =item * easier to maintain
+</span><span class="">   79: 
+</span><span class="">   80: =item * easier to extend
+</span><span class="">   81: 
+</span><span class="">   82: =item * easier to reason about
+</span><span class="">   83: 
+</span><span class="">   84: =back
+</span><span class="">   85: 
+</span><span class="">   86: DeepMock is built on top of L&lt;Test::Mockingbird&gt;, adding structure,
+</span><span class="">   87: expectations, and a clean DSL.
+</span><span class="">   88: 
+</span><span class="">   89: =head1 WHY DEEP MOCK?
+</span><span class="">   90: 
+</span><span class="">   91: Traditional mocking in Perl tends to be:
+</span><span class="">   92: 
+</span><span class="">   93: =over 4
+</span><span class="">   94: 
+</span><span class="">   95: =item * imperative
+</span><span class="">   96: 
+</span><span class="">   97: =item * scattered across the test body
+</span><span class="">   98: 
+</span><span class="">   99: =item * difficult to audit
+</span><span class="">  100: 
+</span><span class="">  101: =item * easy to forget to restore
+</span><span class="">  102: 
+</span><span class="">  103: =back
+</span><span class="">  104: 
+</span><span class="">  105: DeepMock solves these problems by letting you declare everything up front:
+</span><span class="">  106: 
+</span><span class="">  107:     deep_mock(
+</span><span class="">  108:         {
+</span><span class="">  109:             mocks        =&gt; [...],
+</span><span class="">  110:             expectations =&gt; [...],
+</span><span class="">  111:         },
+</span><span class="">  112:         sub { ... }
+</span><span class="">  113:     );
+</span><span class="">  114: 
+</span><span class="">  115: This gives you:
+</span><span class="">  116: 
+</span><span class="">  117: =over 4
+</span><span class="">  118: 
+</span><span class="">  119: =item * a single place to see all mocks and spies
+</span><span class="">  120: 
+</span><span class="">  121: =item * automatic restore of all mocks
+</span><span class="">  122: 
+</span><span class="">  123: =item * structured expectations
+</span><span class="">  124: 
+</span><span class="">  125: =item * reusable patterns
+</span><span class="">  126: 
+</span><span class="">  127: =item * a clean separation between setup and test logic
+</span><span class="">  128: 
+</span><span class="">  129: =back
+</span><span class="">  130: 
+</span><span class="">  131: =head1 PLAN STRUCTURE
+</span><span class="">  132: 
+</span><span class="">  133: A DeepMock plan is a hashref with the following keys:
+</span><span class="">  134: 
+</span><span class="">  135: =head2 C&lt;mocks&gt;
+</span><span class="">  136: 
+</span><span class="">  137: An arrayref of mock specifications. Each entry is a hashref:
+</span><span class="">  138: 
+</span><span class="">  139:     {
+</span><span class="">  140:         target =&gt; &#39;Package::method&#39;,   # required
+</span><span class="">  141:         type   =&gt; &#39;mock&#39; | &#39;spy&#39; | &#39;inject&#39;,
+</span><span class="">  142:         with   =&gt; sub { ... },         # for mock/inject
+</span><span class="">  143:         tag    =&gt; &#39;identifier&#39;,        # for spies or scoped mocks
+</span><span class="">  144:         scoped =&gt; 1,                   # optional
+</span><span class="">  145:     }
+</span><span class="">  146: 
+</span><span class="">  147: =head3 Types
+</span><span class="">  148: 
+</span><span class="">  149: =over 4
+</span><span class="">  150: 
+</span><span class="">  151: =item C&lt;mock&gt;
+</span><span class="">  152: 
+</span><span class="">  153: Replaces the target method with the provided coderef.
+</span><span class="">  154: 
+</span><span class="">  155: =item C&lt;spy&gt;
+</span><span class="">  156: 
+</span><span class="">  157: Wraps the method and records all calls. Must have a C&lt;tag&gt;.
+</span><span class="">  158: 
+</span><span class="">  159: =item C&lt;inject&gt;
+</span><span class="">  160: 
+</span><span class="">  161: Injects a value or behavior into the target (delegates to C&lt;Test::Mockingbird::inject&gt;).
+</span><span class="">  162: 
+</span><span class="">  163: =back
+</span><span class="">  164: 
+</span><span class="">  165: =head2 C&lt;expectations&gt;
+</span><span class="">  166: 
+</span><span class="">  167: An arrayref of expectation specifications. Each entry is a hashref:
+</span><span class="">  168: 
+</span><span class="">  169:     {
+</span><span class="">  170:         tag   =&gt; &#39;double_spy&#39;,   # required
+</span><span class="">  171:         calls =&gt; 2,              # optional
+</span><span class="">  172:         args_like =&gt; [           # optional
+</span><span class="">  173:             [ qr/foo/, qr/bar/ ],
+</span><span class="">  174:         ],
+</span><span class="">  175:     }
+</span><span class="">  176: 
+</span><span class="">  177: =head3 Expectation fields
+</span><span class="">  178: 
+</span><span class="">  179: =over 4
+</span><span class="">  180: 
+</span><span class="">  181: =item C&lt;tag&gt;
+</span><span class="">  182: 
+</span><span class="">  183: Identifies which spy this expectation applies to.
+</span><span class="">  184: 
+</span><span class="">  185: =item C&lt;calls&gt;
+</span><span class="">  186: 
+</span><span class="">  187: Expected number of calls.
+</span><span class="">  188: 
+</span><span class="">  189: =item C&lt;args_eq&gt;
+</span><span class="">  190: 
+</span><span class="">  191: Arrayref of arrayrefs. Each inner array lists exact argument values expected
+</span><span class="">  192: for a specific call. Values are compared with C&lt;Test::More::is&gt;.
+</span><span class="">  193: 
+</span><span class="">  194: =item C&lt;args_deeply&gt;
+</span><span class="">  195: 
+</span><span class="">  196: Arrayref of arrayrefs. Each inner array lists deep structures to compare
+</span><span class="">  197: against the arguments for a specific call. Uses C&lt;Test::Deep::cmp_deeply&gt;.
+</span><span class="">  198: 
+</span><span class="">  199: =item C&lt;args_like&gt;
+</span><span class="">  200: 
+</span><span class="">  201: Arrayref of arrayrefs of regexes. Each inner array describes expected
+</span><span class="">  202: arguments for a specific call.
+</span><span class="">  203: 
+</span><span class="">  204: =item C&lt;never&gt;
+</span><span class="">  205: 
+</span><span class="">  206: Asserts that the spy was never called.
+</span><span class="">  207: Mutually exclusive with C&lt;calls&gt;.
+</span><span class="">  208: 
+</span><span class="">  209: =back
+</span><span class="">  210: 
+</span><span class="">  211: =head2 C&lt;globals&gt;
+</span><span class="">  212: 
+</span><span class="">  213: Optional hashref controlling global behavior:
+</span><span class="">  214: 
+</span><span class="">  215:     globals =&gt; {
+</span><span class="">  216:         restore_on_scope_exit =&gt; 1,   # default
+</span><span class="">  217:     }
+</span><span class="">  218: 
+</span><span class="">  219: =head2 C&lt;time&gt;
+</span><span class="">  220: 
+</span><span class="">  221: Optional hashref describing a time-travel plan to apply while the
+</span><span class="">  222: C&lt;deep_mock&gt; block is running. This integrates with
+</span><span class="">  223: L&lt;Test::Mockingbird::TimeTravel&gt; and allows declarative control of frozen
+</span><span class="">  224: time, time jumps, and temporal overrides.
+</span><span class="">  225: 
+</span><span class="">  226: If provided, the time plan is applied:
+</span><span class="">  227: 
+</span><span class="">  228: =over 4
+</span><span class="">  229: 
+</span><span class="">  230: =item 1. before any mocks are installed
+</span><span class="">  231: 
+</span><span class="">  232: =item 2. before the test code block is executed
+</span><span class="">  233: 
+</span><span class="">  234: =item 3. automatically restored after the block completes
+</span><span class="">  235: 
+</span><span class="">  236: =back
+</span><span class="">  237: 
+</span><span class="">  238: A time plan may include any of the following keys:
+</span><span class="">  239: 
+</span><span class="">  240:     time =&gt; {
+</span><span class="">  241:         freeze  =&gt; &#39;2025-01-01T00:00:00Z&#39;,
+</span><span class="">  242:         travel  =&gt; &#39;2025-01-02T12:00:00Z&#39;,
+</span><span class="">  243:         advance =&gt; [ 2 =&gt; &#39;minutes&#39; ],
+</span><span class="">  244:         rewind  =&gt; [ 1 =&gt; &#39;hour&#39;    ],
+</span><span class="">  245:     }
+</span><span class="">  246: 
+</span><span class="">  247: =head3 C&lt;freeze&gt;
+</span><span class="">  248: 
+</span><span class="">  249: Freezes time at the given timestamp. Accepts any format supported by
+</span><span class="">  250: C&lt;Test::Mockingbird::TimeTravel&gt;, including:
+</span><span class="">  251: 
+</span><span class="">  252: =over 4
+</span><span class="">  253: 
+</span><span class="">  254: =item * C&lt;YYYY-MM-DD&gt;
+</span><span class="">  255: 
+</span><span class="">  256: =item * C&lt;YYYY-MM-DD HH:MM:SS&gt;
+</span><span class="">  257: 
+</span><span class="">  258: =item * C&lt;YYYY-MM-DDTHH:MM:SSZ&gt;
+</span><span class="">  259: 
+</span><span class="">  260: =item * raw epoch seconds
+</span><span class="">  261: 
+</span><span class="">  262: =back
+</span><span class="">  263: 
+</span><span class="">  264: =head3 C&lt;travel&gt;
+</span><span class="">  265: 
+</span><span class="">  266: Moves the frozen clock to a new timestamp without unfreezing time.
+</span><span class="">  267: 
+</span><span class="">  268: =head3 C&lt;advance&gt;
+</span><span class="">  269: 
+</span><span class="">  270: Advances the frozen clock by a duration. Must be an arrayref:
+</span><span class="">  271: 
+</span><span class="">  272:     advance =&gt; [ $amount =&gt; $unit ]
+</span><span class="">  273: 
+</span><span class="">  274: Units may be C&lt;seconds&gt;, C&lt;minutes&gt;, C&lt;hours&gt;, or C&lt;days&gt;.
+</span><span class="">  275: 
+</span><span class="">  276: =head3 C&lt;rewind&gt;
+</span><span class="">  277: 
+</span><span class="">  278: Rewinds the frozen clock by a duration. Same format as C&lt;advance&gt;.
+</span><span class="">  279: 
+</span><span class="">  280: =head3 Example
+</span><span class="">  281: 
+</span><span class="">  282:     deep_mock(
+</span><span class="">  283:         {
+</span><span class="">  284:             time =&gt; {
+</span><span class="">  285:                 freeze  =&gt; &#39;2025-01-01T00:00:00Z&#39;,
+</span><span class="">  286:                 advance =&gt; [ 2 =&gt; &#39;minutes&#39; ],
+</span><span class="">  287:             },
+</span><span class="">  288:             mocks =&gt; [
+</span><span class="">  289:                 {
+</span><span class="">  290:                     target =&gt; &#39;MyApp::stamp&#39;,
+</span><span class="">  291:                     type   =&gt; &#39;mock&#39;,
+</span><span class="">  292:                     with   =&gt; sub { now() },   # observes frozen time
+</span><span class="">  293:                 },
+</span><span class="">  294:             ],
+</span><span class="">  295:         },
+</span><span class="">  296:         sub {
+</span><span class="">  297:             is MyApp::stamp(),
+</span><span class="">  298:                Test::Mockingbird::TimeTravel::_parse_datetime(
+</span><span class="">  299:                    &#39;2025-01-01T00:02:00Z&#39;
+</span><span class="">  300:                ),
+</span><span class="">  301:                &#39;mock sees advanced frozen time&#39;;
+</span><span class="">  302:         }
+</span><span class="">  303:     );
+</span><span class="">  304: 
+</span><span class="">  305: =head3 Restoration
+</span><span class="">  306: 
+</span><span class="">  307: All time-travel state is automatically restored after the C&lt;deep_mock&gt;
+</span><span class="">  308: block completes, regardless of whether the block returns normally or dies.
+</span><span class="">  309: This mirrors the automatic restoration of mocks.
+</span><span class="">  310: 
+</span><span class="">  311: =head1 COOKBOOK
+</span><span class="">  312: 
+</span><span class="">  313: =head2 Mocking a method
+</span><span class="">  314: 
+</span><span class="">  315:     mocks =&gt; [
+</span><span class="">  316:         {
+</span><span class="">  317:             target =&gt; &#39;MyApp::greet&#39;,
+</span><span class="">  318:             type   =&gt; &#39;mock&#39;,
+</span><span class="">  319:             with   =&gt; sub { &quot;hi&quot; },
+</span><span class="">  320:         },
+</span><span class="">  321:     ]
+</span><span class="">  322: 
+</span><span class="">  323: =head2 Spying on a method
+</span><span class="">  324: 
+</span><span class="">  325:     mocks =&gt; [
+</span><span class="">  326:         {
+</span><span class="">  327:             target =&gt; &#39;MyApp::double&#39;,
+</span><span class="">  328:             type   =&gt; &#39;spy&#39;,
+</span><span class="">  329:             tag    =&gt; &#39;dbl&#39;,
+</span><span class="">  330:         },
+</span><span class="">  331:     ]
+</span><span class="">  332: 
+</span><span class="">  333: =head2 Injecting a dependency
+</span><span class="">  334: 
+</span><span class="">  335:     mocks =&gt; [
+</span><span class="">  336:         {
+</span><span class="">  337:             target =&gt; &#39;MyApp::Config::get&#39;,
+</span><span class="">  338:             type   =&gt; &#39;inject&#39;,
+</span><span class="">  339:             with   =&gt; { debug =&gt; 1 },
+</span><span class="">  340:         },
+</span><span class="">  341:     ]
+</span><span class="">  342: 
+</span><span class="">  343: =head2 Expecting a call count
+</span><span class="">  344: 
+</span><span class="">  345:     expectations =&gt; [
+</span><span class="">  346:         {
+</span><span class="">  347:             tag   =&gt; &#39;dbl&#39;,
+</span><span class="">  348:             calls =&gt; 3,
+</span><span class="">  349:         },
+</span><span class="">  350:     ]
+</span><span class="">  351: 
+</span><span class="">  352: =head2 Expecting argument patterns
+</span><span class="">  353: 
+</span><span class="">  354:     expectations =&gt; [
+</span><span class="">  355:         {
+</span><span class="">  356:             tag      =&gt; &#39;dbl&#39;,
+</span><span class="">  357:             args_like =&gt; [
+</span><span class="">  358:                 [ qr/^\d+$/ ],     # first call
+</span><span class="">  359:                 [ qr/^\d+$/ ],     # second call
+</span><span class="">  360:             ],
+</span><span class="">  361:         },
+</span><span class="">  362:     ]
+</span><span class="">  363: 
+</span><span class="">  364: =head2 Combining mocking with time travel
+</span><span class="">  365: 
+</span><span class="">  366: DeepMock can apply a time-travel plan (via
+</span><span class="">  367: L&lt;Test::Mockingbird::TimeTravel&gt;) before installing mocks. This allows
+</span><span class="">  368: tests to observe deterministic timestamps inside mocked methods or
+</span><span class="">  369: spies.
+</span><span class="">  370: 
+</span><span class="">  371:     {
+</span><span class="">  372:         package MyApp;
+</span><span class="">  373:         sub stamp { time }   # original behaviour (non-deterministic)
+</span><span class="">  374:         sub logit { $_[1] }
+</span><span class="">  375:     }
+</span><span class="">  376: 
+</span><span class="">  377:     deep_mock(
+</span><span class="">  378:         {
+</span><span class="">  379:             time =&gt; {
+</span><span class="">  380:                 freeze  =&gt; &#39;2025-01-01T00:00:00Z&#39;,
+</span><span class="">  381:                 advance =&gt; [ 2 =&gt; &#39;minutes&#39; ],
+</span><span class="">  382:             },
+</span><span class="">  383:             mocks =&gt; [
+</span><span class="">  384:                 {
+</span><span class="">  385:                     target =&gt; &#39;MyApp::stamp&#39;,
+</span><span class="">  386:                     type   =&gt; &#39;mock&#39;,
+</span><span class="">  387:                     with   =&gt; sub { now() },   # observe frozen time
+</span><span class="">  388:                 },
+</span><span class="">  389:                 {
+</span><span class="">  390:                     target =&gt; &#39;MyApp::logit&#39;,
+</span><span class="">  391:                     type   =&gt; &#39;spy&#39;,
+</span><span class="">  392:                     tag    =&gt; &#39;log_spy&#39;,
+</span><span class="">  393:                 },
+</span><span class="">  394:             ],
+</span><span class="">  395:             expectations =&gt; [
+</span><span class="">  396:                 {
+</span><span class="">  397:                     tag   =&gt; &#39;log_spy&#39;,
+</span><span class="">  398:                     calls =&gt; 1,
+</span><span class="">  399:                     args_like =&gt; [
+</span><span class="">  400:                         [ qr/^event:/ ],
+</span><span class="">  401:                     ],
+</span><span class="">  402:                 },
+</span><span class="">  403:             ],
+</span><span class="">  404:         },
+</span><span class="">  405:         sub {
+</span><span class="">  406:             my $t = MyApp::stamp();     # returns frozen + advanced time
+</span><span class="">  407:             MyApp::logit(&quot;event:$t&quot;);   # spy records call + args
+</span><span class="">  408:         }
+</span><span class="">  409:     );
+</span><span class="">  410: 
+</span><span class="">  411: In this example:
+</span><span class="">  412: 
+</span><span class="">  413: =over 4
+</span><span class="">  414: 
+</span><span class="">  415: =item *
+</span><span class="">  416: 
+</span><span class="">  417: Time is frozen at C&lt;2025-01-01T00:00:00Z&gt; and advanced by two minutes
+</span><span class="">  418: before any mocks are installed.
+</span><span class="">  419: 
+</span><span class="">  420: =item *
+</span><span class="">  421: 
+</span><span class="">  422: C&lt;MyApp::stamp&gt; is mocked to return C&lt;now()&gt;, giving a deterministic
+</span><span class="">  423: timestamp inside the test.
+</span><span class="">  424: 
+</span><span class="">  425: =item *
+</span><span class="">  426: 
+</span><span class="">  427: C&lt;MyApp::logit&gt; is spied on, and its arguments are validated against
+</span><span class="">  428: regex patterns.
+</span><span class="">  429: 
+</span><span class="">  430: =item *
+</span><span class="">  431: 
+</span><span class="">  432: After the block completes, both the mocking layer and the time-travel
+</span><span class="">  433: layer are automatically restored.
+</span><span class="">  434: 
+</span><span class="">  435: =back
+</span><span class="">  436: 
+</span><span class="">  437: 
+</span><span class="">  438: =head2 Full example
+</span><span class="">  439: 
+</span><span class="">  440:     deep_mock(
+</span><span class="">  441:         {
+</span><span class="">  442:             mocks =&gt; [
+</span><span class="">  443:                 { target =&gt; &#39;A::foo&#39;, type =&gt; &#39;mock&#39;, with =&gt; sub { 1 } },
+</span><span class="">  444:                 { target =&gt; &#39;A::bar&#39;, type =&gt; &#39;spy&#39;,  tag =&gt; &#39;bar&#39; },
+</span><span class="">  445:             ],
+</span><span class="">  446:             expectations =&gt; [
+</span><span class="">  447:                 { tag =&gt; &#39;bar&#39;, calls =&gt; 2 },
+</span><span class="">  448:             ],
+</span><span class="">  449:         },
+</span><span class="">  450:         sub {
+</span><span class="">  451:             A::foo();
+</span><span class="">  452:             A::bar(10);
+</span><span class="">  453:             A::bar(20);
+</span><span class="">  454:         }
+</span><span class="">  455:     );
+</span><span class="">  456: 
+</span><span class="">  457: =head1 TROUBLESHOOTING
+</span><span class="">  458: 
+</span><span class="">  459: =head2 &quot;Not enough arguments for deep_mock&quot;
+</span><span class="">  460: 
+</span><span class="">  461: You are using the BLOCK prototype form:
+</span><span class="">  462: 
+</span><span class="">  463:     deep_mock {
+</span><span class="">  464:         ...
+</span><span class="">  465:     }, sub { ... };
+</span><span class="">  466: 
+</span><span class="">  467: This only works if C&lt;deep_mock&gt; has a C&lt;(&amp;$)&gt; prototype AND the first
+</span><span class="">  468: argument is a real block, not a hashref.
+</span><span class="">  469: 
+</span><span class="">  470: DeepMock uses C&lt;($$)&gt; to avoid Perl&#39;s block-vs-hashref ambiguity.
+</span><span class="">  471: 
+</span><span class="">  472: Use parentheses instead:
+</span><span class="">  473: 
+</span><span class="">  474:     deep_mock(
+</span><span class="">  475:         { ... },
+</span><span class="">  476:         sub { ... }
+</span><span class="">  477:     );
+</span><span class="">  478: 
+</span><span class="">  479: =head2 &quot;Type of arg 1 must be block or sub {}&quot;
+</span><span class="">  480: 
+</span><span class="">  481: You are still using the BLOCK prototype form. Switch to parentheses.
+</span><span class="">  482: 
+</span><span class="">  483: =head2 &quot;Use of uninitialized value in multiplication&quot;
+</span><span class="">  484: 
+</span><span class="">  485: Your spied method is being called with no arguments during spy installation.
+</span><span class="">  486: Make your method robust:
+</span><span class="">  487: 
+</span><span class="">  488:     sub double { ($_[1] // 0) * 2 }
+</span><span class="">  489: 
+</span><span class="">  490: =head2 My mocks aren&#39;t restored
+</span><span class="">  491: 
+</span><span class="">  492: Ensure you didn&#39;t disable automatic restore:
+</span><span class="">  493: 
+</span><span class="">  494:     globals =&gt; { restore_on_scope_exit =&gt; 0 }
+</span><span class="">  495: 
+</span><span class="">  496: =head2 Nested deep_mock scopes are not supported
+</span><span class="">  497: 
+</span><span class="">  498: DeepMock installs mocks using L&lt;Test::Mockingbird&gt;, which provides only
+</span><span class="">  499: global restore semantics via C&lt;restore_all&gt;. Because Test::Mockingbird
+</span><span class="">  500: does not expose a per-method restore API, DeepMock cannot safely restore
+</span><span class="">  501: only the mocks installed in an inner scope.
+</span><span class="">  502: 
+</span><span class="">  503: As a result, nested calls like:
+</span><span class="">  504: 
+</span><span class="">  505:     deep_mock { ... } sub {
+</span><span class="">  506:         deep_mock { ... } sub {
+</span><span class="">  507:             ...
+</span><span class="">  508:         };
+</span><span class="">  509:     };
+</span><span class="">  510: 
+</span><span class="">  511: will cause the inner restore to remove the outer mocks as well.
+</span><span class="">  512: 
+</span><span class="">  513: DeepMock therefore does not support nested mocking scopes.
+</span><span class="">  514: 
+</span><span class="">  515: =head2 deep_mock
+</span><span class="">  516: 
+</span><span class="">  517: Run a block of code with a set of mocks and expectations applied.
+</span><span class="">  518: 
+</span><span class="">  519: =head3 Purpose
+</span><span class="">  520: 
+</span><span class="">  521: Provides a declarative wrapper around Test::Mockingbird that installs mocks,
+</span><span class="">  522: runs a code block, and then validates expectations such as call counts and
+</span><span class="">  523: argument patterns.
+</span><span class="">  524: 
+</span><span class="">  525: =head3 Arguments
+</span><span class="">  526: 
+</span><span class="">  527: =over 4
+</span><span class="">  528: 
+</span><span class="">  529: =item * C&lt;$plan&gt; - HashRef
+</span><span class="">  530: 
+</span><span class="">  531: A plan describing mocks and expectations. Keys:
+</span><span class="">  532: 
+</span><span class="">  533: =over 4
+</span><span class="">  534: 
+</span><span class="">  535: =item * C&lt;mocks&gt; - ArrayRef of mock specifications
+</span><span class="">  536: 
+</span><span class="">  537: Each specification includes:
+</span><span class="">  538: 
+</span><span class="">  539: - C&lt;target&gt; - &quot;Package::method&quot;
+</span><span class="">  540: - C&lt;type&gt; - &quot;mock&quot; or &quot;spy&quot;
+</span><span class="">  541: - C&lt;with&gt; - coderef for mock behavior (mock only)
+</span><span class="">  542: - C&lt;tag&gt; - identifier for later expectations
+</span><span class="">  543: 
+</span><span class="">  544: =item * C&lt;expectations&gt; - ArrayRef of expectation specifications
+</span><span class="">  545: 
+</span><span class="">  546: Each specification includes:
+</span><span class="">  547: 
+</span><span class="">  548: - C&lt;tag&gt; - spy tag to validate
+</span><span class="">  549: - C&lt;calls&gt; - expected call count
+</span><span class="">  550: - C&lt;args_like&gt; - regex argument matching
+</span><span class="">  551: - C&lt;args_eq&gt; - exact argument matching
+</span><span class="">  552: - C&lt;args_deeply&gt; - deep structural matching
+</span><span class="">  553: - C&lt;never&gt; - assert spy was not called
+</span><span class="">  554: 
+</span><span class="">  555: =back
+</span><span class="">  556: 
+</span><span class="">  557: =item * C&lt;$code&gt; - CodeRef
+</span><span class="">  558: 
+</span><span class="">  559: The block to execute while mocks are active.
+</span><span class="">  560: 
+</span><span class="">  561: =back
+</span><span class="">  562: 
+</span><span class="">  563: =head3 Returns
+</span><span class="">  564: 
+</span><span class="">  565: Nothing. Dies on expectation failure.
+</span><span class="">  566: 
+</span><span class="">  567: =head3 Side Effects
+</span><span class="">  568: 
+</span><span class="">  569: Temporarily installs mocks and spies into the target packages. All mocks are
+</span><span class="">  570: removed after the code block completes.
+</span><span class="">  571: 
+</span><span class="">  572: =head3 Notes
+</span><span class="">  573: 
+</span><span class="">  574: This routine does not support nested deep_mock scopes. All mocks are global
+</span><span class="">  575: until restored.
+</span><span class="">  576: 
+</span><span class="">  577: =head3 API
+</span><span class="">  578: 
+</span><span class="">  579: =head4 Input (Params::Validate::Strict)
+</span><span class="">  580: 
+</span><span class="">  581:     {
+</span><span class="">  582:         mocks        =&gt; ArrayRef,
+</span><span class="">  583:         expectations =&gt; ArrayRef,
+</span><span class="">  584:     },
+</span><span class="">  585:     CodeRef
+</span><span class="">  586: 
+</span><span class="">  587: =head4 Output (Returns::Set)
+</span><span class="">  588: 
+</span><span class="">  589:     returns: undef
+</span><span class="">  590: 
+</span><span class="">  591: =cut
+</span><span class="">  592: 
+</span><span class="">  593: sub deep_mock
+</span><span class="">  594: {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">595 → 610 → 621</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">595 → 610 → 0</span></span>  595: 	my ($plan, $code) = @_;
+</span><span class="">  596: 
+</span><span class="">  597: 	croak &#39;deep_mock expects a HASHREF plan&#39; unless ref $plan eq &#39;HASH&#39;;
+</span><span class="">  598: 
+</span><span class="">  599: 	my %handles;
+</span><span class="">  600: 
+</span><span class="">  601: 	# Apply time travel plan
+</span><span class="">  602: 	_apply_time_plan($plan-&gt;{time});
+</span><span class="">  603: 
+</span><span class="">  604: 	# Install mocks for this scope and capture restore handles
+</span><span class="">  605: 	my @installed = _install_mocks($plan-&gt;{mocks} || [], \%handles);
+</span><span class="">  606: 
+</span><span class="">  607: 	my ($wantarray, @ret, $ret, $err);
+</span><span class="">  608: 	$wantarray = wantarray;
+</span><span class="">  609: 
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch.">  610: 	if ($wantarray) {
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<ul>
+				<li><b>COND_INV_610_2: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
+</li></ul></details>
+<span class="">  611: 		@ret = eval { $code-&gt;() };
+</span><span class="">  612: 		$err = $@;
+</span><span class="">  613: 	} elsif (defined $wantarray) {
+</span><span class="">  614: 		$ret = eval { $code-&gt;() };
+</span><span class="">  615: 		$err = $@;
+</span><span class="">  616: 	} else {
+</span><span class="">  617: 		eval { $code-&gt;() };
+</span><span class="">  618: 		$err = $@;
+</span><span class="">  619: 	}
+</span><span class="">  620: 
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">621 → 633 → 0</span></span>  621: 	_run_expectations($plan-&gt;{expectations} || [], \%handles);
+</span><span class="">  622: 
+</span><span class="">  623: 	my $auto_restore = !exists $plan-&gt;{globals}{restore_on_scope_exit}
+</span><span class="">  624: 		|| $plan-&gt;{globals}{restore_on_scope_exit};
+</span><span class="">  625: 
+</span><span class="">  626: 	Test::Mockingbird::restore_all() if $auto_restore;
+</span><span class="">  627: 
+</span><span class="">  628: 	# Restore time travel state
+</span><span class="">  629: 	Test::Mockingbird::TimeTravel::restore_all();
+</span><span class="">  630: 
+</span><span class="">  631: 	croak $err if $err;
+</span><span class="">  632: 
+</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  633: 	return $wantarray ? @ret : $ret;
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
+					<ul>
+				<li><b>BOOL_NEGATE_633_2: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_633_2: Replace return expression with undef</b><br>LOW: Mutation survived but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
+							</li></ul></details>
+<span class="">  634: }
+</span><span class="">  635: 
+</span><span class="">  636: # ----------------------------------------------------------------------
+</span><span class="">  637: # NAME
+</span><span class="">  638: #     _install_mocks
+</span><span class="">  639: #
+</span><span class="">  640: # PURPOSE
+</span><span class="">  641: #     Install mocks and spies as described in the plan. Creates
+</span><span class="">  642: #     Test::Mockingbird handles and stores them in the provided hash.
+</span><span class="">  643: #
+</span><span class="">  644: # ENTRY CRITERIA
+</span><span class="">  645: #     - $mocks: ArrayRef of mock specifications
+</span><span class="">  646: #     - $handles: HashRef for storing created mock and spy handles
+</span><span class="">  647: #     - Each mock specification must include:
+</span><span class="">  648: #         target =&gt; &quot;Package::method&quot;
+</span><span class="">  649: #         type   =&gt; &quot;mock&quot; or &quot;spy&quot;
+</span><span class="">  650: #         tag    =&gt; identifier for expectations
+</span><span class="">  651: #         with   =&gt; coderef (required for type &quot;mock&quot;)
+</span><span class="">  652: #
+</span><span class="">  653: # EXIT STATUS
+</span><span class="">  654: #     - Returns a list of guard objects for later cleanup
+</span><span class="">  655: #     - Croaks on invalid specifications
+</span><span class="">  656: #
+</span><span class="">  657: # SIDE EFFECTS
+</span><span class="">  658: #     - Modifies symbol tables of target packages to install mocks/spies
+</span><span class="">  659: #     - Populates $handles with created spy and mock handles
+</span><span class="">  660: #
+</span><span class="">  661: # NOTES
+</span><span class="">  662: #     - Internal helper, not part of the public API
+</span><span class="">  663: #     - Does not support nested mocking scopes
+</span><span class="">  664: # ----------------------------------------------------------------------
+</span><span class="">  665: sub _install_mocks {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">666 → 670 → 711</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">666 → 670 → 0</span></span>  666: 	my ($mocks, $handles) = @_;
+</span><span class="">  667: 
+</span><span class="">  668: 	my @installed;   # list of [$pkg, $method] for this scope
+</span><span class="">  669: 
+</span><span class="">  670: 	for my $m (@$mocks) {
+</span><span class="">  671: 		my $target = $m-&gt;{target} or croak &#39;mock entry missing target&#39;;
+</span><span class="">  672: 
+</span><span class="">  673: 		my ($pkg, $method) = _normalize_target($target);
+</span><span class="">  674: 
+</span><span class="">  675: 		my $type = $m-&gt;{type} || &#39;mock&#39;;
+</span><span class="">  676: 
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch.">  677: 		if ($type eq &#39;mock&#39;) {
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<ul>
+				<li><b>COND_INV_677_3: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
+</li></ul></details>
+<span class="">  678: 			# --------------------------------------------------------------
+</span><span class="">  679: 			# MOCK
+</span><span class="">  680: 			# --------------------------------------------------------------
+</span><span class="">  681: 			croak &quot;mock type requires &#39;with&#39; coderef&quot; unless defined $m-&gt;{with} &amp;&amp; ref $m-&gt;{with} eq &#39;CODE&#39;;
+</span><span class="">  682: 
+</span><span class="">  683: 			Test::Mockingbird::mock($pkg, $method, $m-&gt;{with});
+</span><span class="">  684: 
+</span><span class="">  685: 			push @installed, [ $pkg, $method ];
+</span><span class="">  686: 
+</span><span class="">  687: 			$handles-&gt;{ $m-&gt;{tag} }{guard} = 1 if $m-&gt;{tag};
+</span><span class="">  688: 		} elsif ($type eq &#39;spy&#39;) {
+</span><span class="">  689: 			# --------------------------------------------------------------
+</span><span class="">  690: 			# SPY
+</span><span class="">  691: 			# --------------------------------------------------------------
+</span><span class="">  692: 			my $spy = Test::Mockingbird::spy($pkg, $method);
+</span><span class="">  693: 
+</span><span class="">  694: 			push @installed, [ $pkg, $method ];
+</span><span class="">  695: 
+</span><span class="">  696: 			$handles-&gt;{ $m-&gt;{tag} }{spy} = $spy if $m-&gt;{tag};
+</span><span class="">  697: 		} elsif ($type eq &#39;inject&#39;) {
+</span><span class="">  698: 			# --------------------------------------------------------------
+</span><span class="">  699: 			# INJECT
+</span><span class="">  700: 			# --------------------------------------------------------------
+</span><span class="">  701: 			Test::Mockingbird::inject($pkg, $method, $m-&gt;{with});
+</span><span class="">  702: 
+</span><span class="">  703: 			push @installed, [ $pkg, $method ];
+</span><span class="">  704: 
+</span><span class="">  705: 			$handles-&gt;{ $m-&gt;{tag} }{inject} = 1 if $m-&gt;{tag};
+</span><span class="">  706: 		} else {
+</span><span class="">  707: 			croak &quot;Unknown mock type &#39;$type&#39; for target &#39;$target&#39;&quot;;
+</span><span class="">  708: 		}
+</span><span class="">  709: 	}
+</span><span class="">  710: 
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">711 → 711 → 0</span></span>  711: 	return @installed;
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
+					<ul>
+				<li><b>BOOL_NEGATE_711_2: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_711_2: Replace return expression with undef</b><br>LOW: Mutation survived but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
+							</li></ul></details>
+<span class="">  712: }
+</span><span class="">  713: 
+</span><span class="">  714: # ----------------------------------------------------------------------
+</span><span class="">  715: # NAME
+</span><span class="">  716: #     _run_expectations
+</span><span class="">  717: #
+</span><span class="">  718: # PURPOSE
+</span><span class="">  719: #     Validate expectations against recorded spy calls. Supports call
+</span><span class="">  720: #     counts, regex matching, exact matching, deep matching, and &quot;never&quot;.
+</span><span class="">  721: #
+</span><span class="">  722: # ENTRY CRITERIA
+</span><span class="">  723: #     - $expectations: ArrayRef of expectation specifications
+</span><span class="">  724: #     - $handles: HashRef containing spy handles keyed by tag
+</span><span class="">  725: #     - Each expectation may include:
+</span><span class="">  726: #         tag          =&gt; spy tag to validate
+</span><span class="">  727: #         calls        =&gt; expected call count
+</span><span class="">  728: #         args_like    =&gt; regex argument matching
+</span><span class="">  729: #         args_eq      =&gt; exact argument matching
+</span><span class="">  730: #         args_deeply  =&gt; deep structural matching
+</span><span class="">  731: #         never        =&gt; assert spy was not called
+</span><span class="">  732: #
+</span><span class="">  733: # EXIT STATUS
+</span><span class="">  734: #     - Returns nothing
+</span><span class="">  735: #     - Emits TAP output via Test::More and Test::Deep
+</span><span class="">  736: #     - Croaks if a required spy handle is missing
+</span><span class="">  737: #
+</span><span class="">  738: # SIDE EFFECTS
+</span><span class="">  739: #     - Produces test output
+</span><span class="">  740: #
+</span><span class="">  741: # NOTES
+</span><span class="">  742: #     - Internal helper, not part of the public API
+</span><span class="">  743: #     - Caller must ensure all tags refer to installed spies
+</span><span class="">  744: # ----------------------------------------------------------------------
+</span><span class="">  745: 
+</span><span class="">  746: sub _run_expectations {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">747 → 749 → 0</span></span>  747: 	my ($exps, $handles) = @_;
+</span><span class="">  748: 
+</span><span class="">  749: 	for my $exp (@$exps) {
+</span><span class="">  750: 		my $tag = $exp-&gt;{tag}
+</span><span class="">  751: 		  or croak &#39;expectation missing tag&#39;;
+</span><span class="">  752: 
+</span><span class="">  753: 		my $spy = $handles-&gt;{$tag}{spy}
+</span><span class="">  754: 		  or croak &quot;no spy handle for tag &#39;$tag&#39;&quot;;
+</span><span class="">  755: 
+</span><span class="">  756: 		my @calls = $spy-&gt;();   # each call: [ full_method, @args ]
+</span><span class="">  757: 
+</span><span class="">  758: 		# --------------------------------------------------------------
+</span><span class="">  759: 		# CALL COUNT
+</span><span class="">  760: 		# --------------------------------------------------------------
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch.">  761: 		if (defined $exp-&gt;{calls}) {
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<ul>
+				<li><b>COND_INV_761_3: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
+</li></ul></details>
+<span class="">  762: 			Test::More::is(
+</span><span class="">  763: 				scalar(@calls),
+</span><span class="">  764: 				$exp-&gt;{calls},
+</span><span class="">  765: 				&quot;DeepMock: calls for $tag&quot;
+</span><span class="">  766: 			);
+</span><span class="">  767: 		}
+</span><span class="">  768: 
+</span><span class="">  769: 		# --------------------------------------------------------------
+</span><span class="">  770: 		# args_like  (regex matching)
+</span><span class="">  771: 		# --------------------------------------------------------------
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch.">  772: 		if (my $args_like = $exp-&gt;{args_like}) {
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<ul>
+				<li><b>COND_INV_772_3: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
+</li></ul></details>
+<span class="">  773: 			for my $i (0 .. $#$args_like) {
+</span><span class="">  774: 				my $patterns = $args_like-&gt;[$i];
+</span><span class="">  775: 				my $call	 = $calls[$i] || [];
+</span><span class="">  776: 				my @args	 = @$call[1 .. $#$call];
+</span><span class="">  777: 
+</span><span class="">  778: 				for my $j (0 .. $#$patterns) {
+</span><span class="">  779: 					my $re = $patterns-&gt;[$j];
+</span><span class="">  780: 					Test::More::like(
+</span><span class="">  781: 						$args[$j],
+</span><span class="">  782: 						ref $re ? $re : qr/$re/,
+</span><span class="">  783: 						&quot;DeepMock: arg $j for call $i of $tag (args_like)&quot;
+</span><span class="">  784: 					);
+</span><span class="">  785: 				}
+</span><span class="">  786: 			}
+</span><span class="">  787: 		}
+</span><span class="">  788: 
+</span><span class="">  789: 		# --------------------------------------------------------------
+</span><span class="">  790: 		# args_eq  (exact string/number matching)
+</span><span class="">  791: 		# --------------------------------------------------------------
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch.">  792: 		if (my $args_eq = $exp-&gt;{args_eq}) {
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<ul>
+				<li><b>COND_INV_792_3: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
+</li></ul></details>
+<span class="">  793: 			for my $i (0 .. $#$args_eq) {
+</span><span class="">  794: 				my $expected = $args_eq-&gt;[$i];
+</span><span class="">  795: 				my $call	 = $calls[$i] || [];
+</span><span class="">  796: 				my @args	 = @$call[1 .. $#$call];
+</span><span class="">  797: 
+</span><span class="">  798: 				for my $j (0 .. $#$expected) {
+</span><span class="">  799: 					Test::More::is(
+</span><span class="">  800: 						$args[$j],
+</span><span class="">  801: 						$expected-&gt;[$j],
+</span><span class="">  802: 						&quot;DeepMock: arg $j for call $i of $tag (args_eq)&quot;
+</span><span class="">  803: 					);
+</span><span class="">  804: 				}
+</span><span class="">  805: 			}
+</span><span class="">  806: 		}
+</span><span class="">  807: 
+</span><span class="">  808: 		# --------------------------------------------------------------
+</span><span class="">  809: 		# args_deeply  (structural deep comparison)
+</span><span class="">  810: 		# --------------------------------------------------------------
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch.">  811: 		if (my $args_deeply = $exp-&gt;{args_deeply}) {
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<ul>
+				<li><b>COND_INV_811_3: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
+</li></ul></details>
+<span class="">  812: 			require Test::Deep;
+</span><span class="">  813: 
+</span><span class="">  814: 			for my $i (0 .. $#$args_deeply) {
+</span><span class="">  815: 				my $expected = $args_deeply-&gt;[$i];
+</span><span class="">  816: 				my $call	 = $calls[$i] || [];
+</span><span class="">  817: 				my @args	 = @$call[1 .. $#$call];
+</span><span class="">  818: 
+</span><span class="">  819: 				for my $j (0 .. $#$expected) {
+</span><span class="">  820: 					Test::Deep::cmp_deeply(
+</span><span class="">  821: 						$args[$j],
+</span><span class="">  822: 						$expected-&gt;[$j],
+</span><span class="">  823: 						&quot;DeepMock: arg $j for call $i of $tag (args_deeply)&quot;
+</span><span class="">  824: 					);
+</span><span class="">  825: 				}
+</span><span class="">  826: 			}
+</span><span class="">  827: 		}
+</span><span class="">  828: 		# --------------------------------------------------------------
+</span><span class="">  829: 		# never  (assert spy was never called)
+</span><span class="">  830: 		# --------------------------------------------------------------
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch.">  831: 		if ($exp-&gt;{never}) {
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<ul>
+				<li><b>COND_INV_831_3: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
+</li></ul></details>
+<span class="">  832: 			Test::More::is(
+</span><span class="">  833: 				scalar(@calls),
+</span><span class="">  834: 				0,
+</span><span class="">  835: 				&quot;DeepMock: $tag was never called&quot;
+</span><span class="">  836: 			);
+</span><span class="">  837: 		}
+</span><span class="">  838: 	}
+</span><span class="">  839: }
+</span><span class="">  840: 
+</span><span class="">  841: # ----------------------------------------------------------------------
+</span><span class="">  842: # NAME
+</span><span class="">  843: #     _normalize_target
+</span><span class="">  844: #
+</span><span class="">  845: # PURPOSE
+</span><span class="">  846: #     Convert a target specification into a canonical (package, method)
+</span><span class="">  847: #     pair. Accepts either &quot;Package::method&quot; or separate arguments.
+</span><span class="">  848: #
+</span><span class="">  849: # ENTRY CRITERIA
+</span><span class="">  850: #     - $pkg_or_full: String, either &quot;Package::method&quot; or a package name
+</span><span class="">  851: #     - $maybe_method: Optional string, method name if provided separately
+</span><span class="">  852: #
+</span><span class="">  853: # EXIT STATUS
+</span><span class="">  854: #     - Returns a two element list: ($package, $method)
+</span><span class="">  855: #     - Croaks if the target cannot be parsed
+</span><span class="">  856: #
+</span><span class="">  857: # SIDE EFFECTS
+</span><span class="">  858: #     - None
+</span><span class="">  859: #
+</span><span class="">  860: # NOTES
+</span><span class="">  861: #     - Internal helper, not part of the public API
+</span><span class="">  862: #     - Caller must ensure the returned package and method exist or will
+</span><span class="">  863: #       be created by mocking
+</span><span class="">  864: # ----------------------------------------------------------------------
+</span><span class="">  865: 
+</span><span class="">  866: sub _normalize_target {
+</span><span class="">  867: 	# ENTRY: $arg1 may be &#39;Package::method&#39; or a package name
+</span><span class="">  868: 	#		$arg2 may be a method name if provided separately
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">869 → 872 → 877</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">869 → 872 → 0</span></span>  869: 	my ($arg1, $arg2) = @_;
+</span><span class="">  870: 
+</span><span class="">  871: 	# If only one arg and it looks like Package::method, split it
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch.">  872: 	if (defined $arg1 &amp;&amp; !defined $arg2 &amp;&amp; $arg1 =~ /^(.*)::([^:]+)$/) {
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<ul>
+				<li><b>COND_INV_872_2: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
+</li></ul></details>
+<span class="">  873: 		return ($1, $2);
+</span><span class="">  874: 	}
+</span><span class="">  875: 
+</span><span class="">  876: 	# Otherwise, return as-is (package, method)
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">877 → 877 → 0</span></span>  877: 	return ($arg1, $arg2);
+</span><span class="">  878: 
+</span><span class="">  879: 	# EXIT: always returns ($pkg, $method)
+</span><span class="">  880: }
+</span><span class="">  881: 
+</span><span class="">  882: sub _apply_time_plan {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">883 → 886 → 890</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">883 → 886 → 0</span></span>  883: 	my $time = $_[0];
+</span><span class="">  884: 	return unless $time &amp;&amp; ref $time eq &#39;HASH&#39;;
+</span><span class="">  885: 
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch.">  886: 	if (exists $time-&gt;{freeze}) {
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<ul>
+				<li><b>COND_INV_886_2: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
+</li></ul></details>
+<span class="">  887: 		Test::Mockingbird::TimeTravel::freeze_time($time-&gt;{freeze});
+</span><span class="">  888: 	}
+</span><span class="">  889: 
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">890 → 890 → 894</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">890 → 890 → 0</span></span>  890: 	if (exists $time-&gt;{travel}) {
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<ul>
+				<li><b>COND_INV_890_2: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
+</li></ul></details>
+<span class="">  891: 		Test::Mockingbird::TimeTravel::travel_to($time-&gt;{travel});
+</span><span class="">  892: 	}
+</span><span class="">  893: 
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">894 → 894 → 899</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">894 → 894 → 0</span></span>  894: 	if (exists $time-&gt;{advance}) {
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<ul>
+				<li><b>COND_INV_894_2: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
+</li></ul></details>
+<span class="">  895: 		my ($amount, $unit) = @{ $time-&gt;{advance} };
+</span><span class="">  896: 		Test::Mockingbird::TimeTravel::advance_time($amount, $unit);
+</span><span class="">  897: 	}
+</span><span class="">  898: 
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">899 → 899 → 0</span></span>  899: 	if (exists $time-&gt;{rewind}) {
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<ul>
+				<li><b>COND_INV_899_2: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
+</li></ul></details>
+<span class="">  900: 		my ($amount, $unit) = @{ $time-&gt;{rewind} };
+</span><span class="">  901: 		Test::Mockingbird::TimeTravel::rewind_time($amount, $unit);
+</span><span class="">  902: 	}
+</span><span class="">  903: }
+</span><span class="">  904: 
+</span><span class="">  905: 1;
+</span><span class="">  906: 
+</span><span class="">  907: =head1 SUPPORT
+</span><span class="">  908: 
+</span><span class="">  909: This module is provided as-is without any warranty.
+</span><span class="">  910: 
+</span><span class="">  911: Please report any bugs or feature requests to C&lt;bug-test-mockingbird at rt.cpan.org&gt;,
+</span><span class="">  912: or through the web interface at
+</span><span class="">  913: L&lt;http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Mockingbird&gt;.
+</span><span class="">  914: I will be notified, and then you&#39;ll
+</span><span class="">  915: automatically be notified of progress on your bug as I make changes.
+</span><span class="">  916: 
+</span><span class="">  917: You can find documentation for this module with the perldoc command.
+</span><span class="">  918: 
+</span><span class="">  919:     perldoc Test::Mockingbird::DeepMock
+</span><span class="">  920: 
+</span><span class="">  921: =head1 LICENCE AND COPYRIGHT
+</span><span class="">  922: 
+</span><span class="">  923: Copyright 2026 Nigel Horne.
+</span><span class="">  924: 
+</span><span class="">  925: Usage is subject to GPL2 licence terms.
+</span><span class="">  926: If you use it,
+</span><span class="">  927: please let me know.
+</span><span class="">  928: 
+</span><span class="">  929: =cut
+</span><span class="">  930: 
+</span><span class="">  931: 1;
+</span></pre>
+
+<script>
+function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+}
+
+(function() {
+    const saved = localStorage.getItem('theme');
+    if(saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+    }
+})();
+
+document.addEventListener("mousemove", function(e) {
+	document.querySelectorAll(".lcsaj-tip-text").forEach(function(tip) {
+		tip.style.left = (e.clientX + 12) + "px";
+		tip.style.top  = (e.clientY + 12) + "px";
+	});
+});
+</script>
+</body>
+</html>
+	
