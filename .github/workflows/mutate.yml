@@ -61,5 +61,6 @@ jobs:
           fi
           $MUTATE_CMD \
             --lib lib \
+            --tests t \
             --json mutation.json \
             --mutation_level fast
