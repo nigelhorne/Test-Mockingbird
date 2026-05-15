@@ -2,13 +2,13 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
 
 0.11
 
-  Bug fixes
+  [Bug fixes]
 
   -  Bump minimum version: Fixes https://github.com/nigelhorne/Test-Mockingbird/issues/6
 
 0.10	Fri May  8 15:11:42 EDT 2026
 
-  Bug fixes
+  [Bug fixes]
 
   - _parse_target() used !defined $arg3 to detect the single-argument
     shorthand form ('Pkg::method').  Because no caller ever passes three
@@ -38,7 +38,7 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
     risk of the imported alias inheriting the (&$) prototype constraint
     at the call site.
 
-  Notes
+  [Notes]
 
   - spy() installs its wrapper coderef directly without going through
     mock(), so it does not benefit from the set_prototype fix and still
@@ -46,7 +46,7 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
     function.  This is a known limitation documented in the test suite
     and will be addressed separately.
 
-  Tests
+  [Tests]
 
   - Added prototype-preservation subtests to all four test files:
 
@@ -74,6 +74,7 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
                   the prototype; mock_scoped() delegating correctly to
                   mock(); spy() documented as a known limitation that
                   still emits the mismatch warning; and ($$) full cycle.
+
 0.09	Mon May  4 20:22:49 EDT 2026
 
   Bug fixes
