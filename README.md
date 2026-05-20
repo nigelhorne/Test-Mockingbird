@@ -231,6 +231,10 @@ when the guard object is destroyed.
 
 Shorthand:
 
+    # The return value must be assigned to a lexical variable.
+    # If discarded, the guard object is destroyed immediately and the mock never takes effect.
+    # When $g goes out of scope, all mocked methods are restored automatically.
+
     my $g = mock_scoped 'My::Module::method' => sub { 'mocked' };
 
 Longhand:
@@ -330,8 +334,9 @@ where:
 - `$invocant` - the first argument to the call, typically `$self`
 for method calls or the first positional argument for function calls
 - `@arguments` - the remaining arguments passed to the method,
-in the order they were supplied. For named-parameter calls these will
-be alternating key/value pairs suitable for assignment to a hash:
+in the order they were supplied.
+For named-parameter calls,
+these will be alternating key/value pairs suitable for assignment to a hash:
 `my %args = @{$call}[2..$#{$call}]`
 
 ### Example
@@ -353,8 +358,8 @@ be alternating key/value pairs suitable for assignment to a hash:
 ### Limitations
 
 `spy` installs its wrapper coderef directly into the glob without going
-through `mock`, so the prototype-preservation logic in `mock` does not
-apply. If the target function carries a Perl prototype (for example a
+through `mock`, so the prototype-preservation logic in `mock` does not apply.
+If the target function carries a Perl prototype (for example, a
 `()` no-args prototype), installing a spy will emit a
 `Prototype mismatch` warning.
 
