@@ -1,0 +1,472 @@
+{
+   "runs" : [
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240892.80419,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "-e",
+         "start" : 1782240883.49328,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240883.63653,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "-e",
+         "start" : 1782240883.63642,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240883.90133,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/00-load.t",
+         "start" : 1782240883.90015,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240884.24601,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/30-basic.t",
+         "start" : 1782240884.24367,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240884.58678,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/class.t",
+         "start" : 1782240884.58529,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240884.89155,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/comment-spelling.t",
+         "start" : 1782240884.89131,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240885.12366,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/cover.t",
+         "start" : 1782240885.12342,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240885.3532,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/critic.t",
+         "start" : 1782240885.35298,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240885.61287,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/deepmock.t",
+         "start" : 1782240885.61111,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240886.03924,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/edge-cases.t",
+         "start" : 1782240885.99626,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240886.39826,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/eof.t",
+         "start" : 1782240886.398,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240886.63338,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/eol.t",
+         "start" : 1782240886.63313,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240886.9877,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/extended_tests.t",
+         "start" : 1782240886.89637,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240887.45506,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/fixme.t",
+         "start" : 1782240887.45478,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240887.77218,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/function.t",
+         "start" : 1782240887.71782,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240888.18593,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/gv.t",
+         "start" : 1782240888.18569,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240888.44613,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/inject.t",
+         "start" : 1782240888.44474,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240888.83842,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/integration.t",
+         "start" : 1782240888.78507,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240889.25649,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/kwalitee.t",
+         "start" : 1782240889.25628,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240889.48915,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/manifest.t",
+         "start" : 1782240889.48891,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240889.75229,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/mock.t",
+         "start" : 1782240889.75039,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240890.0968,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/mock_scoped.t",
+         "start" : 1782240890.08997,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240890.46693,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/mock_scoped_multi.t",
+         "start" : 1782240890.44102,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240890.82422,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/object.t",
+         "start" : 1782240890.82272,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240891.13628,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/pod-cm.t",
+         "start" : 1782240891.136,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240891.37024,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/pod-coverage.t",
+         "start" : 1782240891.37004,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240891.60029,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/pod.t",
+         "start" : 1782240891.6001,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240891.86628,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/shorthand.t",
+         "start" : 1782240891.85783,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240892.20999,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/spy.t",
+         "start" : 1782240892.20763,
+         "version" : "0.10"
+      },
+      {
+         "OS" : "linux",
+         "abstract" : "Advanced mocking library for Perl with support for dependency injection and spies",
+         "dir" : "/home/runner/work/Test-Mockingbird/Test-Mockingbird",
+         "finish" : 1782240892.59793,
+         "name" : "Test-Mockingbird",
+         "perl" : "5.40.4",
+         "run" : "t/unit.t",
+         "start" : 1782240892.54982,
+         "version" : "0.10"
+      }
+   ],
+   "summary" : {
+      "Total" : {
+         "branch" : {
+            "covered" : 143,
+            "error" : 5,
+            "percentage" : 96.6216216216216,
+            "total" : 148,
+            "uncoverable" : 0
+         },
+         "condition" : {
+            "covered" : 86,
+            "error" : 20,
+            "percentage" : 81.1320754716981,
+            "total" : 106,
+            "uncoverable" : 0
+         },
+         "statement" : {
+            "covered" : 475,
+            "error" : 4,
+            "percentage" : 99.1649269311065,
+            "total" : 479
+         },
+         "subroutine" : {
+            "covered" : 75,
+            "error" : 1,
+            "percentage" : 98.6842105263158,
+            "total" : 76
+         },
+         "total" : {
+            "covered" : 779,
+            "error" : 30,
+            "percentage" : 96.291718170581,
+            "total" : 809,
+            "uncoverable" : 0
+         }
+      },
+      "blib/lib/Test/Mockingbird.pm" : {
+         "branch" : {
+            "covered" : 58,
+            "error" : 4,
+            "percentage" : 93.5483870967742,
+            "total" : 62,
+            "uncoverable" : 0
+         },
+         "condition" : {
+            "covered" : 61,
+            "error" : 15,
+            "percentage" : 80.2631578947368,
+            "total" : 76,
+            "uncoverable" : 0
+         },
+         "statement" : {
+            "covered" : 287,
+            "error" : 4,
+            "percentage" : 98.6254295532646,
+            "total" : 291
+         },
+         "subroutine" : {
+            "covered" : 48,
+            "error" : 1,
+            "percentage" : 97.9591836734694,
+            "total" : 49
+         },
+         "total" : {
+            "covered" : 454,
+            "error" : 24,
+            "percentage" : 94.9790794979079,
+            "total" : 478,
+            "uncoverable" : 0
+         }
+      },
+      "lib/Test/Mockingbird/DeepMock.pm" : {
+         "branch" : {
+            "covered" : 55,
+            "error" : 1,
+            "percentage" : 98.2142857142857,
+            "total" : 56,
+            "uncoverable" : 0
+         },
+         "condition" : {
+            "covered" : 22,
+            "error" : 5,
+            "percentage" : 81.4814814814815,
+            "total" : 27,
+            "uncoverable" : 0
+         },
+         "statement" : {
+            "covered" : 113,
+            "percentage" : 100,
+            "total" : 113
+         },
+         "subroutine" : {
+            "covered" : 12,
+            "percentage" : 100,
+            "total" : 12
+         },
+         "total" : {
+            "covered" : 202,
+            "error" : 6,
+            "percentage" : 97.1153846153846,
+            "total" : 208,
+            "uncoverable" : 0
+         }
+      },
+      "lib/Test/Mockingbird/TimeTravel.pm" : {
+         "branch" : {
+            "covered" : 30,
+            "error" : 0,
+            "percentage" : 100,
+            "total" : 30,
+            "uncoverable" : 0
+         },
+         "condition" : {
+            "covered" : 3,
+            "error" : 0,
+            "percentage" : 100,
+            "total" : 3,
+            "uncoverable" : 0
+         },
+         "statement" : {
+            "covered" : 75,
+            "percentage" : 100,
+            "total" : 75
+         },
+         "subroutine" : {
+            "covered" : 15,
+            "percentage" : 100,
+            "total" : 15
+         },
+         "total" : {
+            "covered" : 123,
+            "error" : 0,
+            "percentage" : 100,
+            "total" : 123,
+            "uncoverable" : 0
+         }
+      }
+   }
+}
