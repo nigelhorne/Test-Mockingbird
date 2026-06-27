@@ -246,7 +246,7 @@ pre details.mutant-details ul {
 <strong>Structural Coverage (Approximate)</strong><p>
 TER1 (Statement): 98.63%<br>
 TER2 (Branch): 93.55%<br>
-TER3 (LCSAJ): 100.0% (29/29)<br>
+TER3 (LCSAJ): 100.0% (11/11)<br>
 Approximate LCSAJ segments: 63<br>
 </div>
 
@@ -536,7 +536,7 @@ Approximate LCSAJ segments: 63<br>
 </span><span class="">  244: =cut
 </span><span class="">  245: 
 </span><span class="">  246: sub mock {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">247 → 251 → 259</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">247 → 251 → 0</span></span>  247: 	my ($arg1, $arg2, $arg3) = @_;
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">247 → 251 → 259</span></span>  247: 	my ($arg1, $arg2, $arg3) = @_;
 </span><span class="">  248: 
 </span><span class="">  249: 	my ($package, $method, $replacement);
 </span><span class="">  250: 
@@ -548,7 +548,7 @@ Approximate LCSAJ segments: 63<br>
 </span><span class="">  256: 		($package, $method, $replacement) = ($arg1, $arg2, $arg3);
 </span><span class="">  257: 	}
 </span><span class="">  258: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">259 → 288 → 0</span></span>  259: 	croak &#39;Package, method and replacement are required for mocking&#39;
+</span><span class="">  259: 	croak &#39;Package, method and replacement are required for mocking&#39;
 </span><span class="">  260: 		unless $package &amp;&amp; $method &amp;&amp; $replacement;
 </span><span class="">  261: 
 </span><span class="">  262: 	my $full_method = &quot;${package}::$method&quot;;
@@ -601,7 +601,7 @@ Approximate LCSAJ segments: 63<br>
 </span><span class="">  309: =cut
 </span><span class="">  310: 
 </span><span class="">  311: sub unmock {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">312 → 316 → 324</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">312 → 316 → 0</span></span>  312: 	my ($arg1, $arg2) = @_;
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">312 → 316 → 324</span></span>  312: 	my ($arg1, $arg2) = @_;
 </span><span class="">  313: 
 </span><span class="">  314: 	my ($package, $method);
 </span><span class="">  315: 
@@ -725,7 +725,7 @@ Approximate LCSAJ segments: 63<br>
 </span><span class="">  433: =cut
 </span><span class="">  434: 
 </span><span class="">  435: sub mock_scoped {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">436 → 458 → 499</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">436 → 458 → 0</span></span>  436: 	my @args = @_;
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">436 → 458 → 499</span></span>  436: 	my @args = @_;
 </span><span class="">  437: 
 </span><span class="">  438: 	# ------------------------------------------------------------------
 </span><span class="">  439: 	# Parse argument forms into a list of [package, method, coderef].
@@ -862,7 +862,7 @@ is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 </span><span class="">  496: 	# by mock_return, mock_exception, etc.
 </span><span class="">  497: 	# ------------------------------------------------------------------
 </span><span class="">  498: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">499 → 511 → 0</span></span>  499: 	my @full_methods;
+</span><span class="">  499: 	my @full_methods;
 </span><span class="">  500: 
 </span><span class="">  501: 	{
 </span><span class="">  502: 		local $Test::Mockingbird::TYPE = &#39;mock_scoped&#39;;
@@ -1013,8 +1013,8 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  626: 		type         =&gt; &#39;spy&#39;,
 </span><span class="">  627: 		installed_at =&gt; (caller)[1] . &#39; line &#39; . (caller)[2],
 </span><span class="">  628: 	};
-</span><span class="">  629: 	return sub { @calls };
-</span><span class="">  630: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  629: 	return sub { @calls };
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  630: }
 </span><span class="">  631: 
 </span><span class="">  632: =head2 inject($package, $dependency, $mock_object)
 </span><span class="">  633: 
@@ -1031,7 +1031,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  644: =cut
 </span><span class="">  645: 
 </span><span class="">  646: sub inject {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">647 → 655 → 667</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">647 → 655 → 0</span></span>  647: 	my ($arg1, $arg2, $arg3) = @_;
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">647 → 655 → 667</span></span>  647: 	my ($arg1, $arg2, $arg3) = @_;
 </span><span class="">  648: 
 </span><span class="">  649: 	my ($package, $dependency, $mock_object);
 </span><span class="">  650: 
@@ -1051,7 +1051,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  664: 		($package, $dependency, $mock_object) = ($arg1, $arg2, $arg3);
 </span><span class="">  665: 	}
 </span><span class="">  666: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">667 → 691 → 0</span></span>  667: 	croak &#39;Package and dependency are required for injection&#39; unless $package &amp;&amp; $dependency;
+</span><span class="">  667: 	croak &#39;Package and dependency are required for injection&#39; unless $package &amp;&amp; $dependency;
 </span><span class="">  668: 
 </span><span class="">  669: 	my $full_dependency = &quot;${package}::$dependency&quot;;
 </span><span class="">  670: 
@@ -1116,7 +1116,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  729: =cut
 </span><span class="">  730: 
 </span><span class="">  731: sub restore_all {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">732 → 739 → 767</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">732 → 739 → 0</span></span>  732: 	my $arg = $_[0];
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">732 → 739 → 767</span></span>  732: 	my $arg = $_[0];
 </span><span class="">  733: 
 </span><span class="">  734: 	# ------------------------------------------------------------------
 </span><span class="">  735: 	# If a package name is provided, restore only methods belonging to
@@ -1151,7 +1151,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  764: 	# ------------------------------------------------------------------
 </span><span class="">  765: 	# Global restore: revert every mocked or injected method
 </span><span class="">  766: 	# ------------------------------------------------------------------
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">767 → 767 → 782</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">767 → 767 → 0</span></span>  767: 	for my $full_method (keys %mocked) {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">767 → 767 → 782</span></span>  767: 	for my $full_method (keys %mocked) {
 </span><span class="">  768: 		while (@{ $mocked{$full_method} }) {
 </span><span class="">  769: 			my $prev = pop @{ $mocked{$full_method} };
 </span><span class="">  770: 
@@ -1166,7 +1166,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  779: 	}
 </span><span class="">  780: 
 </span><span class="">  781: 	# Clear all tracking
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">782 → 783 → 0</span></span>  782: 	%mocked    = ();
+</span><span class="">  782: 	%mocked    = ();
 </span><span class="">  783: 	%mock_meta = ();
 </span><span class="">  784: }
 </span><span class="">  785: 
@@ -1209,8 +1209,29 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  822: 	local $Test::Mockingbird::TYPE = &#39;mock_return&#39;;
 </span><span class="">  823: 
 </span><span class="">  824: 	# MUST use the shorthand form:
-</span><span class="">  825: 	return mock $target =&gt; $code;
-</span><span class="">  826: }
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  825: 	return mock $target =&gt; $code;
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
+					<ul>
+				<li><b>BOOL_NEGATE_825_2: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_825_2: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
+							</li></ul></details>
+<span class="">  826: }
 </span><span class="">  827: 
 </span><span class="">  828: =head2 mock_exception
 </span><span class="">  829: 
@@ -1252,8 +1273,29 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  865: 
 </span><span class="">  866: 	local $Test::Mockingbird::TYPE = &#39;mock_exception&#39;;
 </span><span class="">  867: 
-</span><span class="">  868: 	return mock($target, $code);
-</span><span class="">  869: }
+</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  868: 	return mock($target, $code);
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
+					<ul>
+				<li><b>BOOL_NEGATE_868_2: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_868_2: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
+							</li></ul></details>
+<span class="">  869: }
 </span><span class="">  870: 
 </span><span class="">  871: =head2 mock_sequence
 </span><span class="">  872: 
@@ -1295,10 +1337,10 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  908: 
 </span><span class="">  909: 	my $code = sub {
 </span><span class="">  910: 		# If only one value remains, repeat it
-</span><span class="survived-1 tooltip" data-tooltip="Boundary mutation survived. Add tests around edge values (e.g. min, max, off-by-one).">  911: 		return $queue[0] if @queue == 1;
+</span><span class="survived-3 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Boundary mutation survived. Add tests around edge values (e.g. min, max, off-by-one). Return value mutation survived. Add tests asserting exact return values.">  911: 		return $queue[0] if @queue == 1;
 </span>
 					<details class="mutant-details">
-					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
+					<summary>Mutants (Total: 3, Killed: 0, Survived: 3)</summary>
 					<ul>
 				<li><b>NUM_BOUNDARY_911_30_!=: Numeric boundary flip == to !=</b><br>HIGH: Likely missing edge-case test (boundary value)
 
@@ -1308,14 +1350,72 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 </pre>
 								</div>
+							</li><li><b>BOOL_NEGATE_911_3: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_911_3: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
 							</li></ul></details>
-<span class="">  912: 		return shift @queue;
-</span><span class="">  913: 	};
+<span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  912: 		return shift @queue;
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
+					<ul>
+				<li><b>BOOL_NEGATE_912_3: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_912_3: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
+							</li></ul></details>
+<span class="">  913: 	};
 </span><span class="">  914: 
 </span><span class="">  915: 	local $Test::Mockingbird::TYPE = &#39;mock_sequence&#39;;
 </span><span class="">  916: 
-</span><span class="">  917: 	return mock($target, $code);
-</span><span class="">  918: }
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  917: 	return mock($target, $code);
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
+					<ul>
+				<li><b>BOOL_NEGATE_917_2: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_917_2: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
+							</li></ul></details>
+<span class="">  918: }
 </span><span class="">  919: 
 </span><span class="">  920: =head2 mock_once
 </span><span class="">  921: 
@@ -1375,8 +1475,29 @@ is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 </span><span class="">  975: 	local $Test::Mockingbird::TYPE = &#39;mock_once&#39;;
 </span><span class="">  976: 
 </span><span class="">  977: 	# Install the wrapper as a mock layer
-</span><span class="">  978: 	return mock $target =&gt; $wrapper;
-</span><span class="">  979: }
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  978: 	return mock $target =&gt; $wrapper;
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
+					<ul>
+				<li><b>BOOL_NEGATE_978_2: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_978_2: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
+							</li></ul></details>
+<span class="">  979: }
 </span><span class="">  980: 
 </span><span class="">  981: =head2 restore
 </span><span class="">  982: 
@@ -1397,7 +1518,7 @@ is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 </span><span class="">  997: =cut
 </span><span class="">  998: 
 </span><span class="">  999: sub restore {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1000 → 1014 → 1036</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1000 → 1014 → 0</span></span> 1000: 	my $target = $_[0];
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1000 → 1014 → 1036</span></span> 1000: 	my $target = $_[0];
 </span><span class=""> 1001: 
 </span><span class=""> 1002: 	# Entry criteria:
 </span><span class=""> 1003: 	# - target must be defined
@@ -1439,7 +1560,7 @@ is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 </span><span class=""> 1033: 	}
 </span><span class=""> 1034: 
 </span><span class=""> 1035: 	# Clean up tracking
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1036 → 1039 → 0</span></span> 1036: 	delete $mocked{$full_method};
+</span><span class=""> 1036: 	delete $mocked{$full_method};
 </span><span class=""> 1037: 	delete $mock_meta{$full_method};
 </span><span class=""> 1038: 
 </span><span class=""> 1039: 	return;
@@ -1478,7 +1599,7 @@ is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 </span><span class=""> 1072: 	# Side effects: none
 </span><span class=""> 1073: 	# Notes: purely observational
 </span><span class=""> 1074: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1075 → 1077 → 1085</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1075 → 1077 → 0</span></span> 1075: 	my %report;
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1075 → 1077 → 1085</span></span> 1075: 	my %report;
 </span><span class=""> 1076: 
 </span><span class=""> 1077: 	for my $full_method (sort keys %mocked) {
 </span><span class=""> 1078: 		$report{$full_method} = {
@@ -1488,8 +1609,8 @@ is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 </span><span class=""> 1082: 		};
 </span><span class=""> 1083: 	}
 </span><span class=""> 1084: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1085 → 1085 → 0</span></span> 1085: 	return \%report;
-</span><span class=""> 1086: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1085: 	return \%report;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1086: }
 </span><span class=""> 1087: 
 </span><span class=""> 1088: =head2 diagnose_mocks_pretty
 </span><span class=""> 1089: 
@@ -1545,7 +1666,7 @@ is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 </span><span class=""> 1139: 	# Side effects: none
 </span><span class=""> 1140: 	# Notes: uses diagnose_mocks() internally
 </span><span class=""> 1141: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1142 → 1145 → 1163</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1142 → 1145 → 0</span></span> 1142: 	my $diag = diagnose_mocks();
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1142 → 1145 → 1163</span></span> 1142: 	my $diag = diagnose_mocks();
 </span><span class=""> 1143: 	my @out;
 </span><span class=""> 1144: 
 </span><span class=""> 1145: 	for my $full_method (sort keys %$diag) {
@@ -1566,11 +1687,32 @@ is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 </span><span class=""> 1160: 		push @out, &#39;&#39;;
 </span><span class=""> 1161: 	}
 </span><span class=""> 1162: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1163 → 1163 → 0</span></span> 1163: 	return join &quot;\n&quot;, @out;
-</span><span class=""> 1164: }
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths."> 1163: 	return join &quot;\n&quot;, @out;
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
+					<ul>
+				<li><b>BOOL_NEGATE_1163_2: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_1163_2: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
+							</li></ul></details>
+<span class=""> 1164: }
 </span><span class=""> 1165: 
 </span><span class=""> 1166: sub _parse_target {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1167 → 1173 → 1178</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1167 → 1173 → 0</span></span> 1167: 	my ($arg1, $arg2, $arg3) = @_;
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1167 → 1173 → 1178</span></span> 1167: 	my ($arg1, $arg2, $arg3) = @_;
 </span><span class=""> 1168: 
 </span><span class=""> 1169: 	# Shorthand: a single &#39;Pkg::method&#39; string with no second argument.
 </span><span class=""> 1170: 	# The original check used !defined $arg3, which was too permissive:
@@ -1581,7 +1723,7 @@ is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 </span><span class=""> 1175: 	}
 </span><span class=""> 1176: 
 </span><span class=""> 1177: 	# Longhand: (&#39;Pkg&#39;,&#39;method&#39;) or any other multi-argument form
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1178 → 1178 → 0</span></span> 1178: 	return ($arg1, $arg2);
+</span><span class=""> 1178: 	return ($arg1, $arg2);
 </span><span class=""> 1179: }
 </span><span class=""> 1180: 
 </span><span class=""> 1181: sub _get_prototype {
@@ -1594,8 +1736,29 @@ is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 </span><span class=""> 1188: 
 </span><span class=""> 1189: 	my $code = $pkg-&gt;can($sub) or return;
 </span><span class=""> 1190: 
-</span><span class=""> 1191: 	return prototype($code);
-</span><span class=""> 1192: }
+</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values."> 1191: 	return prototype($code);
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
+					<ul>
+				<li><b>BOOL_NEGATE_1191_2: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_1191_2: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
+							</li></ul></details>
+<span class=""> 1192: }
 </span><span class=""> 1193: 
 </span><span class=""> 1194: =head2 DESTROY
 </span><span class=""> 1195: 
@@ -1679,8 +1842,8 @@ is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 </span><span class=""> 1273: 	my ($class, @full_methods) = @_;
 </span><span class=""> 1274: 
 </span><span class=""> 1275: 	# Entry: at least one fully qualified method name required
-</span><span class=""> 1276: 	return bless { full_methods =&gt; \@full_methods }, $class;
-</span><span class=""> 1277: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1276: 	return bless { full_methods =&gt; \@full_methods }, $class;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1277: }
 </span><span class=""> 1278: 
 </span><span class=""> 1279: sub DESTROY {
 </span><span class=""> 1280: 	my $self = $_[0];

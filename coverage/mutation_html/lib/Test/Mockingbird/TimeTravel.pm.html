@@ -246,7 +246,7 @@ pre details.mutant-details ul {
 <strong>Structural Coverage (Approximate)</strong><p>
 TER1 (Statement): 100.00%<br>
 TER2 (Branch): 100.00%<br>
-TER3 (LCSAJ): 100.0% (7/7)<br>
+TER3 (LCSAJ): 100.0% (3/3)<br>
 Approximate LCSAJ segments: 31<br>
 </div>
 
@@ -1104,7 +1104,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  728: 	my $delta = _unit_to_seconds($amount, $unit);
 </span><span class="">  729: 
 </span><span class="">  730: 	$CURRENT_EPOCH -= $delta;
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  731: 	return $CURRENT_EPOCH;
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  731: 	return $CURRENT_EPOCH;
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
@@ -1428,7 +1428,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class=""> 1010: #     - All parsed timestamps are interpreted as UTC.
 </span><span class=""> 1011: # ----------------------------------------------------------------------
 </span><span class=""> 1012: sub _parse_timestamp {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1013 → 1024 → 1031</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1013 → 1024 → 0</span></span> 1013: 	my $ts = $_[0];
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1013 → 1024 → 1031</span></span> 1013: 	my $ts = $_[0];
 </span><span class=""> 1014: 
 </span><span class=""> 1015: 	croak &#39;Invalid timestamp format for TimeTravel: (undef)&#39; unless defined $ts &amp;&amp; length $ts;
 </span><span class=""> 1016: 
@@ -1436,7 +1436,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class=""> 1018: 	$ts =~ s/^\s+|\s+$//g;
 </span><span class=""> 1019: 
 </span><span class=""> 1020: 	# Raw epoch
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values."> 1021: 	return $ts if $ts =~ /^\d+$/;
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths."> 1021: 	return $ts if $ts =~ /^\d+$/;
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
@@ -1469,11 +1469,32 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </li></ul></details>
 <span class=""> 1025: 				 (\d{2}):(\d{2}):(\d{2})
 </span><span class=""> 1026: 				 Z$/x) {
-</span><span class=""> 1027: 		return timegm($6,$5,$4,$3,$2-1,$1);
-</span><span class=""> 1028: 	}
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths."> 1027: 		return timegm($6,$5,$4,$3,$2-1,$1);
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
+					<ul>
+				<li><b>BOOL_NEGATE_1027_3: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_1027_3: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
+							</li></ul></details>
+<span class=""> 1028: 	}
 </span><span class=""> 1029: 
 </span><span class=""> 1030: 	# Space-separated timestamp: YYYY-MM-DD HH:MM:SS
-</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1031 → 1031 → 1037</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1031 → 1031 → 0</span></span> 1031: 	if ($ts =~ /^(\d{4})-(\d{2})-(\d{2})\s+
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1031 → 1031 → 1037</span></span> 1031: 	if ($ts =~ /^(\d{4})-(\d{2})-(\d{2})\s+
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
@@ -1481,21 +1502,63 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 				<li><b>COND_INV_1031_2: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
 </li></ul></details>
 <span class=""> 1032: 				 (\d{2}):(\d{2}):(\d{2})$/x) {
-</span><span class=""> 1033: 		return timegm($6,$5,$4,$3,$2-1,$1);
-</span><span class=""> 1034: 	}
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths."> 1033: 		return timegm($6,$5,$4,$3,$2-1,$1);
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
+					<ul>
+				<li><b>BOOL_NEGATE_1033_3: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_1033_3: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
+							</li></ul></details>
+<span class=""> 1034: 	}
 </span><span class=""> 1035: 
 </span><span class=""> 1036: 	# Date-only: YYYY-MM-DD &acirc;&#134;&#146; midnight UTC
-</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1037 → 1037 → 1041</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1037 → 1037 → 0</span></span> 1037: 	if ($ts =~ /^(\d{4})-(\d{2})-(\d{2})$/) {
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1037 → 1037 → 1041</span></span> 1037: 	if ($ts =~ /^(\d{4})-(\d{2})-(\d{2})$/) {
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
 					<ul>
 				<li><b>COND_INV_1037_2: Invert condition if to unless</b><br>MEDIUM: Add tests asserting both true and false outcomes
 </li></ul></details>
-<span class=""> 1038: 		return timegm(0,0,0,$3,$2-1,$1);
-</span><span class=""> 1039: 	}
+<span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values."> 1038: 		return timegm(0,0,0,$3,$2-1,$1);
+</span>
+					<details class="mutant-details">
+					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
+					<ul>
+				<li><b>BOOL_NEGATE_1038_3: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Boolean branch test suggestion
+ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
+</pre>
+								</div>
+							</li><li><b>RETURN_UNDEF_1038_3: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
+
+								<div class="suggested-test">
+								<div class="suggest-label">🧪 Suggested Test</div>
+								<pre># Return value assertion
+is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
+</pre>
+								</div>
+							</li></ul></details>
+<span class=""> 1039: 	}
 </span><span class=""> 1040: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1041 → 1041 → 0</span></span> 1041: 	croak &quot;Invalid timestamp format for TimeTravel: $ts&quot;;
+</span><span class=""> 1041: 	croak &quot;Invalid timestamp format for TimeTravel: $ts&quot;;
 </span><span class=""> 1042: }
 </span><span class=""> 1043: 
 </span><span class=""> 1044: # Backwards compatibility for tests
@@ -1572,7 +1635,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class=""> 1094: 
 </span><span class=""> 1095: 	croak &quot;Unknown time unit &#39;$unit&#39;&quot; unless exists $factor{$unit};
 </span><span class=""> 1096: 
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values."> 1097: 	return $amount * $factor{$unit};
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths."> 1097: 	return $amount * $factor{$unit};
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>

@@ -246,7 +246,7 @@ pre details.mutant-details ul {
 <strong>Structural Coverage (Approximate)</strong><p>
 TER1 (Statement): 100.00%<br>
 TER2 (Branch): 98.21%<br>
-TER3 (LCSAJ): 100.0% (17/17)<br>
+TER3 (LCSAJ): 100.0% (8/8)<br>
 Approximate LCSAJ segments: 57<br>
 </div>
 
@@ -884,7 +884,7 @@ Approximate LCSAJ segments: 57<br>
 </span><span class="">  592: 
 </span><span class="">  593: sub deep_mock
 </span><span class="">  594: {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">595 → 610 → 621</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">595 → 610 → 0</span></span>  595: 	my ($plan, $code) = @_;
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">595 → 610 → 621</span></span>  595: 	my ($plan, $code) = @_;
 </span><span class="">  596: 
 </span><span class="">  597: 	croak &#39;deep_mock expects a HASHREF plan&#39; unless ref $plan eq &#39;HASH&#39;;
 </span><span class="">  598: 
@@ -916,7 +916,7 @@ Approximate LCSAJ segments: 57<br>
 </span><span class="">  618: 		$err = $@;
 </span><span class="">  619: 	}
 </span><span class="">  620: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">621 → 633 → 0</span></span>  621: 	_run_expectations($plan-&gt;{expectations} || [], \%handles);
+</span><span class="">  621: 	_run_expectations($plan-&gt;{expectations} || [], \%handles);
 </span><span class="">  622: 
 </span><span class="">  623: 	my $auto_restore = !exists $plan-&gt;{globals}{restore_on_scope_exit}
 </span><span class="">  624: 		|| $plan-&gt;{globals}{restore_on_scope_exit};
@@ -982,7 +982,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  663: #     - Does not support nested mocking scopes
 </span><span class="">  664: # ----------------------------------------------------------------------
 </span><span class="">  665: sub _install_mocks {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">666 → 670 → 711</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">666 → 670 → 0</span></span>  666: 	my ($mocks, $handles) = @_;
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">666 → 670 → 711</span></span>  666: 	my ($mocks, $handles) = @_;
 </span><span class="">  667: 
 </span><span class="">  668: 	my @installed;   # list of [$pkg, $method] for this scope
 </span><span class="">  669: 
@@ -1033,7 +1033,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  708: 		}
 </span><span class="">  709: 	}
 </span><span class="">  710: 
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">711 → 711 → 0</span></span>  711: 	return @installed;
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  711: 	return @installed;
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
@@ -1242,7 +1242,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  866: sub _normalize_target {
 </span><span class="">  867: 	# ENTRY: $arg1 may be &#39;Package::method&#39; or a package name
 </span><span class="">  868: 	#		$arg2 may be a method name if provided separately
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">869 → 872 → 877</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">869 → 872 → 0</span></span>  869: 	my ($arg1, $arg2) = @_;
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">869 → 872 → 877</span></span>  869: 	my ($arg1, $arg2) = @_;
 </span><span class="">  870: 
 </span><span class="">  871: 	# If only one arg and it looks like Package::method, split it
 </span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch.">  872: 	if (defined $arg1 &amp;&amp; !defined $arg2 &amp;&amp; $arg1 =~ /^(.*)::([^:]+)$/) {
@@ -1256,13 +1256,13 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  874: 	}
 </span><span class="">  875: 
 </span><span class="">  876: 	# Otherwise, return as-is (package, method)
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">877 → 877 → 0</span></span>  877: 	return ($arg1, $arg2);
+</span><span class="">  877: 	return ($arg1, $arg2);
 </span><span class="">  878: 
 </span><span class="">  879: 	# EXIT: always returns ($pkg, $method)
 </span><span class="">  880: }
 </span><span class="">  881: 
 </span><span class="">  882: sub _apply_time_plan {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">883 → 886 → 890</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">883 → 886 → 0</span></span>  883: 	my $time = $_[0];
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">883 → 886 → 890</span></span>  883: 	my $time = $_[0];
 </span><span class="">  884: 	return unless $time &amp;&amp; ref $time eq &#39;HASH&#39;;
 </span><span class="">  885: 
 </span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch.">  886: 	if (exists $time-&gt;{freeze}) {
@@ -1275,7 +1275,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 <span class="">  887: 		Test::Mockingbird::TimeTravel::freeze_time($time-&gt;{freeze});
 </span><span class="">  888: 	}
 </span><span class="">  889: 
-</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">890 → 890 → 894</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">890 → 890 → 0</span></span>  890: 	if (exists $time-&gt;{travel}) {
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">890 → 890 → 894</span></span>  890: 	if (exists $time-&gt;{travel}) {
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
@@ -1285,7 +1285,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 <span class="">  891: 		Test::Mockingbird::TimeTravel::travel_to($time-&gt;{travel});
 </span><span class="">  892: 	}
 </span><span class="">  893: 
-</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">894 → 894 → 899</span></span><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">894 → 894 → 0</span></span>  894: 	if (exists $time-&gt;{advance}) {
+</span><span class="survived-1 tooltip" data-tooltip="Mutation survived. Add targeted tests to validate this branch."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">894 → 894 → 899</span></span>  894: 	if (exists $time-&gt;{advance}) {
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 1, Killed: 0, Survived: 1)</summary>
