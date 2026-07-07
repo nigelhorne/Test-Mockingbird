@@ -42,6 +42,18 @@ Version 0.10
     assert_call_order('A::fetch', 'B::process');   # passes
     clear_call_log();                               # reset without uninstalling spies
 
+    # Constructor interception
+    my $stub = My::Service->new;   # normally builds a real object
+    intercept_new 'My::Service' => $stub;
+    my $obj = My::Service->new(name => 'test');   # returns $stub
+
+    intercept_new 'My::Service' => sub {
+        my ($class, %args) = @_;
+        return My::Double->new(%args);            # factory coderef
+    };
+
+    restore_all();
+
 # DESCRIPTION
 
 Test::Mockingbird provides powerful mocking, spying, and dependency injection capabilities to streamline testing in Perl.
@@ -572,6 +584,51 @@ testing retry logic, fallback behaviour, and state transitions.
 #### Output (Returns::Set schema)
 
 \- `return`: undef
+
+## intercept\_new
+
+Intercept the `new` constructor of a class so that every call returns a
+controlled value instead of a real instance.
+
+    # Return the same pre-built object on every call
+    intercept_new 'My::Service' => $mock_obj;
+    my $a = My::Service->new;          # $mock_obj
+    my $b = My::Service->new(id => 1); # $mock_obj (same instance every time)
+
+    # Use a factory coderef (receives all original arguments, including the class name)
+    intercept_new 'My::Service' => sub {
+        my ($class, %args) = @_;
+        return My::Double->new(%args);
+    };
+
+    restore_all();   # or:  unmock 'My::Service::new'
+
+This is a thin wrapper around `mock`. The same mock stack semantics apply:
+`restore_all()` and `unmock('My::Service::new')` both work, and multiple
+interceptors can be stacked and peeled in LIFO order. `diagnose_mocks()`
+records the layer with type `intercept_new`.
+
+### API specification
+
+#### Input (Params::Validate::Strict schema)
+
+\- `$class`: required, scalar string; the package whose `new` method to
+  intercept
+\- `$factory`: required; either a coderef (called with the original arguments
+  including the invocant class name) or any other value (returned verbatim
+  on every call); may be `undef`
+
+#### Output (Returns::Set schema)
+
+\- `return`: undef
+
+### Notes
+
+When `$class` does not define its own `new` (relying instead on an inherited
+one from a parent class or `UNIVERSAL`), `intercept_new` still works: it
+installs the replacement directly into `$class`'s own stash. On restore,
+the captured inherited coderef is reinstalled in the stash rather than being
+removed, which may leave a redundant entry. Call `restore_all()` to clean up.
 
 ## restore
 

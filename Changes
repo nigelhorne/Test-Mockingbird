@@ -34,6 +34,25 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
     diagnose_mocks() work identically.  Future is an optional runtime
     dependency; the module croaks with a helpful message if it is absent.
 
+  - intercept_new($class, $obj_or_coderef) intercepts the C<new> constructor
+    of any class so that each call returns a controlled value instead of a
+    real instance.  Two forms are supported:
+
+      intercept_new 'My::Service' => $stub_obj;
+          Every call to My::Service->new returns $stub_obj unchanged.
+          Plain scalars, undef, and pre-built objects are all valid.
+
+      intercept_new 'My::Service' => sub { ... };
+          Every call invokes the coderef with the original arguments
+          (including the class name as the first argument) and returns
+          whatever the coderef returns.
+
+    intercept_new is a thin wrapper around mock(), so the usual mock stack
+    semantics apply: layers can be stacked and peeled with unmock(), the
+    full stack is cleared by restore_all(), and diagnose_mocks() records
+    each layer with type 'intercept_new'.  Works for classes with no own
+    new() (inherited constructors are intercepted in the same way).
+
   - inject_all($package, \%deps) injects multiple mock dependencies into a
     package in a single call.  Each key in the hashref is treated as a
     dependency name; the corresponding value is passed to inject() as the
@@ -59,6 +78,13 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
   -  Bump minimum version: Fixes https://github.com/nigelhorne/Test-Mockingbird/issues/6
 
   [Tests]
+
+  - Added t/intercept_new.t (14 subtests) covering: plain object, plain
+    scalar, and undef return values; coderef factory with arg forwarding;
+    factory returning a different class; restore_all and unmock restores;
+    LIFO stacking of two interceptors; diagnose_mocks type; inherited
+    constructor interception; combination with spy; and all error cases
+    (undef class, empty class, missing factory argument).
 
   - Added t/async.t (24 subtests) covering all five Async exports: scalar,
     list, and undef return values; failure with and without category/detail;

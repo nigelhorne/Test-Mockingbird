@@ -28,6 +28,7 @@ t/function.t
 t/gv.t
 t/inject.t
 t/inject_all.t
+t/intercept_new.t
 t/integration.t
 t/kwalitee.t
 t/manifest.t

@@ -17,6 +17,7 @@ our @EXPORT = qw(
 	spy
 	inject
 	inject_all
+	intercept_new
 	restore
 	restore_all
 	mock_return
@@ -81,6 +82,18 @@ our $VERSION = '0.11';
   B::process();
   assert_call_order('A::fetch', 'B::process');   # passes
   clear_call_log();                               # reset without uninstalling spies
+
+  # Constructor interception
+  my $stub = My::Service->new;   # normally builds a real object
+  intercept_new 'My::Service' => $stub;
+  my $obj = My::Service->new(name => 'test');   # returns $stub
+
+  intercept_new 'My::Service' => sub {
+      my ($class, %args) = @_;
+      return My::Double->new(%args);            # factory coderef
+  };
+
+  restore_all();
 
 =head1 DESCRIPTION
 
@@ -1066,6 +1079,71 @@ sub mock_once {
 
 	# Install the wrapper as a mock layer
 	return mock $target => $wrapper;
+}
+
+=head2 intercept_new
+
+Intercept the C<new> constructor of a class so that every call returns a
+controlled value instead of a real instance.
+
+    # Return the same pre-built object on every call
+    intercept_new 'My::Service' => $mock_obj;
+    my $a = My::Service->new;          # $mock_obj
+    my $b = My::Service->new(id => 1); # $mock_obj (same instance every time)
+
+    # Use a factory coderef (receives all original arguments, including the class name)
+    intercept_new 'My::Service' => sub {
+        my ($class, %args) = @_;
+        return My::Double->new(%args);
+    };
+
+    restore_all();   # or:  unmock 'My::Service::new'
+
+This is a thin wrapper around C<mock>. The same mock stack semantics apply:
+C<restore_all()> and C<unmock('My::Service::new')> both work, and multiple
+interceptors can be stacked and peeled in LIFO order. C<diagnose_mocks()>
+records the layer with type C<intercept_new>.
+
+=head3 API specification
+
+=head4 Input (Params::Validate::Strict schema)
+
+- C<$class>: required, scalar string; the package whose C<new> method to
+  intercept
+- C<$factory>: required; either a coderef (called with the original arguments
+  including the invocant class name) or any other value (returned verbatim
+  on every call); may be C<undef>
+
+=head4 Output (Returns::Set schema)
+
+- C<return>: undef
+
+=head3 Notes
+
+When C<$class> does not define its own C<new> (relying instead on an inherited
+one from a parent class or C<UNIVERSAL>), C<intercept_new> still works: it
+installs the replacement directly into C<$class>'s own stash. On restore,
+the captured inherited coderef is reinstalled in the stash rather than being
+removed, which may leave a redundant entry. Call C<restore_all()> to clean up.
+
+=cut
+
+sub intercept_new {
+	my ($class, $factory) = @_;
+
+	croak 'intercept_new requires a class name'
+		unless defined $class && length $class;
+	croak 'intercept_new requires a replacement object or coderef'
+		if @_ < 2;
+
+	my $replacement = ref($factory) eq 'CODE'
+		? $factory
+		: sub { $factory };
+
+	local $Test::Mockingbird::TYPE = 'intercept_new';
+	mock("${class}::new", $replacement);
+
+	return;
 }
 
 =head2 restore
