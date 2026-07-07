@@ -11,6 +11,7 @@ MANIFEST.SKIP
 README.md
 t/00-load.t
 t/30-basic.t
+t/call_order.t
 t/class.t
 t/comment-spelling.t
 t/cover.t
@@ -24,6 +25,7 @@ t/fixme.t
 t/function.t
 t/gv.t
 t/inject.t
+t/inject_all.t
 t/integration.t
 t/kwalitee.t
 t/manifest.t

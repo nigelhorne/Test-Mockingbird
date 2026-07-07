@@ -21,6 +21,13 @@ Version 0.10
     # Dependency Injection
     Test::Mockingbird::inject('My::Module', 'Dependency', $mock_object);
 
+    # Batch dependency injection
+    inject_all('My::Module', {
+        DB     => $mock_db,
+        Logger => $mock_logger,
+        Config => $mock_config,
+    });
+
     # Unmocking
     Test::Mockingbird::unmock('My::Module', 'method');
 
@@ -394,6 +401,59 @@ or the shorthand:
     inject 'My::Module::Dependency' => $mock_object;
 
 The injected dependency can be restored with `restore_all` or `unmock`.
+
+## inject\_all($package, \\%dependencies)
+
+Inject multiple mock dependencies into a package in a single call.
+
+    inject_all('My::Service', {
+        DB     => $mock_db,
+        Logger => $mock_logger,
+        Config => $mock_config,
+    });
+
+This is equivalent to calling `inject` once per key/value pair:
+
+    inject 'My::Service::DB'     => $mock_db;
+    inject 'My::Service::Logger' => $mock_logger;
+    inject 'My::Service::Config' => $mock_config;
+
+Every injected dependency is tracked by the usual mock stack and is
+restored automatically by `restore_all()` or individually by
+`unmock('My::Service::DB')` etc.
+
+### API specification
+
+#### Input (Params::Validate::Strict schema)
+
+\- `$package`: required, scalar string; the package into which dependencies
+  are injected
+\- `\%dependencies`: required, hashref; keys are dependency names (bare,
+  without package prefix), values are the objects or values to inject
+
+An empty hashref is accepted and has no effect.
+
+#### Output (Returns::Set schema)
+
+\- `return`: undef
+
+### Example
+
+    {
+        package My::UserService;
+        sub DB     { }   # normally returns a real DB handle
+        sub Logger { }   # normally returns a real logger
+    }
+
+    inject_all('My::UserService', {
+        DB     => $mock_db,
+        Logger => $mock_logger,
+    });
+
+    # My::UserService::DB()     now returns $mock_db
+    # My::UserService::Logger() now returns $mock_logger
+
+    restore_all();   # both restored in one call
 
 ## restore\_all
 

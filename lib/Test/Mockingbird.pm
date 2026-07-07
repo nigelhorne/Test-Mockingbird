@@ -16,6 +16,7 @@ our @EXPORT = qw(
 	mock_scoped
 	spy
 	inject
+	inject_all
 	restore
 	restore_all
 	mock_return
@@ -59,6 +60,13 @@ our $VERSION = '0.11';
 
   # Dependency Injection
   Test::Mockingbird::inject('My::Module', 'Dependency', $mock_object);
+
+  # Batch dependency injection
+  inject_all('My::Module', {
+      DB     => $mock_db,
+      Logger => $mock_logger,
+      Config => $mock_config,
+  });
 
   # Unmocking
   Test::Mockingbird::unmock('My::Module', 'method');
@@ -656,24 +664,21 @@ The injected dependency can be restored with C<restore_all> or C<unmock>.
 =cut
 
 sub inject {
-	my ($arg1, $arg2, $arg3) = @_;
-
 	my ($package, $dependency, $mock_object);
 
 	# ------------------------------------------------------------
-	# New shorthand syntax:
-	#   inject 'My::Module::Dependency' => $mock_obj
+	# Shorthand (2 args): inject 'My::Module::Dependency' => $mock_obj
+	# Longhand  (3 args): inject('My::Module', 'Dependency', $mock_obj)
+	#
+	# Discriminate by argument count, not by definedness of the third
+	# argument.  The previous !defined $arg3 check was wrong: it caused
+	# inject('Pkg', 'Dep', undef) to be misrouted to the shorthand branch,
+	# making it impossible to inject undef as a value.
 	# ------------------------------------------------------------
-	if (defined $arg1 && !defined $arg3 && $arg1 =~ /^(.*)::([^:]+)$/) {
-		$package     = $1;
-		$dependency  = $2;
-		$mock_object = $arg2;
+	if (@_ == 2 && defined $_[0] && $_[0] =~ /^(.*)::([^:]+)$/) {
+		($package, $dependency, $mock_object) = ($1, $2, $_[1]);
 	} else {
-		# ------------------------------------------------------------
-		# Original syntax:
-		#   inject('My::Module', 'Dependency', $mock_obj)
-		# ------------------------------------------------------------
-		($package, $dependency, $mock_object) = ($arg1, $arg2, $arg3);
+		($package, $dependency, $mock_object) = @_;
 	}
 
 	croak 'Package and dependency are required for injection' unless $package && $dependency;
@@ -704,6 +709,78 @@ sub inject {
 		type         => 'inject',
 		installed_at => (caller)[1] . ' line ' . (caller)[2],
 	};
+}
+
+=head2 inject_all($package, \%dependencies)
+
+Inject multiple mock dependencies into a package in a single call.
+
+    inject_all('My::Service', {
+        DB     => $mock_db,
+        Logger => $mock_logger,
+        Config => $mock_config,
+    });
+
+This is equivalent to calling C<inject> once per key/value pair:
+
+    inject 'My::Service::DB'     => $mock_db;
+    inject 'My::Service::Logger' => $mock_logger;
+    inject 'My::Service::Config' => $mock_config;
+
+Every injected dependency is tracked by the usual mock stack and is
+restored automatically by C<restore_all()> or individually by
+C<unmock('My::Service::DB')> etc.
+
+=head3 API specification
+
+=head4 Input (Params::Validate::Strict schema)
+
+- C<$package>: required, scalar string; the package into which dependencies
+  are injected
+- C<\%dependencies>: required, hashref; keys are dependency names (bare,
+  without package prefix), values are the objects or values to inject
+
+An empty hashref is accepted and has no effect.
+
+=head4 Output (Returns::Set schema)
+
+- C<return>: undef
+
+=head3 Example
+
+    {
+        package My::UserService;
+        sub DB     { }   # normally returns a real DB handle
+        sub Logger { }   # normally returns a real logger
+    }
+
+    inject_all('My::UserService', {
+        DB     => $mock_db,
+        Logger => $mock_logger,
+    });
+
+    # My::UserService::DB()     now returns $mock_db
+    # My::UserService::Logger() now returns $mock_logger
+
+    restore_all();   # both restored in one call
+
+=cut
+
+sub inject_all {
+	my ($package, $deps) = @_;
+
+	croak 'inject_all requires a package name'
+		unless defined $package && length $package;
+
+	croak 'inject_all requires a hashref of dependencies'
+		unless ref $deps eq 'HASH';
+
+	for my $name (keys %$deps) {
+		local $Test::Mockingbird::TYPE = 'inject';
+		inject($package, $name, $deps->{$name});
+	}
+
+	return;
 }
 
 =head2 restore_all

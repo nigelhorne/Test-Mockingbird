@@ -4,6 +4,13 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
 
   [New features]
 
+  - inject_all($package, \%deps) injects multiple mock dependencies into a
+    package in a single call.  Each key in the hashref is treated as a
+    dependency name; the corresponding value is passed to inject() as the
+    mock object.  All injected dependencies are tracked by the usual mock
+    stack and are restored by restore_all() or individual unmock() calls.
+    An empty hashref is a no-op.  Exported by default alongside inject().
+
   - Call ordering: assert_call_order(@methods) verifies that spied methods
     were invoked in the declared left-to-right sequence.  Intervening calls
     to other methods are ignored; only the relative order of the named
@@ -22,6 +29,11 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
   -  Bump minimum version: Fixes https://github.com/nigelhorne/Test-Mockingbird/issues/6
 
   [Tests]
+
+  - Added t/inject_all.t covering: basic multi-dependency injection, empty
+    hashref no-op, restore_all cleanup, individual unmock of one injected
+    dependency, error on missing package, error on non-hashref second arg,
+    and diagnose_mocks recording all injected layers.
 
   - Added t/call_order.t covering: correct-order pass, wrong-order fail
     (return value verified via local $TODO), intervening-call tolerance,
