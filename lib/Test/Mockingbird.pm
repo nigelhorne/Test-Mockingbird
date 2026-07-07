@@ -1258,6 +1258,12 @@ sub clear_call_log {
 	@call_log = ();
 }
 
+# Private helper used by Test::Mockingbird::Async to append to @call_log
+# without crossing the lexical boundary.
+sub _record_call {
+	push @call_log, $_[0];
+}
+
 =head2 diagnose_mocks
 
 Return a structured hashref describing all currently active mock layers.

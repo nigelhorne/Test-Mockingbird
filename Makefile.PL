@@ -32,6 +32,12 @@ WriteMakefile(
 				url => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Test-Mockingbird',
 				web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Test-Mockingbird',
 			}
+		}, prereqs => {
+			runtime => {
+				recommends => {
+					Future => '0',
+				},
+			},
 		},
 	},
 	PREREQ_PM => {

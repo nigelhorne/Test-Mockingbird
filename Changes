@@ -4,6 +4,36 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
 
   [New features]
 
+  - New module Test::Mockingbird::Async providing Future-based async mocking:
+
+      mock_future_return($target, @values)
+          Replaces the target with a stub returning Future->done(@values).
+
+      mock_future_fail($target, $message, @details)
+          Replaces the target with a stub returning Future->fail($message, @details).
+          No exception is thrown at the call site; the caller receives a
+          pre-failed Future.
+
+      mock_future_sequence($target, @items)
+          Returns each item in sequence over successive calls; last item
+          repeats when exhausted.  Each item is either a plain value
+          (wrapped in Future->done) or a pre-built Future (passed through).
+
+      mock_future_once($target, @values)
+          Returns Future->done(@values) on the first call, then automatically
+          restores the previous implementation.
+
+      async_spy($target)
+          Wraps the target, records each call as a hashref
+          { args => [$method, @args], future => $returned_future }, and
+          returns a coderef that retrieves the call list.  Writes to the
+          call-order log so assert_call_order() works across plain and
+          async spies.
+
+    All functions use the core mock stack; restore_all(), unmock(), and
+    diagnose_mocks() work identically.  Future is an optional runtime
+    dependency; the module croaks with a helpful message if it is absent.
+
   - inject_all($package, \%deps) injects multiple mock dependencies into a
     package in a single call.  Each key in the hashref is treated as a
     dependency name; the corresponding value is passed to inject() as the
@@ -29,6 +59,13 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
   -  Bump minimum version: Fixes https://github.com/nigelhorne/Test-Mockingbird/issues/6
 
   [Tests]
+
+  - Added t/async.t (24 subtests) covering all five Async exports: scalar,
+    list, and undef return values; failure with and without category/detail;
+    sequence ordering and last-item repeat; pre-built Future pass-through;
+    mixed plain/Future sequences; once-fires-once; async_spy arg capture,
+    Future capture, longhand target, diagnose_mocks type, and
+    assert_call_order integration; and all error cases.
 
   - Added t/inject_all.t covering: basic multi-dependency injection, empty
     hashref no-op, restore_all cleanup, individual unmock of one injected
