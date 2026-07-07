@@ -27,6 +27,14 @@ Version 0.10
     # Restore everything
     Test::Mockingbird::restore_all();
 
+    # Call ordering
+    spy 'A::fetch';
+    spy 'B::process';
+    A::fetch();
+    B::process();
+    assert_call_order('A::fetch', 'B::process');   # passes
+    clear_call_log();                               # reset without uninstalling spies
+
 # DESCRIPTION
 
 Test::Mockingbird provides powerful mocking, spying, and dependency injection capabilities to streamline testing in Perl.
@@ -516,6 +524,94 @@ mocked, this routine has no effect.
 #### Input (Params::Validate::Strict schema)
 
 \- `target`: required, scalar, string; method target in shorthand or longhand form
+
+#### Output (Returns::Set schema)
+
+\- `return`: undef
+
+## assert\_call\_order
+
+Assert that the named methods were called in the given left-to-right order.
+
+    assert_call_order('A::fetch', 'B::process', 'C::save');
+
+Each argument must be a fully-qualified method name previously wrapped with
+`spy()`. The check scans the internal call log for the named methods in
+sequence. Intervening calls to other methods are ignored, so only the
+relative order of the named methods is verified.
+
+Produces one TAP `ok` or `not ok` line and returns a boolean.
+
+Fails (with a diagnostic message) if:
+
+- any named method was never called
+- the observed order does not match the declared order
+
+The call log is populated by `spy()` and cleared by `restore_all()` or
+`clear_call_log()`. Plain `mock()` calls do not write to the log;
+install a spy on any method whose ordering you need to verify.
+
+### API specification
+
+#### Input (Params::Validate::Strict schema)
+
+\- `@methods`: required; two or more fully-qualified method name strings
+
+#### Output (Returns::Set schema)
+
+\- `return`: boolean; true if the order matched, false otherwise
+
+### Example
+
+    {
+        package Pipeline;
+        sub open  { 1 }
+        sub run   { 1 }
+        sub close { 1 }
+    }
+
+    spy 'Pipeline::open';
+    spy 'Pipeline::run';
+    spy 'Pipeline::close';
+
+    Pipeline::open();
+    Pipeline::run();
+    Pipeline::close();
+
+    assert_call_order('Pipeline::open', 'Pipeline::run', 'Pipeline::close');
+
+    restore_all();
+
+## clear\_call\_log
+
+Clear the call-order log without restoring any mocks or spies.
+
+Normally the log is cleared automatically by `restore_all()`. Call this
+when you want to reset ordering state between phases of a single test
+without tearing down the installed spies.
+
+    spy 'A::fetch';
+    spy 'B::process';
+
+    # phase 1
+    A::fetch();
+    B::process();
+    assert_call_order('A::fetch', 'B::process');
+
+    clear_call_log();   # reset, spies still active
+
+    # phase 2
+    B::process();
+    A::fetch();
+    # assert_call_order would now fail because B came first in phase 2
+
+    restore_all();      # also clears the log
+
+### API specification
+
+#### Input (Params::Validate::Strict schema)
+
+\- none
 
 #### Output (Returns::Set schema)
 

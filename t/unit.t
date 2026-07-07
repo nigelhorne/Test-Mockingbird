@@ -277,6 +277,66 @@ subtest 'restore unwinds stacked mocks' => sub {
 	restore_all();
 };
 
+subtest '_run_expectations order key delegates to assert_call_order' => sub {
+	{
+		package UT_ORD_A;
+		sub go { 1 }
+	}
+	{
+		package UT_ORD_B;
+		sub go { 1 }
+	}
+
+	my %handles;
+	my $spy_a = Test::Mockingbird::spy('UT_ORD_A', 'go');
+	my $spy_b = Test::Mockingbird::spy('UT_ORD_B', 'go');
+	$handles{a}{spy} = $spy_a;
+	$handles{b}{spy} = $spy_b;
+
+	UT_ORD_A::go();
+	UT_ORD_B::go();
+
+	# Should pass - A before B
+	Test::Mockingbird::DeepMock::_run_expectations(
+		[
+			{ tag => 'a', calls => 1 },
+			{ tag => 'b', calls => 1 },
+			{ order => [ 'UT_ORD_A::go', 'UT_ORD_B::go' ] },
+		],
+		\%handles,
+	);
+
+	Test::Mockingbird::restore_all();
+};
+
+subtest '_run_expectations order-only entry skips tag croak' => sub {
+	# An entry with only an order key (no tag) must not trigger
+	# "expectation missing tag" in the per-spy loop.
+	{
+		package UT_ORD_SKIP_A;
+		sub run { 1 }
+	}
+	{
+		package UT_ORD_SKIP_B;
+		sub run { 1 }
+	}
+
+	my $spy_a = Test::Mockingbird::spy('UT_ORD_SKIP_A', 'run');
+	my $spy_b = Test::Mockingbird::spy('UT_ORD_SKIP_B', 'run');
+
+	UT_ORD_SKIP_A::run();
+	UT_ORD_SKIP_B::run();
+
+	lives_ok {
+		Test::Mockingbird::DeepMock::_run_expectations(
+			[ { order => [ 'UT_ORD_SKIP_A::run', 'UT_ORD_SKIP_B::run' ] } ],
+			{}
+		);
+	} 'order-only expectation (no tag) does not croak with missing tag';
+
+	Test::Mockingbird::restore_all();
+};
+
 subtest 'diagnose_mocks tracks stacked layers' => sub {
 	{
 		package DM::U1;

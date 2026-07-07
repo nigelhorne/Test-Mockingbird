@@ -21,7 +21,7 @@ Version 0.10
 
 =cut
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 =head1 SYNOPSIS
 
@@ -206,6 +206,17 @@ arguments for a specific call.
 Asserts that the spy was never called.
 Mutually exclusive with C<calls>.
 
+=item C<order>
+
+Asserts that the listed fully-qualified method names were called in the
+given left-to-right order (not necessarily consecutively). This key is
+processed once per expectations list, not per spy tag. It delegates to
+C<Test::Mockingbird::assert_call_order>.
+
+    expectations => [
+        { order => ['A::fetch', 'B::process', 'C::save'] },
+    ]
+
 =back
 
 =head2 C<globals>
@@ -360,6 +371,33 @@ This mirrors the automatic restoration of mocks.
             ],
         },
     ]
+
+=head2 Asserting call ordering across methods
+
+Use the C<order> key to assert that spied methods were called in a specific
+left-to-right sequence. Intervening calls to other methods are ignored.
+
+    deep_mock(
+        {
+            mocks => [
+                { target => 'A::open',  type => 'spy', tag => 'open'  },
+                { target => 'B::close', type => 'spy', tag => 'close' },
+            ],
+            expectations => [
+                { tag => 'open',  calls => 1 },
+                { tag => 'close', calls => 1 },
+                { order => [ 'A::open', 'B::close' ] },
+            ],
+        },
+        sub {
+            A::open();
+            B::close();
+        }
+    );
+
+The C<order> entry does not require a C<tag>; it is processed once after all
+per-spy expectations have been checked. Multiple C<order> entries in the same
+list are each verified independently.
 
 =head2 Combining mocking with time travel
 
@@ -747,6 +785,9 @@ sub _run_expectations {
 	my ($exps, $handles) = @_;
 
 	for my $exp (@$exps) {
+		# order-only expectations have no tag; they are handled separately below
+		next if exists $exp->{order} && !exists $exp->{tag};
+
 		my $tag = $exp->{tag}
 		  or croak 'expectation missing tag';
 
@@ -835,6 +876,17 @@ sub _run_expectations {
 				"DeepMock: $tag was never called"
 			);
 		}
+	}
+
+	# --------------------------------------------------------------
+	# order  (assert cross-method call ordering)
+	# An order expectation lives outside per-spy expectations because
+	# it spans multiple methods.  Handled separately after the loop.
+	# --------------------------------------------------------------
+	for my $exp (@$exps) {
+		next unless exists $exp->{order};
+		my @methods = @{ $exp->{order} };
+		Test::Mockingbird::assert_call_order(@methods);
 	}
 }
 

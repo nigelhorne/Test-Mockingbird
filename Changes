@@ -2,9 +2,33 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
 
 0.11
 
+  [New features]
+
+  - Call ordering: assert_call_order(@methods) verifies that spied methods
+    were invoked in the declared left-to-right sequence.  Intervening calls
+    to other methods are ignored; only the relative order of the named
+    methods is checked.  Returns a boolean and emits a single TAP ok/not-ok.
+
+  - clear_call_log() resets the call-order log without tearing down spies
+    or mocks.  restore_all() continues to clear the log automatically.
+
+  - Test::Mockingbird::DeepMock now accepts an C<order> key in the
+    expectations array.  It takes an arrayref of fully-qualified method
+    names and delegates to assert_call_order() after all per-spy
+    expectations have been checked.  The key does not require a spy tag.
+
   [Bug fixes]
 
   -  Bump minimum version: Fixes https://github.com/nigelhorne/Test-Mockingbird/issues/6
+
+  [Tests]
+
+  - Added t/call_order.t covering: correct-order pass, wrong-order fail
+    (return value verified via local $TODO), intervening-call tolerance,
+    clear_call_log() mid-test reset, and the DeepMock order expectation.
+
+  - Added call-ordering subtests to t/unit.t (_run_expectations order key)
+    and t/integration.t (end-to-end via deep_mock).
 
 0.10	Fri May  8 15:11:42 EDT 2026
 

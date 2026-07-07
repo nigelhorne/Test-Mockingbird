@@ -8,6 +8,10 @@ use lib 'lib';
 use Test::Most;
 use Test::Mockingbird;
 use Test::Mockingbird::DeepMock qw(deep_mock);
+
+# assert_call_order and clear_call_log are exported by Test::Mockingbird
+# but integration.t also imports restore_all from TimeTravel below,
+# so use the fully-qualified form where needed to avoid ambiguity.
 use Test::Mockingbird::TimeTravel qw(
 	now
 	freeze_time
@@ -256,6 +260,96 @@ subtest 'restore interacts correctly with mock_once and mock_sequence' => sub {
 	restore 'Edge::Restore::c';
 	is Edge::Restore::c(), 'orig', 'restore removes all layers';
 	restore_all();
+};
+
+subtest 'assert_call_order across multiple packages' => sub {
+	{
+		package Ord::Alpha;
+		sub open  { 1 }
+	}
+	{
+		package Ord::Beta;
+		sub process { 1 }
+	}
+	{
+		package Ord::Gamma;
+		sub close { 1 }
+	}
+
+	spy 'Ord::Alpha::open';
+	spy 'Ord::Beta::process';
+	spy 'Ord::Gamma::close';
+
+	Ord::Alpha::open();
+	Ord::Beta::process();
+	Ord::Gamma::close();
+
+	assert_call_order('Ord::Alpha::open', 'Ord::Beta::process', 'Ord::Gamma::close');
+
+	Test::Mockingbird::restore_all();
+};
+
+subtest 'call ordering via deep_mock order expectation' => sub {
+	{
+		package DM_ORD_A;
+		sub fetch { 1 }
+	}
+	{
+		package DM_ORD_B;
+		sub save { 1 }
+	}
+
+	deep_mock(
+		{
+			mocks => [
+				{ target => 'DM_ORD_A::fetch', type => 'spy', tag => 'fetch' },
+				{ target => 'DM_ORD_B::save',  type => 'spy', tag => 'save'  },
+			],
+			expectations => [
+				{ tag => 'fetch', calls => 1 },
+				{ tag => 'save',  calls => 1 },
+				{ order => [ 'DM_ORD_A::fetch', 'DM_ORD_B::save' ] },
+			],
+		},
+		sub {
+			DM_ORD_A::fetch();
+			DM_ORD_B::save();
+		}
+	);
+};
+
+subtest 'clear_call_log resets between phases without uninstalling spies' => sub {
+	{
+		package Phase::A;
+		sub go { 1 }
+	}
+	{
+		package Phase::B;
+		sub go { 1 }
+	}
+
+	spy 'Phase::A::go';
+	spy 'Phase::B::go';
+
+	# Phase 1: correct order
+	Phase::A::go();
+	Phase::B::go();
+	assert_call_order('Phase::A::go', 'Phase::B::go');
+
+	clear_call_log();
+
+	# Phase 2: reversed order; spies still active
+	Phase::B::go();
+	Phase::A::go();
+
+	my $result;
+	{
+		local $TODO = 'reversed order - expected to fail';
+		$result = assert_call_order('Phase::A::go', 'Phase::B::go');
+	}
+	ok !$result, 'assert_call_order returns false for reversed order after clear';
+
+	Test::Mockingbird::restore_all();
 };
 
 subtest 'diagnose_mocks integrates with spy and inject' => sub {

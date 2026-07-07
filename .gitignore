@@ -9,6 +9,7 @@
 
 # Devel::Cover
 cover_db/
+cover_html/
 
 # Devel::NYTProf
 nytprof.out
@@ -35,3 +36,16 @@ inc/
 /*.zip
 *.swp
 .DS_Store
+
+# Carton/Carmel
+/local/
+/.carmel/
+# cpanfile.snapshot should generally be ignored for library code, otherwise included
+# cpanfile.snapshot
+
+# Don't stash the output files
+t/tmp_*.t
+
+schemas/
+\.claude
+CLAUDE.md

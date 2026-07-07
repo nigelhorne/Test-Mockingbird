@@ -24,11 +24,14 @@ our @EXPORT = qw(
 	mock_once
 	diagnose_mocks
 	diagnose_mocks_pretty
+	assert_call_order
+	clear_call_log
 );
 
 # Store mocked data
 my %mocked;		# becomes: method => [ stack of backups ]
 my %mock_meta;	# full_method => [ { type => ..., installed_at => ... }, ... ]
+my @call_log;		# ordered record of every spied call: [ $full_method, ... ]
 
 =head1 NAME
 
@@ -40,7 +43,7 @@ Version 0.10
 
 =cut
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 =head1 SYNOPSIS
 
@@ -62,6 +65,14 @@ our $VERSION = '0.10';
 
   # Restore everything
   Test::Mockingbird::restore_all();
+
+  # Call ordering
+  spy 'A::fetch';
+  spy 'B::process';
+  A::fetch();
+  B::process();
+  assert_call_order('A::fetch', 'B::process');   # passes
+  clear_call_log();                               # reset without uninstalling spies
 
 =head1 DESCRIPTION
 
@@ -612,6 +623,7 @@ sub spy {
 	# Wrapper: record call, then delegate to the captured original
 	my $wrapper = sub {
 		push @calls, [ $full_method, @_ ];
+		push @call_log, $full_method;
 		return $orig->(@_);
 	};
 
@@ -781,6 +793,7 @@ sub restore_all {
 	# Clear all tracking
 	%mocked    = ();
 	%mock_meta = ();
+	@call_log  = ();
 }
 
 =head2 mock_return
@@ -1037,6 +1050,135 @@ sub restore {
 	delete $mock_meta{$full_method};
 
 	return;
+}
+
+=head2 assert_call_order
+
+Assert that the named methods were called in the given left-to-right order.
+
+    assert_call_order('A::fetch', 'B::process', 'C::save');
+
+Each argument must be a fully-qualified method name previously wrapped with
+C<spy()>. The check scans the internal call log for the named methods in
+sequence. Intervening calls to other methods are ignored, so only the
+relative order of the named methods is verified.
+
+Produces one TAP C<ok> or C<not ok> line and returns a boolean.
+
+Fails (with a diagnostic message) if:
+
+=over 4
+
+=item * any named method was never called
+
+=item * the observed order does not match the declared order
+
+=back
+
+The call log is populated by C<spy()> and cleared by C<restore_all()> or
+C<clear_call_log()>. Plain C<mock()> calls do not write to the log;
+install a spy on any method whose ordering you need to verify.
+
+=head3 API specification
+
+=head4 Input (Params::Validate::Strict schema)
+
+- C<@methods>: required; two or more fully-qualified method name strings
+
+=head4 Output (Returns::Set schema)
+
+- C<return>: boolean; true if the order matched, false otherwise
+
+=head3 Example
+
+    {
+        package Pipeline;
+        sub open  { 1 }
+        sub run   { 1 }
+        sub close { 1 }
+    }
+
+    spy 'Pipeline::open';
+    spy 'Pipeline::run';
+    spy 'Pipeline::close';
+
+    Pipeline::open();
+    Pipeline::run();
+    Pipeline::close();
+
+    assert_call_order('Pipeline::open', 'Pipeline::run', 'Pipeline::close');
+
+    restore_all();
+
+=cut
+
+sub assert_call_order {
+	my @expected = @_;
+
+	croak 'assert_call_order requires at least two method names'
+		unless @expected >= 2;
+
+	my $pos = 0;   # index into @expected
+
+	for my $logged (@call_log) {
+		if ($logged eq $expected[$pos]) {
+			$pos++;
+			last if $pos == @expected;
+		}
+	}
+
+	my $ok = ($pos == @expected);
+
+	require Test::More;
+	if ($ok) {
+		Test::More::pass("call order: " . join(' → ', @expected));
+	} else {
+		Test::More::fail("call order: " . join(' → ', @expected));
+		Test::More::diag("Expected '$expected[$pos]' next, but it was not observed in the call log");
+	}
+
+	return $ok;
+}
+
+=head2 clear_call_log
+
+Clear the call-order log without restoring any mocks or spies.
+
+Normally the log is cleared automatically by C<restore_all()>. Call this
+when you want to reset ordering state between phases of a single test
+without tearing down the installed spies.
+
+    spy 'A::fetch';
+    spy 'B::process';
+
+    # phase 1
+    A::fetch();
+    B::process();
+    assert_call_order('A::fetch', 'B::process');
+
+    clear_call_log();   # reset, spies still active
+
+    # phase 2
+    B::process();
+    A::fetch();
+    # assert_call_order would now fail because B came first in phase 2
+
+    restore_all();      # also clears the log
+
+=head3 API specification
+
+=head4 Input (Params::Validate::Strict schema)
+
+- none
+
+=head4 Output (Returns::Set schema)
+
+- C<return>: undef
+
+=cut
+
+sub clear_call_log {
+	@call_log = ();
 }
 
 =head2 diagnose_mocks
