@@ -244,7 +244,7 @@ pre details.mutant-details ul {
 <div class="nav"><a href="Mockingbird/TimeTravel.pm.html">⬅ Previous</a> <a href="../../../index.html">Index</a>
  <a href="Mockingbird/DeepMock.pm.html">Next ➡</a></div><div class='summary'>
 <strong>Structural Coverage (Approximate)</strong><p>
-TER1 (Statement): 98.72%<br>
+TER1 (Statement): 98.40%<br>
 TER2 (Branch): 93.24%<br>
 TER3 (LCSAJ): 100.0% (14/14)<br>
 Approximate LCSAJ segments: 75<br>
@@ -1204,7 +1204,7 @@ Approximate LCSAJ segments: 75<br>
 </span><span class="">  912: 	local $Test::Mockingbird::TYPE = &#39;mock_return&#39;;
 </span><span class="">  913: 
 </span><span class="">  914: 	# MUST use the shorthand form:
-</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  915: 	return mock $target =&gt; $code;
+</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  915: 	return mock $target =&gt; $code;
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
@@ -1634,251 +1634,257 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class=""> 1258: 	@call_log = ();
 </span><span class=""> 1259: }
 </span><span class=""> 1260: 
-</span><span class=""> 1261: =head2 diagnose_mocks
-</span><span class=""> 1262: 
-</span><span class=""> 1263: Return a structured hashref describing all currently active mock layers.
-</span><span class=""> 1264: This routine is purely observational and does not modify any state.
-</span><span class=""> 1265: 
-</span><span class=""> 1266: =head3 API specification
-</span><span class=""> 1267: 
-</span><span class=""> 1268: =head4 Input
-</span><span class=""> 1269: 
-</span><span class=""> 1270: Params::Validate::Strict schema:
+</span><span class=""> 1261: # Private helper used by Test::Mockingbird::Async to append to @call_log
+</span><span class=""> 1262: # without crossing the lexical boundary.
+</span><span class=""> 1263: sub _record_call {
+</span><span class=""> 1264: 	push @call_log, $_[0];
+</span><span class=""> 1265: }
+</span><span class=""> 1266: 
+</span><span class=""> 1267: =head2 diagnose_mocks
+</span><span class=""> 1268: 
+</span><span class=""> 1269: Return a structured hashref describing all currently active mock layers.
+</span><span class=""> 1270: This routine is purely observational and does not modify any state.
 </span><span class=""> 1271: 
-</span><span class=""> 1272: - none
+</span><span class=""> 1272: =head3 API specification
 </span><span class=""> 1273: 
-</span><span class=""> 1274: =head4 Output
+</span><span class=""> 1274: =head4 Input
 </span><span class=""> 1275: 
-</span><span class=""> 1276: Returns::Set schema:
+</span><span class=""> 1276: Params::Validate::Strict schema:
 </span><span class=""> 1277: 
-</span><span class=""> 1278: - C&lt;return&gt;: hashref; keys are fully qualified method names, values are
-</span><span class=""> 1279:   hashrefs containing:
-</span><span class=""> 1280:   - C&lt;depth&gt;: integer; number of active mock layers
-</span><span class=""> 1281:   - C&lt;layers&gt;: arrayref of hashrefs; each layer has:
-</span><span class=""> 1282:       - C&lt;type&gt;: string
-</span><span class=""> 1283:       - C&lt;installed_at&gt;: string
-</span><span class=""> 1284:   - C&lt;original_existed&gt;: boolean
-</span><span class=""> 1285: 
-</span><span class=""> 1286: =cut
-</span><span class=""> 1287: 
-</span><span class=""> 1288: sub diagnose_mocks {
-</span><span class=""> 1289: 	# Entry: none
-</span><span class=""> 1290: 	# Exit: structured hashref describing all active mocks
-</span><span class=""> 1291: 	# Side effects: none
-</span><span class=""> 1292: 	# Notes: purely observational
+</span><span class=""> 1278: - none
+</span><span class=""> 1279: 
+</span><span class=""> 1280: =head4 Output
+</span><span class=""> 1281: 
+</span><span class=""> 1282: Returns::Set schema:
+</span><span class=""> 1283: 
+</span><span class=""> 1284: - C&lt;return&gt;: hashref; keys are fully qualified method names, values are
+</span><span class=""> 1285:   hashrefs containing:
+</span><span class=""> 1286:   - C&lt;depth&gt;: integer; number of active mock layers
+</span><span class=""> 1287:   - C&lt;layers&gt;: arrayref of hashrefs; each layer has:
+</span><span class=""> 1288:       - C&lt;type&gt;: string
+</span><span class=""> 1289:       - C&lt;installed_at&gt;: string
+</span><span class=""> 1290:   - C&lt;original_existed&gt;: boolean
+</span><span class=""> 1291: 
+</span><span class=""> 1292: =cut
 </span><span class=""> 1293: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1294 → 1296 → 1304</span></span> 1294: 	my %report;
-</span><span class=""> 1295: 
-</span><span class=""> 1296: 	for my $full_method (sort keys %mocked) {
-</span><span class=""> 1297: 		$report{$full_method} = {
-</span><span class=""> 1298: 			depth            =&gt; scalar @{ $mocked{$full_method} },
-</span><span class=""> 1299: 			layers           =&gt; [ @{ $mock_meta{$full_method} // [] } ],
-</span><span class=""> 1300: 			original_existed =&gt; defined $mocked{$full_method}[0] ? 1 : 0,
-</span><span class=""> 1301: 		};
-</span><span class=""> 1302: 	}
-</span><span class=""> 1303: 
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1304: 	return \%report;
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1305: }
-</span><span class=""> 1306: 
-</span><span class=""> 1307: =head2 diagnose_mocks_pretty
-</span><span class=""> 1308: 
-</span><span class=""> 1309: Return a human-readable string describing all currently active mock layers.
-</span><span class=""> 1310: This routine is purely observational and does not modify any state.
-</span><span class=""> 1311: 
-</span><span class=""> 1312: =head3 API specification
-</span><span class=""> 1313: 
-</span><span class=""> 1314: =head4 Input
-</span><span class=""> 1315: 
-</span><span class=""> 1316: Params::Validate::Strict schema:
+</span><span class=""> 1294: sub diagnose_mocks {
+</span><span class=""> 1295: 	# Entry: none
+</span><span class=""> 1296: 	# Exit: structured hashref describing all active mocks
+</span><span class=""> 1297: 	# Side effects: none
+</span><span class=""> 1298: 	# Notes: purely observational
+</span><span class=""> 1299: 
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1300 → 1302 → 1310</span></span> 1300: 	my %report;
+</span><span class=""> 1301: 
+</span><span class=""> 1302: 	for my $full_method (sort keys %mocked) {
+</span><span class=""> 1303: 		$report{$full_method} = {
+</span><span class=""> 1304: 			depth            =&gt; scalar @{ $mocked{$full_method} },
+</span><span class=""> 1305: 			layers           =&gt; [ @{ $mock_meta{$full_method} // [] } ],
+</span><span class=""> 1306: 			original_existed =&gt; defined $mocked{$full_method}[0] ? 1 : 0,
+</span><span class=""> 1307: 		};
+</span><span class=""> 1308: 	}
+</span><span class=""> 1309: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1310: 	return \%report;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1311: }
+</span><span class=""> 1312: 
+</span><span class=""> 1313: =head2 diagnose_mocks_pretty
+</span><span class=""> 1314: 
+</span><span class=""> 1315: Return a human-readable string describing all currently active mock layers.
+</span><span class=""> 1316: This routine is purely observational and does not modify any state.
 </span><span class=""> 1317: 
-</span><span class=""> 1318: - none
+</span><span class=""> 1318: =head3 API specification
 </span><span class=""> 1319: 
-</span><span class=""> 1320: =head4 Output
+</span><span class=""> 1320: =head4 Input
 </span><span class=""> 1321: 
-</span><span class=""> 1322: Returns::Set schema:
+</span><span class=""> 1322: Params::Validate::Strict schema:
 </span><span class=""> 1323: 
-</span><span class=""> 1324: - C&lt;return&gt;: scalar string; formatted multi-line description of all active
-</span><span class=""> 1325:   mock layers, including:
-</span><span class=""> 1326:   - fully qualified method name
-</span><span class=""> 1327:   - depth (number of active layers)
-</span><span class=""> 1328:   - whether the original method existed
-</span><span class=""> 1329:   - each layer&#39;s type and installation location
-</span><span class=""> 1330: 
-</span><span class=""> 1331: =head3 Behaviour
-</span><span class=""> 1332: 
-</span><span class=""> 1333: =head4 Entry
-</span><span class=""> 1334: 
-</span><span class=""> 1335: - No arguments are accepted.
+</span><span class=""> 1324: - none
+</span><span class=""> 1325: 
+</span><span class=""> 1326: =head4 Output
+</span><span class=""> 1327: 
+</span><span class=""> 1328: Returns::Set schema:
+</span><span class=""> 1329: 
+</span><span class=""> 1330: - C&lt;return&gt;: scalar string; formatted multi-line description of all active
+</span><span class=""> 1331:   mock layers, including:
+</span><span class=""> 1332:   - fully qualified method name
+</span><span class=""> 1333:   - depth (number of active layers)
+</span><span class=""> 1334:   - whether the original method existed
+</span><span class=""> 1335:   - each layer&#39;s type and installation location
 </span><span class=""> 1336: 
-</span><span class=""> 1337: =head4 Exit
+</span><span class=""> 1337: =head3 Behaviour
 </span><span class=""> 1338: 
-</span><span class=""> 1339: - Returns a formatted string describing the current mocking state.
+</span><span class=""> 1339: =head4 Entry
 </span><span class=""> 1340: 
-</span><span class=""> 1341: =head4 Side effects
+</span><span class=""> 1341: - No arguments are accepted.
 </span><span class=""> 1342: 
-</span><span class=""> 1343: - None. This routine does not modify C&lt;%mocked&gt;, C&lt;%mock_meta&gt;, or any
-</span><span class=""> 1344:   symbol table entries.
-</span><span class=""> 1345: 
-</span><span class=""> 1346: =head4 Notes
-</span><span class=""> 1347: 
-</span><span class=""> 1348: - This routine is intended for debugging and diagnostics. It is safe to
-</span><span class=""> 1349:   call at any point during a test run.
-</span><span class=""> 1350: - The output format is stable and suitable for human inspection, but not
-</span><span class=""> 1351:   guaranteed to remain fixed for machine parsing.
-</span><span class=""> 1352: 
-</span><span class=""> 1353: =cut
-</span><span class=""> 1354: 
-</span><span class=""> 1355: sub diagnose_mocks_pretty {
-</span><span class=""> 1356: 	# Entry: none
-</span><span class=""> 1357: 	# Exit: formatted string
-</span><span class=""> 1358: 	# Side effects: none
-</span><span class=""> 1359: 	# Notes: uses diagnose_mocks() internally
+</span><span class=""> 1343: =head4 Exit
+</span><span class=""> 1344: 
+</span><span class=""> 1345: - Returns a formatted string describing the current mocking state.
+</span><span class=""> 1346: 
+</span><span class=""> 1347: =head4 Side effects
+</span><span class=""> 1348: 
+</span><span class=""> 1349: - None. This routine does not modify C&lt;%mocked&gt;, C&lt;%mock_meta&gt;, or any
+</span><span class=""> 1350:   symbol table entries.
+</span><span class=""> 1351: 
+</span><span class=""> 1352: =head4 Notes
+</span><span class=""> 1353: 
+</span><span class=""> 1354: - This routine is intended for debugging and diagnostics. It is safe to
+</span><span class=""> 1355:   call at any point during a test run.
+</span><span class=""> 1356: - The output format is stable and suitable for human inspection, but not
+</span><span class=""> 1357:   guaranteed to remain fixed for machine parsing.
+</span><span class=""> 1358: 
+</span><span class=""> 1359: =cut
 </span><span class=""> 1360: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1361 → 1364 → 1382</span></span> 1361: 	my $diag = diagnose_mocks();
-</span><span class=""> 1362: 	my @out;
-</span><span class=""> 1363: 
-</span><span class=""> 1364: 	for my $full_method (sort keys %$diag) {
-</span><span class=""> 1365: 		my $entry = $diag-&gt;{$full_method};
+</span><span class=""> 1361: sub diagnose_mocks_pretty {
+</span><span class=""> 1362: 	# Entry: none
+</span><span class=""> 1363: 	# Exit: formatted string
+</span><span class=""> 1364: 	# Side effects: none
+</span><span class=""> 1365: 	# Notes: uses diagnose_mocks() internally
 </span><span class=""> 1366: 
-</span><span class=""> 1367: 		push @out, &quot;$full_method:&quot;;
-</span><span class=""> 1368: 		push @out, &quot;  depth: $entry-&gt;{depth}&quot;;
-</span><span class=""> 1369: 		push @out, &quot;  original_existed: $entry-&gt;{original_existed}&quot;;
-</span><span class=""> 1370: 
-</span><span class=""> 1371: 		for my $layer (@{ $entry-&gt;{layers} }) {
-</span><span class=""> 1372: 			push @out, sprintf(
-</span><span class=""> 1373: 				&quot;  - type: %-14s installed_at: %s&quot;,
-</span><span class=""> 1374: 				$layer-&gt;{type},
-</span><span class=""> 1375: 				$layer-&gt;{installed_at},
-</span><span class=""> 1376: 			);
-</span><span class=""> 1377: 		}
-</span><span class=""> 1378: 
-</span><span class=""> 1379: 		push @out, &#39;&#39;;
-</span><span class=""> 1380: 	}
-</span><span class=""> 1381: 
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1382: 	return join &quot;\n&quot;, @out;
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1383: }
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1367 → 1370 → 1388</span></span> 1367: 	my $diag = diagnose_mocks();
+</span><span class=""> 1368: 	my @out;
+</span><span class=""> 1369: 
+</span><span class=""> 1370: 	for my $full_method (sort keys %$diag) {
+</span><span class=""> 1371: 		my $entry = $diag-&gt;{$full_method};
+</span><span class=""> 1372: 
+</span><span class=""> 1373: 		push @out, &quot;$full_method:&quot;;
+</span><span class=""> 1374: 		push @out, &quot;  depth: $entry-&gt;{depth}&quot;;
+</span><span class=""> 1375: 		push @out, &quot;  original_existed: $entry-&gt;{original_existed}&quot;;
+</span><span class=""> 1376: 
+</span><span class=""> 1377: 		for my $layer (@{ $entry-&gt;{layers} }) {
+</span><span class=""> 1378: 			push @out, sprintf(
+</span><span class=""> 1379: 				&quot;  - type: %-14s installed_at: %s&quot;,
+</span><span class=""> 1380: 				$layer-&gt;{type},
+</span><span class=""> 1381: 				$layer-&gt;{installed_at},
+</span><span class=""> 1382: 			);
+</span><span class=""> 1383: 		}
 </span><span class=""> 1384: 
-</span><span class=""> 1385: sub _parse_target {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1386 → 1392 → 1397</span></span> 1386: 	my ($arg1, $arg2, $arg3) = @_;
+</span><span class=""> 1385: 		push @out, &#39;&#39;;
+</span><span class=""> 1386: 	}
 </span><span class=""> 1387: 
-</span><span class=""> 1388: 	# Shorthand: a single &#39;Pkg::method&#39; string with no second argument.
-</span><span class=""> 1389: 	# The original check used !defined $arg3, which was too permissive:
-</span><span class=""> 1390: 	# spy(&#39;A::B&#39;,&#39;method&#39;) has arg3 undef but arg2 defined, and must NOT
-</span><span class=""> 1391: 	# be treated as shorthand.  The correct discriminator is !defined $arg2.
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1392: 	if (defined $arg1 &amp;&amp; !defined $arg2 &amp;&amp; $arg1 =~ /^(.*)::([^:]+)$/) {
-</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1393: 		return ($1, $2);
-</span><span class=""> 1394: 	}
-</span><span class=""> 1395: 
-</span><span class=""> 1396: 	# Longhand: (&#39;Pkg&#39;,&#39;method&#39;) or any other multi-argument form
-</span><span class=""> 1397: 	return ($arg1, $arg2);
-</span><span class=""> 1398: }
-</span><span class=""> 1399: 
-</span><span class=""> 1400: sub _get_prototype {
-</span><span class=""> 1401: 	my $full = $_[0];
-</span><span class=""> 1402: 
-</span><span class=""> 1403: 	croak &quot;Invalid fully-qualified name &#39;$full&#39;&quot;
-</span><span class=""> 1404: 		unless $full =~ /^[A-Za-z_]\w*(?:::\w+)+$/;
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1388: 	return join &quot;\n&quot;, @out;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1389: }
+</span><span class=""> 1390: 
+</span><span class=""> 1391: sub _parse_target {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1392 → 1398 → 1403</span></span> 1392: 	my ($arg1, $arg2, $arg3) = @_;
+</span><span class=""> 1393: 
+</span><span class=""> 1394: 	# Shorthand: a single &#39;Pkg::method&#39; string with no second argument.
+</span><span class=""> 1395: 	# The original check used !defined $arg3, which was too permissive:
+</span><span class=""> 1396: 	# spy(&#39;A::B&#39;,&#39;method&#39;) has arg3 undef but arg2 defined, and must NOT
+</span><span class=""> 1397: 	# be treated as shorthand.  The correct discriminator is !defined $arg2.
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1398: 	if (defined $arg1 &amp;&amp; !defined $arg2 &amp;&amp; $arg1 =~ /^(.*)::([^:]+)$/) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1399: 		return ($1, $2);
+</span><span class=""> 1400: 	}
+</span><span class=""> 1401: 
+</span><span class=""> 1402: 	# Longhand: (&#39;Pkg&#39;,&#39;method&#39;) or any other multi-argument form
+</span><span class=""> 1403: 	return ($arg1, $arg2);
+</span><span class=""> 1404: }
 </span><span class=""> 1405: 
-</span><span class=""> 1406: 	my ($pkg, $sub) = $full =~ /^(.*)::([^:]+)$/;
-</span><span class=""> 1407: 
-</span><span class=""> 1408: 	my $code = $pkg-&gt;can($sub) or return;
-</span><span class=""> 1409: 
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1410: 	return prototype($code);
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1411: }
-</span><span class=""> 1412: 
-</span><span class=""> 1413: =head2 DESTROY
-</span><span class=""> 1414: 
-</span><span class=""> 1415: If C&lt;Test::Mockingbird&gt; goes out of scope, restore everything.
-</span><span class=""> 1416: 
-</span><span class=""> 1417: =cut
+</span><span class=""> 1406: sub _get_prototype {
+</span><span class=""> 1407: 	my $full = $_[0];
+</span><span class=""> 1408: 
+</span><span class=""> 1409: 	croak &quot;Invalid fully-qualified name &#39;$full&#39;&quot;
+</span><span class=""> 1410: 		unless $full =~ /^[A-Za-z_]\w*(?:::\w+)+$/;
+</span><span class=""> 1411: 
+</span><span class=""> 1412: 	my ($pkg, $sub) = $full =~ /^(.*)::([^:]+)$/;
+</span><span class=""> 1413: 
+</span><span class=""> 1414: 	my $code = $pkg-&gt;can($sub) or return;
+</span><span class=""> 1415: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1416: 	return prototype($code);
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1417: }
 </span><span class=""> 1418: 
-</span><span class=""> 1419: sub DESTROY
-</span><span class=""> 1420: {
-</span><span class=""> 1421: 	restore_all();
-</span><span class=""> 1422: }
-</span><span class=""> 1423: 
-</span><span class=""> 1424: =head1 SUPPORT
-</span><span class=""> 1425: 
-</span><span class=""> 1426: This module is provided as-is without any warranty.
-</span><span class=""> 1427: 
-</span><span class=""> 1428: Please report any bugs or feature requests to C&lt;bug-test-mockingbird at rt.cpan.org&gt;,
-</span><span class=""> 1429: or through the web interface at
-</span><span class=""> 1430: L&lt;http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Mockingbird&gt;.
-</span><span class=""> 1431: I will be notified, and then you&#39;ll
-</span><span class=""> 1432: automatically be notified of progress on your bug as I make changes.
+</span><span class=""> 1419: =head2 DESTROY
+</span><span class=""> 1420: 
+</span><span class=""> 1421: If C&lt;Test::Mockingbird&gt; goes out of scope, restore everything.
+</span><span class=""> 1422: 
+</span><span class=""> 1423: =cut
+</span><span class=""> 1424: 
+</span><span class=""> 1425: sub DESTROY
+</span><span class=""> 1426: {
+</span><span class=""> 1427: 	restore_all();
+</span><span class=""> 1428: }
+</span><span class=""> 1429: 
+</span><span class=""> 1430: =head1 SUPPORT
+</span><span class=""> 1431: 
+</span><span class=""> 1432: This module is provided as-is without any warranty.
 </span><span class=""> 1433: 
-</span><span class=""> 1434: You can find documentation for this module with the perldoc command.
-</span><span class=""> 1435: 
-</span><span class=""> 1436:     perldoc Test::Mockingbird
-</span><span class=""> 1437: 
-</span><span class=""> 1438: =head1 AUTHOR
+</span><span class=""> 1434: Please report any bugs or feature requests to C&lt;bug-test-mockingbird at rt.cpan.org&gt;,
+</span><span class=""> 1435: or through the web interface at
+</span><span class=""> 1436: L&lt;http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Mockingbird&gt;.
+</span><span class=""> 1437: I will be notified, and then you&#39;ll
+</span><span class=""> 1438: automatically be notified of progress on your bug as I make changes.
 </span><span class=""> 1439: 
-</span><span class=""> 1440: Nigel Horne, C&lt;&lt; &lt;njh at nigelhorne.com&gt; &gt;&gt;
+</span><span class=""> 1440: You can find documentation for this module with the perldoc command.
 </span><span class=""> 1441: 
-</span><span class=""> 1442: =head1 BUGS
+</span><span class=""> 1442:     perldoc Test::Mockingbird
 </span><span class=""> 1443: 
-</span><span class=""> 1444: =head1 SEE ALSO
+</span><span class=""> 1444: =head1 AUTHOR
 </span><span class=""> 1445: 
-</span><span class=""> 1446: =over 4
+</span><span class=""> 1446: Nigel Horne, C&lt;&lt; &lt;njh at nigelhorne.com&gt; &gt;&gt;
 </span><span class=""> 1447: 
-</span><span class=""> 1448: =item * L&lt;Test Dashboard|https://nigelhorne.github.io/Test-Mockingbird/coverage/&gt;
+</span><span class=""> 1448: =head1 BUGS
 </span><span class=""> 1449: 
-</span><span class=""> 1450: =item * L&lt;Test::Mockingbird::DeepMock&gt;
+</span><span class=""> 1450: =head1 SEE ALSO
 </span><span class=""> 1451: 
-</span><span class=""> 1452: =item * L&lt;Test::Mockingbird::TimeTravel&gt;
+</span><span class=""> 1452: =over 4
 </span><span class=""> 1453: 
-</span><span class=""> 1454: =back
+</span><span class=""> 1454: =item * L&lt;Test Dashboard|https://nigelhorne.github.io/Test-Mockingbird/coverage/&gt;
 </span><span class=""> 1455: 
-</span><span class=""> 1456: =head1 REPOSITORY
+</span><span class=""> 1456: =item * L&lt;Test::Mockingbird::DeepMock&gt;
 </span><span class=""> 1457: 
-</span><span class=""> 1458: L&lt;https://github.com/nigelhorne/Test-Mockingbird&gt;
+</span><span class=""> 1458: =item * L&lt;Test::Mockingbird::TimeTravel&gt;
 </span><span class=""> 1459: 
-</span><span class=""> 1460: =head1 SUPPORT
+</span><span class=""> 1460: =back
 </span><span class=""> 1461: 
-</span><span class=""> 1462: This module is provided as-is without any warranty.
+</span><span class=""> 1462: =head1 REPOSITORY
 </span><span class=""> 1463: 
-</span><span class=""> 1464: =head1 LICENCE AND COPYRIGHT
+</span><span class=""> 1464: L&lt;https://github.com/nigelhorne/Test-Mockingbird&gt;
 </span><span class=""> 1465: 
-</span><span class=""> 1466: Copyright 2025-2026 Nigel Horne.
+</span><span class=""> 1466: =head1 SUPPORT
 </span><span class=""> 1467: 
-</span><span class=""> 1468: Usage is subject to GPL2 licence terms.
-</span><span class=""> 1469: If you use it,
-</span><span class=""> 1470: please let me know.
+</span><span class=""> 1468: This module is provided as-is without any warranty.
+</span><span class=""> 1469: 
+</span><span class=""> 1470: =head1 LICENCE AND COPYRIGHT
 </span><span class=""> 1471: 
-</span><span class=""> 1472: =cut
+</span><span class=""> 1472: Copyright 2025-2026 Nigel Horne.
 </span><span class=""> 1473: 
-</span><span class=""> 1474: 1;
-</span><span class=""> 1475: 
-</span><span class=""> 1476: package Test::Mockingbird::Guard;
+</span><span class=""> 1474: Usage is subject to GPL2 licence terms.
+</span><span class=""> 1475: If you use it,
+</span><span class=""> 1476: please let me know.
 </span><span class=""> 1477: 
-</span><span class=""> 1478: # ----------------------------------------------------------------------
-</span><span class=""> 1479: # NAME
-</span><span class=""> 1480: #     Test::Mockingbird::Guard
-</span><span class=""> 1481: #
-</span><span class=""> 1482: # PURPOSE
-</span><span class=""> 1483: #     Guard object returned by mock_scoped.  Holds one or more fully
-</span><span class=""> 1484: #     qualified method names and unmocks all of them when destroyed.
-</span><span class=""> 1485: #
-</span><span class=""> 1486: # NOTES
-</span><span class=""> 1487: #     Constructor accepts a list so that a single mock_scoped call can
-</span><span class=""> 1488: #     cover multiple methods while still returning one guard.
-</span><span class=""> 1489: # ----------------------------------------------------------------------
-</span><span class=""> 1490: 
-</span><span class=""> 1491: sub new {
-</span><span class=""> 1492: 	my ($class, @full_methods) = @_;
-</span><span class=""> 1493: 
-</span><span class=""> 1494: 	# Entry: at least one fully qualified method name required
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1495: 	return bless { full_methods =&gt; \@full_methods }, $class;
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1496: }
-</span><span class=""> 1497: 
-</span><span class=""> 1498: sub DESTROY {
-</span><span class=""> 1499: 	my $self = $_[0];
-</span><span class=""> 1500: 
-</span><span class=""> 1501: 	# Unmock every method this guard is responsible for
-</span><span class=""> 1502: 	Test::Mockingbird::unmock($_) for @{ $self-&gt;{full_methods} };
-</span><span class=""> 1503: }
-</span><span class=""> 1504: 
-</span><span class=""> 1505: 1;
+</span><span class=""> 1478: =cut
+</span><span class=""> 1479: 
+</span><span class=""> 1480: 1;
+</span><span class=""> 1481: 
+</span><span class=""> 1482: package Test::Mockingbird::Guard;
+</span><span class=""> 1483: 
+</span><span class=""> 1484: # ----------------------------------------------------------------------
+</span><span class=""> 1485: # NAME
+</span><span class=""> 1486: #     Test::Mockingbird::Guard
+</span><span class=""> 1487: #
+</span><span class=""> 1488: # PURPOSE
+</span><span class=""> 1489: #     Guard object returned by mock_scoped.  Holds one or more fully
+</span><span class=""> 1490: #     qualified method names and unmocks all of them when destroyed.
+</span><span class=""> 1491: #
+</span><span class=""> 1492: # NOTES
+</span><span class=""> 1493: #     Constructor accepts a list so that a single mock_scoped call can
+</span><span class=""> 1494: #     cover multiple methods while still returning one guard.
+</span><span class=""> 1495: # ----------------------------------------------------------------------
+</span><span class=""> 1496: 
+</span><span class=""> 1497: sub new {
+</span><span class=""> 1498: 	my ($class, @full_methods) = @_;
+</span><span class=""> 1499: 
+</span><span class=""> 1500: 	# Entry: at least one fully qualified method name required
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1501: 	return bless { full_methods =&gt; \@full_methods }, $class;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1502: }
+</span><span class=""> 1503: 
+</span><span class=""> 1504: sub DESTROY {
+</span><span class=""> 1505: 	my $self = $_[0];
+</span><span class=""> 1506: 
+</span><span class=""> 1507: 	# Unmock every method this guard is responsible for
+</span><span class=""> 1508: 	Test::Mockingbird::unmock($_) for @{ $self-&gt;{full_methods} };
+</span><span class=""> 1509: }
+</span><span class=""> 1510: 
+</span><span class=""> 1511: 1;
 </span></pre>
 
 <script>

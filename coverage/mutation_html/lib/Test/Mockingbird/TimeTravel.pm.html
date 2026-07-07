@@ -241,7 +241,7 @@ pre details.mutant-details ul {
 <body>
 <button class="toggle" onclick="toggleTheme()">🌙 Toggle Theme</button>
 <h1>lib/Test/Mockingbird/TimeTravel.pm</h1>
-<div class="nav"><a href="../../../../index.html">Index</a>
+<div class="nav"><a href="Async.pm.html">⬅ Previous</a> <a href="../../../../index.html">Index</a>
  <a href="../Mockingbird.pm.html">Next ➡</a></div><div class='summary'>
 <strong>Structural Coverage (Approximate)</strong><p>
 TER1 (Statement): 100.00%<br>
@@ -765,7 +765,7 @@ Approximate LCSAJ segments: 31<br>
 </span><span class="">  473: 		unless $ACTIVE;
 </span><span class="">  474: 
 </span><span class="">  475: 	$CURRENT_EPOCH = _parse_timestamp($_[0]);
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  476: 	return $CURRENT_EPOCH;
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  476: 	return $CURRENT_EPOCH;
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
@@ -1062,7 +1062,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  728: 	my $delta = _unit_to_seconds($amount, $unit);
 </span><span class="">  729: 
 </span><span class="">  730: 	$CURRENT_EPOCH -= $delta;
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  731: 	return $CURRENT_EPOCH;
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  731: 	return $CURRENT_EPOCH;
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
