@@ -25,36 +25,35 @@ https://pjcj.net
 <div><br/></div>
 <table>
 <tr><th>line</th><th>%</th><th colspan="2">coverage</th><th>branch</th></tr>
-<tr><td class="h"><a id="L635">635</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless ref $plan eq &quot;HASH&quot;</td></tr>
-<tr><td class="h"><a id="L648">648</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if ($wantarray) { }</td></tr>
-<tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif (defined $wantarray) { }</td></tr>
-<tr><td class="h"><a id="L664">664</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $auto_restore</td></tr>
-<tr><td class="h"><a id="L669">669</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $err</td></tr>
-<tr><td class="h"><a id="L671">671</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">$wantarray ? :</td></tr>
-<tr><td class="h"><a id="L709">709</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless my $target = $m-&gt;{&#39;target&#39;}</td></tr>
-<tr><td class="h"><a id="L715">715</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if ($type eq &#39;mock&#39;) { }</td></tr>
+<tr><td class="h"><a id="L182">182</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless ref $plan eq &quot;HASH&quot;</td></tr>
+<tr><td class="h"><a id="L196">196</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if ($ctx) { }</td></tr>
+<tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif (defined $ctx) { }</td></tr>
+<tr><td class="h"><a id="L211">211</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $auto_restore</td></tr>
+<tr><td class="h"><a id="L214">214</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $err</td></tr>
+<tr><td class="h"><a id="L216">216</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">$ctx ? :</td></tr>
+<tr><td class="h"><a id="L248">248</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless my $target = $m-&gt;{&#39;target&#39;}</td></tr>
+<tr><td class="h"><a id="L254">254</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if ($type eq &#39;mock&#39;) { }</td></tr>
 <tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif ($type eq &#39;spy&#39;) { }</td></tr>
 <tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif ($type eq &#39;inject&#39;) { }</td></tr>
-<tr><td class="h"><a id="L719">719</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $m-&gt;{&#39;with&#39;} and ref $m-&gt;{&#39;with&#39;} eq &quot;CODE&quot;</td></tr>
-<tr><td class="h"><a id="L725">725</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $m-&gt;{&#39;tag&#39;}</td></tr>
-<tr><td class="h"><a id="L734">734</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $m-&gt;{&#39;tag&#39;}</td></tr>
-<tr><td class="h"><a id="L743">743</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $m-&gt;{&#39;tag&#39;}</td></tr>
-<tr><td class="h"><a id="L789">789</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if exists $exp-&gt;{&#39;order&#39;} and not exists $exp-&gt;{&#39;tag&#39;}</td></tr>
-<tr><td class="h"><a id="L792">792</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless my $tag = $exp-&gt;{&#39;tag&#39;}</td></tr>
-<tr><td class="h"><a id="L795">795</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless my $spy = $handles-&gt;{$tag}{&#39;spy&#39;}</td></tr>
-<tr><td class="h"><a id="L802">802</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $exp-&gt;{&#39;calls&#39;})</td></tr>
-<tr><td class="h"><a id="L813">813</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (my $args_like = $exp-&gt;{&#39;args_like&#39;})</td></tr>
-<tr><td class="h"><a id="L821">821</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">ref $re ? :</td></tr>
-<tr><td class="h"><a id="L833">833</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (my $args_eq = $exp-&gt;{&#39;args_eq&#39;})</td></tr>
-<tr><td class="h"><a id="L852">852</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (my $args_deeply = $exp-&gt;{&#39;args_deeply&#39;})</td></tr>
-<tr><td class="h"><a id="L872">872</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if ($exp-&gt;{&#39;never&#39;})</td></tr>
-<tr><td class="h"><a id="L887">887</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless exists $exp-&gt;{&#39;order&#39;}</td></tr>
-<tr><td class="h"><a id="L924">924</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg2 and $arg1 =~ /^(.*)::([^:]+)$/)</td></tr>
-<tr><td class="h"><a id="L936">936</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $time and ref $time eq &quot;HASH&quot;</td></tr>
-<tr><td class="h"><a id="L938">938</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">if (exists $time-&gt;{&#39;freeze&#39;})</td></tr>
-<tr><td class="h"><a id="L942">942</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (exists $time-&gt;{&#39;travel&#39;})</td></tr>
-<tr><td class="h"><a id="L946">946</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (exists $time-&gt;{&#39;advance&#39;})</td></tr>
-<tr><td class="h"><a id="L951">951</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (exists $time-&gt;{&#39;rewind&#39;})</td></tr>
+<tr><td class="h"><a id="L256">256</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $m-&gt;{&#39;with&#39;} and ref $m-&gt;{&#39;with&#39;} eq &quot;CODE&quot;</td></tr>
+<tr><td class="h"><a id="L259">259</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $m-&gt;{&#39;tag&#39;}</td></tr>
+<tr><td class="h"><a id="L263">263</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $m-&gt;{&#39;tag&#39;}</td></tr>
+<tr><td class="h"><a id="L267">267</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $m-&gt;{&#39;tag&#39;}</td></tr>
+<tr><td class="h"><a id="L292">292</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if exists $exp-&gt;{&#39;order&#39;} and not exists $exp-&gt;{&#39;tag&#39;}</td></tr>
+<tr><td class="h"><a id="L295">295</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless my $tag = $exp-&gt;{&#39;tag&#39;}</td></tr>
+<tr><td class="h"><a id="L298">298</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless my $spy = $handles-&gt;{$tag}{&#39;spy&#39;}</td></tr>
+<tr><td class="h"><a id="L303">303</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $exp-&gt;{&#39;calls&#39;})</td></tr>
+<tr><td class="h"><a id="L309">309</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (my $args_like = $exp-&gt;{&#39;args_like&#39;})</td></tr>
+<tr><td class="h"><a id="L316">316</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">ref $re ? :</td></tr>
+<tr><td class="h"><a id="L324">324</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (my $args_eq = $exp-&gt;{&#39;args_eq&#39;})</td></tr>
+<tr><td class="h"><a id="L337">337</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (my $args_deeply = $exp-&gt;{&#39;args_deeply&#39;})</td></tr>
+<tr><td class="h"><a id="L351">351</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if ($exp-&gt;{&#39;never&#39;})</td></tr>
+<tr><td class="h"><a id="L358">358</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless exists $exp-&gt;{&#39;order&#39;}</td></tr>
+<tr><td class="h"><a id="L374">374</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $time and ref $time eq &quot;HASH&quot;</td></tr>
+<tr><td class="h"><a id="L377">377</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">if exists $time-&gt;{&#39;freeze&#39;}</td></tr>
+<tr><td class="h"><a id="L380">380</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if exists $time-&gt;{&#39;travel&#39;}</td></tr>
+<tr><td class="h"><a id="L382">382</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (exists $time-&gt;{&#39;advance&#39;})</td></tr>
+<tr><td class="h"><a id="L387">387</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (exists $time-&gt;{&#39;rewind&#39;})</td></tr>
 </table>
 </body>
 </html>
