@@ -17,11 +17,11 @@ Test::Mockingbird::DeepMock - Declarative structured mocking and spying for Perl
 
 =head1 VERSION
 
-Version 0.10
+Version 0.11
 
 =cut
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 =head1 SYNOPSIS
 
@@ -395,6 +395,26 @@ sub _apply_time_plan {
 =head1 SUPPORT
 
 Please report bugs at L<https://github.com/nigelhorne/Test-Mockingbird/issues>.
+
+=head1 AUTHOR
+
+Nigel Horne, C<< <njh at nigelhorne.com> >>
+
+=head1 SEE ALSO
+
+=over 4
+
+=item * L<Test::Mockingbird>
+
+=item * L<Test::Mockingbird::Async>
+
+=item * L<Test::Mockingbird::TimeTravel>
+
+=back
+
+=head1 REPOSITORY
+
+L<https://github.com/nigelhorne/Test-Mockingbird>
 
 =head1 LICENCE AND COPYRIGHT
 

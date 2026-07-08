@@ -70,6 +70,6 @@ Test-.*
 .test-script-*
 typescript
 mutation*
-^xt/mutant_\d
+^xt/
 CLAUDE.md
 \.claude

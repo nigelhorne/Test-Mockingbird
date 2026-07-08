@@ -14,10 +14,10 @@ if($^O eq 'darwin') {
 WriteMakefile(
 	NAME => 'Test::Mockingbird',
 	VERSION_FROM => 'lib/Test/Mockingbird.pm', # finds $VERSION in the module
-	AUTHOR => 'Nigel Horne <njh@bandsman.co.uk>',
+	AUTHOR => 'Nigel Horne <njh@nigelhorne.com>',
 	ABSTRACT => 'Advanced mocking library for Perl with support for dependency injection and spies',
 	((defined($ExtUtils::MakeMaker::VERSION) && ($ExtUtils::MakeMaker::VERSION >= 6.3002))
-		? ('LICENSE'=> 'GPL')
+		? ('LICENSE'=> 'gpl_2')
 		: ()),
 	META_MERGE => {	# https://perldoc.perl.org/CPAN::Meta::Spec
 		'meta-spec' => { version => 2 },
@@ -35,15 +35,17 @@ WriteMakefile(
 		}, prereqs => {
 			runtime => {
 				recommends => {
-					Future => '0',
+					Future => '0.33',
 				},
 			},
 		},
 	},
 	PREREQ_PM => {
-		'Carp' => 0,
-		'Exporter' => 0,
+		'Carp'                => 0,
+		'Exporter'            => 0,
 		'ExtUtils::MakeMaker' => 6.64,	# Minimum version for TEST_REQUIRES
+		'Test::Deep'          => 0,
+		'Test::More'          => 0,
 	}, TEST_REQUIRES => {
 		'Class::Simple' => 0,
 		'Readonly' => 0,
@@ -59,5 +61,5 @@ WriteMakefile(
 		clean	 => {
 		FILES => 'Test-Mockingbird-*',
 	},
-	MIN_PERL_VERSION	=> '5.0163'
+	MIN_PERL_VERSION	=> '5.016003'
 );

@@ -1,10 +1,14 @@
 # Generated from Makefile.PL using makefilepl2cpanfile
 
-requires 'perl', '5.0163';
+requires 'perl', '5.016003';
 
 requires 'Carp';
 requires 'Exporter';
 requires 'ExtUtils::MakeMaker', '6.64';
+requires 'Test::Deep';
+requires 'Test::More';
+
+recommends 'Future', '0.33';
 
 on 'test' => sub {
 	requires 'Class::Simple';

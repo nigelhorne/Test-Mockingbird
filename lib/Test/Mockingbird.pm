@@ -2,7 +2,7 @@ package Test::Mockingbird;
 
 use strict;
 use warnings;
-use 5.0163;
+use 5.016003;
 
 use Carp       qw(croak carp);
 use Exporter   'import';
@@ -60,13 +60,11 @@ async Future mocking
 
 =head1 VERSION
 
-Version 0.10
+Version 0.11
 
 =cut
 
-our $VERSION = '0.10';
-
-=encoding utf-8
+our $VERSION = '0.11';
 
 =head1 SYNOPSIS
 
@@ -187,6 +185,8 @@ call private functions directly. If C<Sub::Private> enforcement is added, a
 testing-interface export mechanism will be required.
 
 =back
+
+=encoding utf-8
 
 =head1 METHODS
 
@@ -613,12 +613,6 @@ C<inject()> call and participates in the same mock stack.
   "inject_all requires a package name"            -- undef or empty package
   "inject_all requires a hashref of dependencies" -- second arg not a HashRef
 
-=head3 FORMAL SPECIFICATION
-
-    inject_all ≙
-      ∀ pkg : Str; deps : HashRef •
-        post ∀ (k,v) ∈ deps • inject(pkg, k, v)
-
 =cut
 
 sub inject_all {
@@ -666,14 +660,6 @@ and C<diagnose_mocks()> all work identically.
   "intercept_new requires a class name"                    -- undef/empty class
   "intercept_new requires a replacement object or coderef" -- factory missing
 
-=head3 FORMAL SPECIFICATION
-
-    intercept_new ≙
-      ∀ class : Str; factory : Any •
-        pre  class ≠ '' ∧ @args ≥ 2
-        let  rep = (factory : CodeRef) ? factory : sub { factory } •
-          post mock("${class}::new", rep)
-
 =cut
 
 sub intercept_new {
@@ -714,13 +700,6 @@ remove entries for the restored package.
 =head4 Output
 
     returns: undef
-
-=head3 FORMAL SPECIFICATION
-
-    restore_all ≙
-      global: mocked' = {} ∧ mock_meta' = {} ∧ call_log' = []
-      scoped: ∀ target ∈ dom(mocked) • target =~ /^pkg::/ ⇒ unmock_all(target)
-              ∧ call_log' = [ e ∈ call_log | e !~ /^pkg::/ ]
 
 =cut
 
@@ -777,13 +756,6 @@ If the method was never mocked this is a no-op.
 
   "restore requires a target" -- undef target
 
-=head3 FORMAL SPECIFICATION
-
-    restore ≙
-      ∀ target : Str •
-        pre  defined(target)
-        post mocked[target] = []
-
 =cut
 
 sub restore {
@@ -824,12 +796,6 @@ Mock a method to always return a fixed value.
 
   "mock_return requires a target and a value" -- target undefined
 
-=head3 FORMAL SPECIFICATION
-
-    mock_return ≙
-      ∀ target : Str; value : Any •
-        post sym_table'[target].CODE = sub { value }
-
 =cut
 
 sub mock_return {
@@ -863,12 +829,6 @@ Mock a method to always throw an exception.
 =head3 MESSAGES
 
   "mock_exception requires a target and an exception message" -- either missing
-
-=head3 FORMAL SPECIFICATION
-
-    mock_exception ≙
-      ∀ target : Str; msg : Str •
-        post sym_table'[target].CODE = sub { croak msg }
 
 =cut
 
@@ -905,14 +865,6 @@ The last value repeats when the sequence is exhausted.
 =head3 MESSAGES
 
   "mock_sequence requires a target and at least one value" -- empty value list
-
-=head3 FORMAL SPECIFICATION
-
-    mock_sequence ≙
-      ∀ target : Str; values : Seq(Any) •
-        pre  |values| ≥ 1
-        post let queue = values •
-          sym_table'[target].CODE = sub { head(queue) if |queue|=1 else shift(queue) }
 
 =cut
 
@@ -954,16 +906,6 @@ implementation is automatically restored.
 =head3 MESSAGES
 
   "mock_once requires a target and a coderef" -- missing or non-CODE factory
-
-=head3 FORMAL SPECIFICATION
-
-    mock_once ≙
-      ∀ target : Str; code : CodeRef •
-        post sym_table'[target] = sub {
-          result = code(@args)
-          unmock(target)
-          return result
-        }
 
 =head3 PSEUDOCODE
 
@@ -1020,13 +962,6 @@ to other methods are ignored.
 
   "assert_call_order requires at least two method names" -- fewer than two given
 
-=head3 FORMAL SPECIFICATION
-
-    assert_call_order ≙
-      ∀ expected : Seq(Str) •
-        pre  |expected| ≥ 2
-        post result = (∀ i • ∃ p_i : ℕ | p_0 < p_1 < … ∧ call_log[p_i] = expected[i])
-
 =cut
 
 sub assert_call_order {
@@ -1076,10 +1011,6 @@ C<restore_all()> also clears the log automatically.
 
     returns: undef
 
-=head3 FORMAL SPECIFICATION
-
-    clear_call_log ≙ post call_log' = []
-
 =cut
 
 sub clear_call_log {
@@ -1121,11 +1052,6 @@ Return a structured hashref of all currently active mock layers.
 
     returns: HashRef
 
-=head3 FORMAL SPECIFICATION
-
-    diagnose_mocks ≙
-      returns { target ↦ { depth, layers } | target ∈ dom(mocked) }
-
 =cut
 
 sub diagnose_mocks {
@@ -1158,10 +1084,6 @@ Return a human-readable multi-line string of all active mock layers.
 =head4 Output
 
     returns: Str
-
-=head3 FORMAL SPECIFICATION
-
-    diagnose_mocks_pretty ≙ stringify(diagnose_mocks())
 
 =cut
 
@@ -1335,6 +1257,84 @@ L<https://github.com/nigelhorne/Test-Mockingbird>
       ∀ pkg : Str; dep : Str; val : Any •
         pre  pkg ≠ '' ∧ dep ≠ ''
         post sym_table'["${pkg}::${dep}"].CODE = sub { val }
+
+=head2 inject_all
+
+    inject_all ≙
+      ∀ pkg : Str; deps : HashRef •
+        post ∀ (k,v) ∈ deps • inject(pkg, k, v)
+
+=head2 intercept_new
+
+    intercept_new ≙
+      ∀ class : Str; factory : Any •
+        pre  class ≠ '' ∧ @args ≥ 2
+        let  rep = (factory : CodeRef) ? factory : sub { factory } •
+          post mock("${class}::new", rep)
+
+=head2 restore_all
+
+    restore_all ≙
+      global: mocked' = {} ∧ mock_meta' = {} ∧ call_log' = []
+      scoped: ∀ target ∈ dom(mocked) • target =~ /^pkg::/ ⇒ unmock_all(target)
+              ∧ call_log' = [ e ∈ call_log | e !~ /^pkg::/ ]
+
+=head2 restore
+
+    restore ≙
+      ∀ target : Str •
+        pre  defined(target)
+        post mocked[target] = []
+
+=head2 mock_return
+
+    mock_return ≙
+      ∀ target : Str; value : Any •
+        post sym_table'[target].CODE = sub { value }
+
+=head2 mock_exception
+
+    mock_exception ≙
+      ∀ target : Str; msg : Str •
+        post sym_table'[target].CODE = sub { croak msg }
+
+=head2 mock_sequence
+
+    mock_sequence ≙
+      ∀ target : Str; values : Seq(Any) •
+        pre  |values| ≥ 1
+        post let queue = values •
+          sym_table'[target].CODE = sub { head(queue) if |queue|=1 else shift(queue) }
+
+=head2 mock_once
+
+    mock_once ≙
+      ∀ target : Str; code : CodeRef •
+        post sym_table'[target] = sub {
+          result = code(@args)
+          unmock(target)
+          return result
+        }
+
+=head2 assert_call_order
+
+    assert_call_order ≙
+      ∀ expected : Seq(Str) •
+        pre  |expected| ≥ 2
+        post result = (∀ i • ∃ p_i : ℕ | p_0 < p_1 < … ∧ call_log[p_i] = expected[i])
+
+=head2 clear_call_log
+
+    clear_call_log ≙ post call_log' = []
+
+=head2 diagnose_mocks
+
+    diagnose_mocks ≙
+      returns { target ↦ { depth, layers } | target ∈ dom(mocked) }
+
+=head2 diagnose_mocks_pretty
+
+    diagnose_mocks_pretty ≙ stringify(diagnose_mocks())
 
 =head1 LICENCE AND COPYRIGHT
 

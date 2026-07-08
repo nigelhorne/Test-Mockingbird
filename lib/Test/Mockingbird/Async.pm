@@ -21,11 +21,11 @@ Test::Mockingbird::Async - Future-based async mocking for Test::Mockingbird
 
 =head1 VERSION
 
-Version 0.10
+Version 0.11
 
 =cut
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 =head1 SYNOPSIS
 
@@ -353,15 +353,11 @@ sub _require_future {
 
 =head1 SUPPORT
 
-This module is provided as-is without any warranty.
+Please report bugs at L<https://github.com/nigelhorne/Test-Mockingbird/issues>.
 
-Please report any bugs or feature requests to C<bug-test-mockingbird at rt.cpan.org>,
-or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Test-Mockingbird>.
+=head1 AUTHOR
 
-You can find documentation for this module with the perldoc command.
-
-    perldoc Test::Mockingbird::Async
+Nigel Horne, C<< <njh at nigelhorne.com> >>
 
 =head1 SEE ALSO
 
