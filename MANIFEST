@@ -31,6 +31,7 @@ t/inject_all.t
 t/intercept_new.t
 t/integration.t
 t/kwalitee.t
+t/locales.t
 t/manifest.t
 t/mock.t
 t/mock_scoped.t

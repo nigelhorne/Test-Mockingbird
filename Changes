@@ -73,7 +73,49 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
     names and delegates to assert_call_order() after all per-spy
     expectations have been checked.  The key does not require a spy tag.
 
-  [Bug fixes]
+  [Bug fixes and refactoring]
+
+  - Fixed unmock() meta-pop bug: previously deleted the entire %mock_meta key
+    on every unmock call (wiping metadata for all lower layers); now correctly
+    pops only the top-most meta entry to mirror the mock stack.
+
+  - Fixed ghost-method bug in mock() and spy(): previously captured \&{method}
+    without no-strict-refs, which under some conditions left stale CODE slots
+    in the GV after restore.  Now always captures via no strict 'refs' so the
+    same GV object is reused across mock/restore cycles.  Documented in
+    LIMITATIONS that ->can() may return truthy for auto-vivified GVs; use
+    defined(&Pkg::method) instead.
+
+  - Fixed inject() to respect the $Test::Mockingbird::TYPE package variable
+    so that callers can override the diagnostic layer type (matching the
+    pattern used by mock_return, mock_exception, and Async functions).
+
+  - Fixed restore_all($pkg) to prune @call_log entries for the specified
+    package (previously cleared only %mocked and %mock_meta).
+
+  - Added _caller_info() private helper that climbs the call stack past any
+    Test::Mockingbird frame to record the user's actual call site in
+    installed_at diagnostics (previously pointed to sugar-function internals).
+
+  - Deduplicated DeepMock::_normalize_target(): now delegates to the
+    authoritative Test::Mockingbird::_parse_target() to ensure consistent
+    target parsing across the library.  The function name is kept as a thin
+    wrapper for backwards-compatibility with white-box tests.
+
+  - Fixed TimeTravel: die $err in with_frozen_time() changed to croak $err
+    for consistency with the rest of the library.
+
+  - VERSION POD in all four modules corrected from '0.10' to '0.11'.
+
+  - Removed duplicate =head1 SUPPORT section from core module.
+
+  - Removed spurious double '1;' at end of DeepMock.pm.
+
+  [New files]
+
+  - t/locales.t: POSIX locale tests verifying the module loads and croak
+    error messages are locale-independent pure-Perl strings under
+    en_US.UTF-8, de_DE.UTF-8, and ja_JP.UTF-8 LC_ALL settings.
 
   -  Bump minimum version: Fixes https://github.com/nigelhorne/Test-Mockingbird/issues/6
 
