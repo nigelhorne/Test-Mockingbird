@@ -21,11 +21,11 @@ Test::Mockingbird::Async - Future-based async mocking for Test::Mockingbird
 
 =head1 VERSION
 
-Version 0.11
+Version 0.10
 
 =cut
 
-our $VERSION = '0.11';
+our $VERSION = '0.10';
 
 =head1 SYNOPSIS
 

@@ -17,11 +17,11 @@ Test::Mockingbird::DeepMock - Declarative structured mocking and spying for Perl
 
 =head1 VERSION
 
-Version 0.11
+Version 0.10
 
 =cut
 
-our $VERSION = '0.11';
+our $VERSION = '0.10';
 
 =head1 SYNOPSIS
 
