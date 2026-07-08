@@ -2,6 +2,18 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
 
 0.11
 
+  [Bug fixes]
+
+  - Fixed "Prototype mismatch" warnings emitted by mock() when replacing a
+    function that carries a Perl prototype (such as the () no-args prototype).
+    The existing set_prototype() call correctly equates prototypes before the
+    glob assignment, but on some Perl builds the GV-level prototype check fires
+    before the CV slot update is fully visible, causing the warning to leak
+    through.  Fixed by adding 'prototype' to the no warnings pragma in the
+    glob-assignment block -- tightly scoped to that single statement so no
+    legitimate warnings from surrounding code are affected.
+    Reported by: https://www.cpantesters.org/cpan/report/42ed27a2-6477-11f1-a3bc-a055f9c4ba34
+
   [New features]
 
   - New module Test::Mockingbird::Async providing Future-based async mocking:

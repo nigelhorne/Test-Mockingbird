@@ -266,7 +266,13 @@ sub mock {
 	}
 
 	{
-		no warnings 'redefine';
+		# 'redefine' suppresses "Subroutine ... redefined".
+		# 'prototype' suppresses "Prototype mismatch" -- that warning lives in
+		# a separate category and is not covered by 'redefine'.  set_prototype()
+		# above should already make the prototypes equal, but on some Perl builds
+		# the GV-level check still fires before the CV slot is fully updated, so
+		# we suppress the warning here as a belt-and-suspenders measure.
+		no warnings 'redefine', 'prototype';
 		no strict 'refs';    ## no critic (ProhibitNoStrict)
 		*{$full_method} = $replacement;
 	}
