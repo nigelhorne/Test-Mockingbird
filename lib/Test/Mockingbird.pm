@@ -66,6 +66,8 @@ Version 0.10
 
 our $VERSION = '0.10';
 
+=encoding utf-8
+
 =head1 SYNOPSIS
 
   use Test::Mockingbird;
@@ -303,15 +305,6 @@ whether a method is callable. See L</LIMITATIONS>.
 
   "Package and method are required for unmocking" -- target missing
 
-=head3 FORMAL SPECIFICATION
-
-    unmock ≙
-      ∀ target : Str •
-        let prev = head(mocked[target]) •
-          post mocked'[target] = tail(mocked[target])
-               ∧ sym_table'[target].CODE = prev
-               ∧ mock_meta'[target] = tail(mock_meta[target])
-
 =cut
 
 sub unmock {
@@ -391,13 +384,6 @@ All mocked methods are restored when C<$g> goes out of scope.
 
   "mock_scoped: unrecognised argument form" -- none of the four forms matched
   "mock_scoped: expected coderef for '$target'" -- non-CODE value provided
-
-=head3 FORMAL SPECIFICATION
-
-    mock_scoped ≙
-      install all mocks via mock()
-      ∧ return Guard(full_methods)
-      ∧ Guard.DESTROY ⇒ ∀ m ∈ full_methods • unmock(m)
 
 =cut
 
@@ -1339,6 +1325,22 @@ L<https://github.com/nigelhorne/Test-Mockingbird>
         post mocked'[target] = ⟨saved(target)⟩ ⌢ mocked[target]
              ∧ sym_table'[target].CODE = replacement
              ∧ prototype(replacement) = prototype(saved(target))
+
+=head2 unmock
+
+    unmock ≙
+      ∀ target : Str •
+        let prev = head(mocked[target]) •
+          post mocked'[target] = tail(mocked[target])
+               ∧ sym_table'[target].CODE = prev
+               ∧ mock_meta'[target] = tail(mock_meta[target])
+
+=head2 mock_scoped
+
+    mock_scoped ≙
+      install all mocks via mock()
+      ∧ return Guard(full_methods)
+      ∧ Guard.DESTROY ⇒ ∀ m ∈ full_methods • unmock(m)
 
 =head1 LICENCE AND COPYRIGHT
 

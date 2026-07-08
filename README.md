@@ -6,7 +6,7 @@ async Future mocking
 
 # VERSION
 
-Version 0.11
+Version 0.10
 
 # SYNOPSIS
 
@@ -156,15 +156,6 @@ warnings.
 
     "Package, method and replacement are required" -- target or coderef missing
 
-### FORMAL SPECIFICATION
-
-    mock ≙
-      ∀ target : Str; replacement : CodeRef •
-        pre  target ≠ '' ∧ defined(replacement)
-        post mocked'[target] = ⟨saved(target)⟩ ⌢ mocked[target]
-             ∧ sym_table'[target].CODE = replacement
-             ∧ prototype(replacement) = prototype(saved(target))
-
 ## unmock
 
 Restore the previous implementation of a mocked method (one layer).
@@ -190,15 +181,6 @@ whether a method is callable. See ["LIMITATIONS"](#limitations).
 ### MESSAGES
 
     "Package and method are required for unmocking" -- target missing
-
-### FORMAL SPECIFICATION
-
-    unmock ≙
-      ∀ target : Str •
-        let prev = head(mocked[target]) •
-          post mocked'[target] = tail(mocked[target])
-               ∧ sym_table'[target].CODE = prev
-               ∧ mock_meta'[target] = tail(mock_meta[target])
 
 ## mock\_scoped
 
@@ -237,13 +219,6 @@ All mocked methods are restored when `$g` goes out of scope.
 
     "mock_scoped: unrecognised argument form" -- none of the four forms matched
     "mock_scoped: expected coderef for '$target'" -- non-CODE value provided
-
-### FORMAL SPECIFICATION
-
-    mock_scoped ≙
-      install all mocks via mock()
-      ∧ return Guard(full_methods)
-      ∧ Guard.DESTROY ⇒ ∀ m ∈ full_methods • unmock(m)
 
 ## spy
 
@@ -693,6 +668,33 @@ Nigel Horne, `<njh at nigelhorne.com>`
 
 [https://github.com/nigelhorne/Test-Mockingbird](https://github.com/nigelhorne/Test-Mockingbird)
 
+# FORMAL SPECIFICATION
+
+## mock
+
+    mock ≙
+      ∀ target : Str; replacement : CodeRef •
+        pre  target ≠ '' ∧ defined(replacement)
+        post mocked'[target] = ⟨saved(target)⟩ ⌢ mocked[target]
+             ∧ sym_table'[target].CODE = replacement
+             ∧ prototype(replacement) = prototype(saved(target))
+
+## unmock
+
+    unmock ≙
+      ∀ target : Str •
+        let prev = head(mocked[target]) •
+          post mocked'[target] = tail(mocked[target])
+               ∧ sym_table'[target].CODE = prev
+               ∧ mock_meta'[target] = tail(mock_meta[target])
+
+## mock\_scoped
+
+    mock_scoped ≙
+      install all mocks via mock()
+      ∧ return Guard(full_methods)
+      ∧ Guard.DESTROY ⇒ ∀ m ∈ full_methods • unmock(m)
+
 # LICENCE AND COPYRIGHT
 
 Copyright 2025-2026 Nigel Horne.
@@ -700,11 +702,3 @@ Copyright 2025-2026 Nigel Horne.
 Usage is subject to the GPL2 licence terms.
 If you use it,
 please let me know.
-
-# POD ERRORS
-
-Hey! **The above document had some coding errors, which are explained below:**
-
-- Around line 223:
-
-    Non-ASCII character seen before =encoding in '≙'. Assuming UTF-8
