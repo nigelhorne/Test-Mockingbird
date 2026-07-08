@@ -10,6 +10,7 @@ on 'test' => sub {
 	requires 'Class::Simple';
 	requires 'Readonly';
 	requires 'Test::DescribeMe';
+	requires 'Test::Memory::Cycle';
 	requires 'Test::Most';
 	requires 'Test::Needs';
 	requires 'Test::Strict';

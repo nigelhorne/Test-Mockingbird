@@ -271,7 +271,7 @@ sub mock {
 		# a separate category and is not covered by 'redefine'.  set_prototype()
 		# above should already make the prototypes equal, but on some Perl builds
 		# the GV-level check still fires before the CV slot is fully updated, so
-		# we suppress the warning here as a belt-and-suspenders measure.
+		# we suppress the warning here.
 		no warnings 'redefine', 'prototype';
 		no strict 'refs';    ## no critic (ProhibitNoStrict)
 		*{$full_method} = $replacement;
@@ -1338,7 +1338,9 @@ L<https://github.com/nigelhorne/Test-Mockingbird>
 
 Copyright 2025-2026 Nigel Horne.
 
-Usage is subject to GPL2 licence terms.
+Usage is subject to the GPL2 licence terms.
+If you use it,
+please let me know.
 
 =cut
 
