@@ -1292,8 +1292,10 @@ sub _caller_info {
 sub _get_prototype {
 	my $full = $_[0];
 
+	# All components (package segments and the sub name itself) must start
+	# with a letter or underscore -- Perl identifiers cannot begin with a digit.
 	croak "Invalid fully-qualified name '$full'"
-		unless $full =~ /^[A-Za-z_]\w*(?:::\w+)+$/;
+		unless $full =~ /^[A-Za-z_]\w*(?:::[A-Za-z_]\w*)+$/;
 
 	my ($pkg, $sub) = $full =~ /^(.*)::([^:]+)$/;
 	my $code = $pkg->can($sub) or return;
