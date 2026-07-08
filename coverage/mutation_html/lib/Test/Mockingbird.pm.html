@@ -244,8 +244,8 @@ pre details.mutant-details ul {
 <div class="nav"><a href="Mockingbird/TimeTravel.pm.html">⬅ Previous</a> <a href="../../../index.html">Index</a>
  <a href="Mockingbird/DeepMock.pm.html">Next ➡</a></div><div class='summary'>
 <strong>Structural Coverage (Approximate)</strong><p>
-TER1 (Statement): 99.35%<br>
-TER2 (Branch): 93.33%<br>
+TER1 (Statement): 100.00%<br>
+TER2 (Branch): 95.56%<br>
 TER3 (LCSAJ): 100.0% (15/15)<br>
 Approximate LCSAJ segments: 91<br>
 </div>
@@ -527,8 +527,8 @@ Approximate LCSAJ segments: 91<br>
 </span><span class="">  235: 	my ($package, $method, $replacement);
 </span><span class="">  236: 
 </span><span class="">  237: 	# Shorthand: &#39;Pkg::method&#39; =&gt; $code (arg3 absent)
-</span><span class="">  238: 	if (defined $arg1 &amp;&amp; !defined $arg3 &amp;&amp; $arg1 =~ /^(.*)::([^:]+)$/) {
-</span><span class="">  239: 		($package, $method, $replacement) = ($1, $2, $arg2);
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  238: 	if (defined $arg1 &amp;&amp; !defined $arg3 &amp;&amp; $arg1 =~ /^(.*)::([^:]+)$/) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  239: 		($package, $method, $replacement) = ($1, $2, $arg2);
 </span><span class="">  240: 	} else {
 </span><span class="">  241: 		($package, $method, $replacement) = ($arg1, $arg2, $arg3);
 </span><span class="">  242: 	}
@@ -553,1182 +553,1108 @@ Approximate LCSAJ segments: 91<br>
 </span><span class="">  261: 	# Stamp the prototype onto the replacement to avoid Perl warning about
 </span><span class="">  262: 	# &quot;Prototype mismatch&quot; when the original had a prototype.
 </span><span class="">  263: 	my $orig_proto = prototype($original);
-</span><span class="">  264: 	if (defined $orig_proto) {
-</span><span class="">  265: 		&amp;Scalar::Util::set_prototype($replacement, $orig_proto);
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  264: 	if (defined $orig_proto) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  265: 		&amp;Scalar::Util::set_prototype($replacement, $orig_proto);
 </span><span class="">  266: 	}
 </span><span class="">  267: 
 </span><span class="">  268: 	{
-</span><span class="">  269: 		no warnings &#39;redefine&#39;;
-</span><span class="">  270: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
-</span><span class="">  271: 		*{$full_method} = $replacement;
-</span><span class="">  272: 	}
-</span><span class="">  273: 
-</span><span class="">  274: 	push @{ $mock_meta{$full_method} }, {
-</span><span class="">  275: 		type             =&gt; $TYPE // _T_MOCK,
-</span><span class="">  276: 		installed_at     =&gt; _caller_info(),
-</span><span class="">  277: 		original_existed =&gt; $orig_existed,
-</span><span class="">  278: 	};
+</span><span class="">  269: 		# &#39;redefine&#39; suppresses &quot;Subroutine ... redefined&quot;.
+</span><span class="">  270: 		# &#39;prototype&#39; suppresses &quot;Prototype mismatch&quot; -- that warning lives in
+</span><span class="">  271: 		# a separate category and is not covered by &#39;redefine&#39;.  set_prototype()
+</span><span class="">  272: 		# above should already make the prototypes equal, but on some Perl builds
+</span><span class="">  273: 		# the GV-level check still fires before the CV slot is fully updated, so
+</span><span class="">  274: 		# we suppress the warning here.
+</span><span class="">  275: 		no warnings &#39;redefine&#39;, &#39;prototype&#39;;
+</span><span class="">  276: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
+</span><span class="">  277: 		*{$full_method} = $replacement;
+</span><span class="">  278: 	}
 </span><span class="">  279: 
-</span><span class="">  280: 	return;
-</span><span class="">  281: }
-</span><span class="">  282: 
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  283: =head2 unmock
-</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  284: 
-</span><span class="">  285: Restore the previous implementation of a mocked method (one layer).
-</span><span class="">  286: 
-</span><span class="">  287:     unmock(&#39;My::Module&#39;, &#39;method&#39;);
-</span><span class="">  288:     unmock &#39;My::Module::method&#39;;
-</span><span class="">  289: 
-</span><span class="">  290: If the method did not exist before it was mocked, the original undef-stub
-</span><span class="">  291: is restored so that calling the method dies with C&lt;&quot;Undefined subroutine&quot;&gt;.
-</span><span class="">  292: Note: C&lt;&lt; -&gt;can() &gt;&gt; may still return truthy; use C&lt;defined(&amp;...)&gt; to test
-</span><span class="">  293: whether a method is callable. See L&lt;/LIMITATIONS&gt;.
-</span><span class="">  294: 
-</span><span class="">  295: =head3 API SPECIFICATION
-</span><span class="">  296: 
-</span><span class="">  297: =head4 Input (Params::Validate::Strict schema)
-</span><span class="">  298: 
-</span><span class="">  299:     target -- Str, &#39;Pkg::method&#39; or (&#39;Pkg&#39;, &#39;method&#39;)
+</span><span class="">  280: 	push @{ $mock_meta{$full_method} }, {
+</span><span class="">  281: 		type             =&gt; $TYPE // _T_MOCK,
+</span><span class="">  282: 		installed_at     =&gt; _caller_info(),
+</span><span class="">  283: 		original_existed =&gt; $orig_existed,
+</span><span class="">  284: 	};
+</span><span class="">  285: 
+</span><span class="">  286: 	return;
+</span><span class="">  287: }
+</span><span class="">  288: 
+</span><span class="">  289: =head2 unmock
+</span><span class="">  290: 
+</span><span class="">  291: Restore the previous implementation of a mocked method (one layer).
+</span><span class="">  292: 
+</span><span class="">  293:     unmock(&#39;My::Module&#39;, &#39;method&#39;);
+</span><span class="">  294:     unmock &#39;My::Module::method&#39;;
+</span><span class="">  295: 
+</span><span class="">  296: If the method did not exist before it was mocked, the original undef-stub
+</span><span class="">  297: is restored so that calling the method dies with C&lt;&quot;Undefined subroutine&quot;&gt;.
+</span><span class="">  298: Note: C&lt;&lt; -&gt;can() &gt;&gt; may still return truthy; use C&lt;defined(&amp;...)&gt; to test
+</span><span class="">  299: whether a method is callable. See L&lt;/LIMITATIONS&gt;.
 </span><span class="">  300: 
-</span><span class="">  301: =head4 Output (Returns::Set schema)
+</span><span class="">  301: =head3 API SPECIFICATION
 </span><span class="">  302: 
-</span><span class="">  303:     returns: undef
+</span><span class="">  303: =head4 Input (Params::Validate::Strict schema)
 </span><span class="">  304: 
-</span><span class="">  305: =head3 MESSAGES
+</span><span class="">  305:     target -- Str, &#39;Pkg::method&#39; or (&#39;Pkg&#39;, &#39;method&#39;)
 </span><span class="">  306: 
-</span><span class="">  307:   &quot;Package and method are required for unmocking&quot; -- target missing
+</span><span class="">  307: =head4 Output (Returns::Set schema)
 </span><span class="">  308: 
-</span><span class="">  309: =head3 FORMAL SPECIFICATION
+</span><span class="">  309:     returns: undef
 </span><span class="">  310: 
-</span><span class="">  311:     unmock &acirc;&#137;&#153;
-</span><span class="">  312:       &acirc;&#136;&#128; target : Str &acirc;&#128;&cent;
-</span><span class="">  313:         let prev = head(mocked[target]) &acirc;&#128;&cent;
-</span><span class="">  314:           post mocked&#39;[target] = tail(mocked[target])
-</span><span class="">  315:                &acirc;&#136;&sect; sym_table&#39;[target].CODE = prev
-</span><span class="">  316:                &acirc;&#136;&sect; mock_meta&#39;[target] = tail(mock_meta[target])
-</span><span class="">  317: 
-</span><span class="">  318: =cut
-</span><span class="">  319: 
-</span><span class="">  320: sub unmock {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">321 → 324 → 330</span></span>  321: 	my ($arg1, $arg2) = @_;
-</span><span class="">  322: 
-</span><span class="">  323: 	my ($package, $method);
-</span><span class="">  324: 	if (defined $arg1 &amp;&amp; !defined $arg2 &amp;&amp; $arg1 =~ /^(.*)::([^:]+)$/) {
-</span><span class="">  325: 		($package, $method) = ($1, $2);
-</span><span class="">  326: 	} else {
-</span><span class="">  327: 		($package, $method) = ($arg1, $arg2);
-</span><span class="">  328: 	}
-</span><span class="">  329: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">330 → 352 → 357</span></span>  330: 	croak &#39;Package and method are required for unmocking&#39;
-</span><span class="">  331: 		unless $package &amp;&amp; $method;
-</span><span class="">  332: 
-</span><span class="">  333: 	my $full_method = &quot;${package}::${method}&quot;;
-</span><span class="">  334: 
-</span><span class="">  335: 	# Nothing to do if this method was never mocked
-</span><span class="">  336: 	return unless exists $mocked{$full_method} &amp;&amp; @{ $mocked{$full_method} };
-</span><span class="">  337: 
-</span><span class="">  338: 	my $prev = pop @{ $mocked{$full_method} };
-</span><span class="">  339: 
-</span><span class="">  340: 	{
-</span><span class="">  341: 		no warnings &#39;redefine&#39;;
-</span><span class="">  342: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
-</span><span class="">  343: 		*{$full_method} = $prev;
-</span><span class="">  344: 	}
+</span><span class="">  311: =head3 MESSAGES
+</span><span class="">  312: 
+</span><span class="">  313:   &quot;Package and method are required for unmocking&quot; -- target missing
+</span><span class="">  314: 
+</span><span class="">  315: =head3 FORMAL SPECIFICATION
+</span><span class="">  316: 
+</span><span class="">  317:     unmock &acirc;&#137;&#153;
+</span><span class="">  318:       &acirc;&#136;&#128; target : Str &acirc;&#128;&cent;
+</span><span class="">  319:         let prev = head(mocked[target]) &acirc;&#128;&cent;
+</span><span class="">  320:           post mocked&#39;[target] = tail(mocked[target])
+</span><span class="">  321:                &acirc;&#136;&sect; sym_table&#39;[target].CODE = prev
+</span><span class="">  322:                &acirc;&#136;&sect; mock_meta&#39;[target] = tail(mock_meta[target])
+</span><span class="">  323: 
+</span><span class="">  324: =cut
+</span><span class="">  325: 
+</span><span class="">  326: sub unmock {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">327 → 330 → 336</span></span>  327: 	my ($arg1, $arg2) = @_;
+</span><span class="">  328: 
+</span><span class="">  329: 	my ($package, $method);
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  330: 	if (defined $arg1 &amp;&amp; !defined $arg2 &amp;&amp; $arg1 =~ /^(.*)::([^:]+)$/) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  331: 		($package, $method) = ($1, $2);
+</span><span class="">  332: 	} else {
+</span><span class="">  333: 		($package, $method) = ($arg1, $arg2);
+</span><span class="">  334: 	}
+</span><span class="">  335: 
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">336 → 358 → 363</span></span>  336: 	croak &#39;Package and method are required for unmocking&#39;
+</span><span class="">  337: 		unless $package &amp;&amp; $method;
+</span><span class="">  338: 
+</span><span class="">  339: 	my $full_method = &quot;${package}::${method}&quot;;
+</span><span class="">  340: 
+</span><span class="">  341: 	# Nothing to do if this method was never mocked
+</span><span class="">  342: 	return unless exists $mocked{$full_method} &amp;&amp; @{ $mocked{$full_method} };
+</span><span class="">  343: 
+</span><span class="">  344: 	my $prev = pop @{ $mocked{$full_method} };
 </span><span class="">  345: 
-</span><span class="">  346: 	# Pop exactly one meta entry to mirror the mock stack.
-</span><span class="">  347: 	# Earlier code deleted the entire key; that wiped meta for all layers
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  348: 	# still on the stack after a partial unmock.
-</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  349: 	pop @{ $mock_meta{$full_method} };
-</span><span class="">  350: 
-</span><span class="">  351: 	# Clean up empty tracking structures
-</span><span class="">  352: 	unless (@{ $mocked{$full_method} }) {
-</span><span class="">  353: 		delete $mocked{$full_method};
-</span><span class="">  354: 		delete $mock_meta{$full_method};
-</span><span class="">  355: 	}
+</span><span class="">  346: 	{
+</span><span class="">  347: 		no warnings &#39;redefine&#39;;
+</span><span class="">  348: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
+</span><span class="">  349: 		*{$full_method} = $prev;
+</span><span class="">  350: 	}
+</span><span class="">  351: 
+</span><span class="">  352: 	# Pop exactly one meta entry to mirror the mock stack.
+</span><span class="">  353: 	# Earlier code deleted the entire key; that wiped meta for all layers
+</span><span class="">  354: 	# still on the stack after a partial unmock.
+</span><span class="">  355: 	pop @{ $mock_meta{$full_method} };
 </span><span class="">  356: 
-</span><span class="">  357: 	return;
-</span><span class="">  358: }
-</span><span class="">  359: 
-</span><span class="">  360: =head2 mock_scoped
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  361: 
-</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  362: Create a scoped mock that restores automatically when the guard goes out of scope.
-</span><span class="">  363: 
-</span><span class="">  364: =head3 Single-method forms
+</span><span class="">  357: 	# Clean up empty tracking structures
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  358: 	unless (@{ $mocked{$full_method} }) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  359: 		delete $mocked{$full_method};
+</span><span class="">  360: 		delete $mock_meta{$full_method};
+</span><span class="">  361: 	}
+</span><span class="">  362: 
+</span><span class="">  363: 	return;
+</span><span class="">  364: }
 </span><span class="">  365: 
-</span><span class="">  366:     my $g = mock_scoped &#39;My::Module::method&#39; =&gt; sub { &#39;mocked&#39; };
-</span><span class="">  367:     my $g = mock_scoped(&#39;My::Module&#39;, &#39;method&#39;, sub { ... });
-</span><span class="">  368: 
-</span><span class="">  369: =head3 Multi-method forms
-</span><span class="">  370: 
-</span><span class="">  371:     my $g = mock_scoped(&#39;My::Module&#39;,
-</span><span class="">  372:         fetch  =&gt; sub { &#39;mocked_fetch&#39;  },
-</span><span class="">  373:         save   =&gt; sub { &#39;mocked_save&#39;   },
-</span><span class="">  374:     );
-</span><span class="">  375: 
-</span><span class="">  376:     my $g = mock_scoped(
-</span><span class="">  377:         &#39;My::Module::fetch&#39;  =&gt; sub { &#39;mocked_fetch&#39;  },
-</span><span class="">  378:         &#39;Other::Module::save&#39; =&gt; sub { &#39;mocked_save&#39;  },
-</span><span class="">  379:     );
-</span><span class="">  380: 
-</span><span class="">  381: All mocked methods are restored when C&lt;$g&gt; goes out of scope.
-</span><span class="">  382: 
-</span><span class="">  383: =head3 API SPECIFICATION
-</span><span class="">  384: 
-</span><span class="">  385: =head4 Input (Params::Validate::Strict schema)
+</span><span class="">  366: =head2 mock_scoped
+</span><span class="">  367: 
+</span><span class="">  368: Create a scoped mock that restores automatically when the guard goes out of scope.
+</span><span class="">  369: 
+</span><span class="">  370: =head3 Single-method forms
+</span><span class="">  371: 
+</span><span class="">  372:     my $g = mock_scoped &#39;My::Module::method&#39; =&gt; sub { &#39;mocked&#39; };
+</span><span class="">  373:     my $g = mock_scoped(&#39;My::Module&#39;, &#39;method&#39;, sub { ... });
+</span><span class="">  374: 
+</span><span class="">  375: =head3 Multi-method forms
+</span><span class="">  376: 
+</span><span class="">  377:     my $g = mock_scoped(&#39;My::Module&#39;,
+</span><span class="">  378:         fetch  =&gt; sub { &#39;mocked_fetch&#39;  },
+</span><span class="">  379:         save   =&gt; sub { &#39;mocked_save&#39;   },
+</span><span class="">  380:     );
+</span><span class="">  381: 
+</span><span class="">  382:     my $g = mock_scoped(
+</span><span class="">  383:         &#39;My::Module::fetch&#39;  =&gt; sub { &#39;mocked_fetch&#39;  },
+</span><span class="">  384:         &#39;Other::Module::save&#39; =&gt; sub { &#39;mocked_save&#39;  },
+</span><span class="">  385:     );
 </span><span class="">  386: 
-</span><span class="">  387:     args -- four recognised forms (see above)
+</span><span class="">  387: All mocked methods are restored when C&lt;$g&gt; goes out of scope.
 </span><span class="">  388: 
-</span><span class="">  389: =head4 Output (Returns::Set schema)
+</span><span class="">  389: =head3 API SPECIFICATION
 </span><span class="">  390: 
-</span><span class="">  391:     returns: Test::Mockingbird::Guard
+</span><span class="">  391: =head4 Input (Params::Validate::Strict schema)
 </span><span class="">  392: 
-</span><span class="">  393: =head3 MESSAGES
+</span><span class="">  393:     args -- four recognised forms (see above)
 </span><span class="">  394: 
-</span><span class="">  395:   &quot;mock_scoped: unrecognised argument form&quot; -- none of the four forms matched
-</span><span class="">  396:   &quot;mock_scoped: expected coderef for &#39;$target&#39;&quot; -- non-CODE value provided
-</span><span class="">  397: 
-</span><span class="">  398: =head3 FORMAL SPECIFICATION
-</span><span class="">  399: 
-</span><span class="">  400:     mock_scoped &acirc;&#137;&#153;
-</span><span class="">  401:       install all mocks via mock()
-</span><span class="">  402:       &acirc;&#136;&sect; return Guard(full_methods)
-</span><span class="">  403:       &acirc;&#136;&sect; Guard.DESTROY &acirc;&#135;&#146; &acirc;&#136;&#128; m &acirc;&#136;&#136; full_methods &acirc;&#128;&cent; unmock(m)
-</span><span class="">  404: 
-</span><span class="">  405: =cut
-</span><span class="">  406: 
-</span><span class="">  407: sub mock_scoped {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">408 → 412 → 443</span></span>  408: 	my @args = @_;
-</span><span class="">  409: 
-</span><span class="">  410: 	my @pairs;
-</span><span class="">  411: 
-</span><span class="">  412: 	if (@args == 2 &amp;&amp; ref($args[1]) eq &#39;CODE&#39;) {
-</span><span class="">  413: 		my ($pkg, $meth) = _parse_target($args[0]);
-</span><span class="">  414: 		push @pairs, [ $pkg, $meth, $args[1] ];
+</span><span class="">  395: =head4 Output (Returns::Set schema)
+</span><span class="">  396: 
+</span><span class="">  397:     returns: Test::Mockingbird::Guard
+</span><span class="">  398: 
+</span><span class="">  399: =head3 MESSAGES
+</span><span class="">  400: 
+</span><span class="">  401:   &quot;mock_scoped: unrecognised argument form&quot; -- none of the four forms matched
+</span><span class="">  402:   &quot;mock_scoped: expected coderef for &#39;$target&#39;&quot; -- non-CODE value provided
+</span><span class="">  403: 
+</span><span class="">  404: =head3 FORMAL SPECIFICATION
+</span><span class="">  405: 
+</span><span class="">  406:     mock_scoped &acirc;&#137;&#153;
+</span><span class="">  407:       install all mocks via mock()
+</span><span class="">  408:       &acirc;&#136;&sect; return Guard(full_methods)
+</span><span class="">  409:       &acirc;&#136;&sect; Guard.DESTROY &acirc;&#135;&#146; &acirc;&#136;&#128; m &acirc;&#136;&#136; full_methods &acirc;&#128;&cent; unmock(m)
+</span><span class="">  410: 
+</span><span class="">  411: =cut
+</span><span class="">  412: 
+</span><span class="">  413: sub mock_scoped {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">414 → 418 → 449</span></span>  414: 	my @args = @_;
 </span><span class="">  415: 
-</span><span class="">  416: 	} elsif (@args == 3 &amp;&amp; !ref($args[1]) &amp;&amp; ref($args[2]) eq &#39;CODE&#39;) {
-</span><span class="">  417: 		push @pairs, [ $args[0], $args[1], $args[2] ];
-</span><span class="">  418: 
-</span><span class="">  419: 	} elsif (@args &gt;= 4 &amp;&amp; (@args % 2) == 0 &amp;&amp; ref($args[1]) eq &#39;CODE&#39;) {
-</span><span class="">  420: 		my @a = @args;
-</span><span class="">  421: 		while (@a) {
-</span><span class="">  422: 			my ($target, $code) = splice @a, 0, 2;
-</span><span class="">  423: 			croak &quot;mock_scoped: expected coderef for &#39;$target&#39;&quot;
-</span><span class="">  424: 				unless ref($code) eq &#39;CODE&#39;;
-</span><span class="">  425: 			my ($pkg, $meth) = _parse_target($target);
-</span><span class="">  426: 			push @pairs, [ $pkg, $meth, $code ];
-</span><span class="">  427: 		}
-</span><span class="">  428: 
-</span><span class="">  429: 	} elsif (@args &gt;= 5 &amp;&amp; (@args % 2) == 1 &amp;&amp; ref($args[2]) eq &#39;CODE&#39;) {
-</span><span class="">  430: 		my @a   = @args;
-</span><span class="">  431: 		my $pkg = shift @a;
-</span><span class="">  432: 		while (@a) {
-</span><span class="">  433: 			my ($meth, $code) = splice @a, 0, 2;
-</span><span class="">  434: 			croak &quot;mock_scoped: expected coderef for method &#39;$meth&#39;&quot;
-</span><span class="">  435: 				unless ref($code) eq &#39;CODE&#39;;
-</span><span class="">  436: 			push @pairs, [ $pkg, $meth, $code ];
-</span><span class="">  437: 		}
-</span><span class="">  438: 
-</span><span class="">  439: 	} else {
-</span><span class="">  440: 		croak &#39;mock_scoped: unrecognised argument form&#39;;
-</span><span class="">  441: 	}
-</span><span class="">  442: 
-</span><span class="">  443: 	my @full_methods;
-</span><span class="">  444: 	{
-</span><span class="">  445: 		local $TYPE = _T_MOCK_SCOPED;
-</span><span class="">  446: 		for my $pair (@pairs) {
-</span><span class="">  447: 			my ($pkg, $meth, $code) = @{$pair};
-</span><span class="">  448: 			mock($pkg, $meth, $code);
-</span><span class="">  449: 			push @full_methods, &quot;${pkg}::${meth}&quot;;
-</span><span class="">  450: 		}
-</span><span class="">  451: 	}
-</span><span class="">  452: 
-</span><span class="">  453: 	return Test::Mockingbird::Guard-&gt;new(@full_methods);
-</span><span class="">  454: }
-</span><span class="">  455: 
-</span><span class="">  456: =head2 spy
-</span><span class="">  457: 
-</span><span class="">  458: Wrap a method so that every call is recorded. The original method is still
-</span><span class="">  459: called and its return value is passed back to the caller.
-</span><span class="">  460: 
-</span><span class="">  461:     my $spy = spy &#39;My::Module::method&#39;;
-</span><span class="">  462:     My::Module::method(&#39;arg&#39;);
-</span><span class="">  463:     my @calls = $spy-&gt;();   # ( [&#39;My::Module::method&#39;, &#39;arg&#39;], ... )
-</span><span class="">  464:     restore_all();
-</span><span class="">  465: 
-</span><span class="">  466: Returns a coderef that, when invoked, returns the list of captured call
-</span><span class="">  467: records. Each record is an arrayref C&lt;[ $full_method, @args ]&gt;.
-</span><span class="">  468: 
-</span><span class="">  469: =head3 Limitation
-</span><span class="">  470: 
-</span><span class="">  471: C&lt;spy()&gt; does not call C&lt;mock()&gt; internally and therefore does not apply
-</span><span class="">  472: prototype preservation. Wrapping a prototyped function emits a
-</span><span class="">  473: C&lt;Prototype mismatch&gt; warning.
+</span><span class="">  416: 	my @pairs;
+</span><span class="">  417: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  418: 	if (@args == 2 &amp;&amp; ref($args[1]) eq &#39;CODE&#39;) {
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  419: 		my ($pkg, $meth) = _parse_target($args[0]);
+</span><span class="">  420: 		push @pairs, [ $pkg, $meth, $args[1] ];
+</span><span class="">  421: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  422: 	} elsif (@args == 3 &amp;&amp; !ref($args[1]) &amp;&amp; ref($args[2]) eq &#39;CODE&#39;) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  423: 		push @pairs, [ $args[0], $args[1], $args[2] ];
+</span><span class="">  424: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  425: 	} elsif (@args &gt;= 4 &amp;&amp; (@args % 2) == 0 &amp;&amp; ref($args[1]) eq &#39;CODE&#39;) {
+</span><p> <b> Mutants (Total: 4, Killed: 4, Survived: 0)</b><p><span class="">  426: 		my @a = @args;
+</span><span class="">  427: 		while (@a) {
+</span><span class="">  428: 			my ($target, $code) = splice @a, 0, 2;
+</span><span class="">  429: 			croak &quot;mock_scoped: expected coderef for &#39;$target&#39;&quot;
+</span><span class="">  430: 				unless ref($code) eq &#39;CODE&#39;;
+</span><span class="">  431: 			my ($pkg, $meth) = _parse_target($target);
+</span><span class="">  432: 			push @pairs, [ $pkg, $meth, $code ];
+</span><span class="">  433: 		}
+</span><span class="">  434: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  435: 	} elsif (@args &gt;= 5 &amp;&amp; (@args % 2) == 1 &amp;&amp; ref($args[2]) eq &#39;CODE&#39;) {
+</span><p> <b> Mutants (Total: 4, Killed: 4, Survived: 0)</b><p><span class="">  436: 		my @a   = @args;
+</span><span class="">  437: 		my $pkg = shift @a;
+</span><span class="">  438: 		while (@a) {
+</span><span class="">  439: 			my ($meth, $code) = splice @a, 0, 2;
+</span><span class="">  440: 			croak &quot;mock_scoped: expected coderef for method &#39;$meth&#39;&quot;
+</span><span class="">  441: 				unless ref($code) eq &#39;CODE&#39;;
+</span><span class="">  442: 			push @pairs, [ $pkg, $meth, $code ];
+</span><span class="">  443: 		}
+</span><span class="">  444: 
+</span><span class="">  445: 	} else {
+</span><span class="">  446: 		croak &#39;mock_scoped: unrecognised argument form&#39;;
+</span><span class="">  447: 	}
+</span><span class="">  448: 
+</span><span class="">  449: 	my @full_methods;
+</span><span class="">  450: 	{
+</span><span class="">  451: 		local $TYPE = _T_MOCK_SCOPED;
+</span><span class="">  452: 		for my $pair (@pairs) {
+</span><span class="">  453: 			my ($pkg, $meth, $code) = @{$pair};
+</span><span class="">  454: 			mock($pkg, $meth, $code);
+</span><span class="">  455: 			push @full_methods, &quot;${pkg}::${meth}&quot;;
+</span><span class="">  456: 		}
+</span><span class="">  457: 	}
+</span><span class="">  458: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  459: 	return Test::Mockingbird::Guard-&gt;new(@full_methods);
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  460: }
+</span><span class="">  461: 
+</span><span class="">  462: =head2 spy
+</span><span class="">  463: 
+</span><span class="">  464: Wrap a method so that every call is recorded. The original method is still
+</span><span class="">  465: called and its return value is passed back to the caller.
+</span><span class="">  466: 
+</span><span class="">  467:     my $spy = spy &#39;My::Module::method&#39;;
+</span><span class="">  468:     My::Module::method(&#39;arg&#39;);
+</span><span class="">  469:     my @calls = $spy-&gt;();   # ( [&#39;My::Module::method&#39;, &#39;arg&#39;], ... )
+</span><span class="">  470:     restore_all();
+</span><span class="">  471: 
+</span><span class="">  472: Returns a coderef that, when invoked, returns the list of captured call
+</span><span class="">  473: records. Each record is an arrayref C&lt;[ $full_method, @args ]&gt;.
 </span><span class="">  474: 
-</span><span class="">  475: =head3 API SPECIFICATION
+</span><span class="">  475: =head3 Limitation
 </span><span class="">  476: 
-</span><span class="">  477: =head4 Input (Params::Validate::Strict schema)
-</span><span class="">  478: 
-</span><span class="">  479:     target -- Str, &#39;Pkg::method&#39; or (&#39;Pkg&#39;, &#39;method&#39;)
+</span><span class="">  477: C&lt;spy()&gt; does not call C&lt;mock()&gt; internally and therefore does not apply
+</span><span class="">  478: prototype preservation. Wrapping a prototyped function emits a
+</span><span class="">  479: C&lt;Prototype mismatch&gt; warning.
 </span><span class="">  480: 
-</span><span class="">  481: =head4 Output (Returns::Set schema)
+</span><span class="">  481: =head3 API SPECIFICATION
 </span><span class="">  482: 
-</span><span class="">  483:     returns: CodeRef   # yields list of call records on invocation
+</span><span class="">  483: =head4 Input (Params::Validate::Strict schema)
 </span><span class="">  484: 
-</span><span class="">  485: =head3 MESSAGES
+</span><span class="">  485:     target -- Str, &#39;Pkg::method&#39; or (&#39;Pkg&#39;, &#39;method&#39;)
 </span><span class="">  486: 
-</span><span class="">  487:   &quot;Package and method are required for spying&quot; -- target missing or incomplete
+</span><span class="">  487: =head4 Output (Returns::Set schema)
 </span><span class="">  488: 
-</span><span class="">  489: =head3 FORMAL SPECIFICATION
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  490: 
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  491:     spy &acirc;&#137;&#153;
-</span><span class="">  492:       &acirc;&#136;&#128; target : Str &acirc;&#128;&cent;
-</span><span class="">  493:         pre  defined(target)
-</span><span class="">  494:         post sym_table&#39;[target].CODE = wrapper(orig)
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  495:              &acirc;&#136;&sect; wrapper: @args &acirc;&#134;&#146; (calls&#39; = calls &acirc;&#140;&cent; &acirc;&#159;&uml;[target, @args]&acirc;&#159;&copy; &acirc;&#136;&sect; orig(@args))
-</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  496: 
-</span><span class="">  497: =cut
-</span><span class="">  498: 
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  499: sub spy {
-</span><p> <b> Mutants (Total: 4, Killed: 4, Survived: 0)</b><p><span class="">  500: 	my ($package, $method) = _parse_target(@_);
-</span><span class="">  501: 
-</span><span class="">  502: 	croak &#39;Package and method are required for spying&#39;
-</span><span class="">  503: 		unless $package &amp;&amp; $method;
+</span><span class="">  489:     returns: CodeRef   # yields list of call records on invocation
+</span><span class="">  490: 
+</span><span class="">  491: =head3 MESSAGES
+</span><span class="">  492: 
+</span><span class="">  493:   &quot;Package and method are required for spying&quot; -- target missing or incomplete
+</span><span class="">  494: 
+</span><span class="">  495: =head3 FORMAL SPECIFICATION
+</span><span class="">  496: 
+</span><span class="">  497:     spy &acirc;&#137;&#153;
+</span><span class="">  498:       &acirc;&#136;&#128; target : Str &acirc;&#128;&cent;
+</span><span class="">  499:         pre  defined(target)
+</span><span class="">  500:         post sym_table&#39;[target].CODE = wrapper(orig)
+</span><span class="">  501:              &acirc;&#136;&sect; wrapper: @args &acirc;&#134;&#146; (calls&#39; = calls &acirc;&#140;&cent; &acirc;&#159;&uml;[target, @args]&acirc;&#159;&copy; &acirc;&#136;&sect; orig(@args))
+</span><span class="">  502: 
+</span><span class="">  503: =cut
 </span><span class="">  504: 
-</span><span class="">  505: 	my $full_method = &quot;${package}::${method}&quot;;
-</span><span class="">  506: 
-</span><span class="">  507: 	# Capture current implementation (or undef stub if none exists).
-</span><span class="">  508: 	# We never delete the GV; we always restore by assigning back to *{},
-</span><span class="">  509: 	# preserving the GV so compiled direct calls remain valid.
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  510: 	my ($orig, $orig_existed);
-</span><p> <b> Mutants (Total: 4, Killed: 4, Survived: 0)</b><p><span class="">  511: 	{
-</span><span class="">  512: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
-</span><span class="">  513: 		$orig_existed = defined(&amp;{$full_method}) ? 1 : 0;
-</span><span class="">  514: 		$orig         = \&amp;{$full_method};
-</span><span class="">  515: 	}
-</span><span class="">  516: 	push @{ $mocked{$full_method} }, $orig;
-</span><span class="">  517: 
-</span><span class="">  518: 	my @calls;
-</span><span class="">  519: 
-</span><span class="">  520: 	my $wrapper = sub {
-</span><span class="">  521: 		push @calls,    [ $full_method, @_ ];
-</span><span class="">  522: 		push @call_log, $full_method;
-</span><span class="">  523: 		return $orig-&gt;(@_);
-</span><span class="">  524: 	};
+</span><span class="">  505: sub spy {
+</span><span class="">  506: 	my ($package, $method) = _parse_target(@_);
+</span><span class="">  507: 
+</span><span class="">  508: 	croak &#39;Package and method are required for spying&#39;
+</span><span class="">  509: 		unless $package &amp;&amp; $method;
+</span><span class="">  510: 
+</span><span class="">  511: 	my $full_method = &quot;${package}::${method}&quot;;
+</span><span class="">  512: 
+</span><span class="">  513: 	# Capture current implementation (or undef stub if none exists).
+</span><span class="">  514: 	# We never delete the GV; we always restore by assigning back to *{},
+</span><span class="">  515: 	# preserving the GV so compiled direct calls remain valid.
+</span><span class="">  516: 	my ($orig, $orig_existed);
+</span><span class="">  517: 	{
+</span><span class="">  518: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
+</span><span class="">  519: 		$orig_existed = defined(&amp;{$full_method}) ? 1 : 0;
+</span><span class="">  520: 		$orig         = \&amp;{$full_method};
+</span><span class="">  521: 	}
+</span><span class="">  522: 	push @{ $mocked{$full_method} }, $orig;
+</span><span class="">  523: 
+</span><span class="">  524: 	my @calls;
 </span><span class="">  525: 
-</span><span class="">  526: 	{
-</span><span class="">  527: 		no warnings &#39;redefine&#39;;
-</span><span class="">  528: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
-</span><span class="">  529: 		*{$full_method} = $wrapper;
-</span><span class="">  530: 	}
+</span><span class="">  526: 	my $wrapper = sub {
+</span><span class="">  527: 		push @calls,    [ $full_method, @_ ];
+</span><span class="">  528: 		push @call_log, $full_method;
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  529: 		return $orig-&gt;(@_);
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  530: 	};
 </span><span class="">  531: 
-</span><span class="">  532: 	push @{ $mock_meta{$full_method} }, {
-</span><span class="">  533: 		type             =&gt; _T_SPY,
-</span><span class="">  534: 		installed_at     =&gt; _caller_info(),
-</span><span class="">  535: 		original_existed =&gt; $orig_existed,
-</span><span class="">  536: 	};
+</span><span class="">  532: 	{
+</span><span class="">  533: 		no warnings &#39;redefine&#39;;
+</span><span class="">  534: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
+</span><span class="">  535: 		*{$full_method} = $wrapper;
+</span><span class="">  536: 	}
 </span><span class="">  537: 
-</span><span class="">  538: 	return sub { @calls };
-</span><span class="">  539: }
-</span><span class="">  540: 
-</span><span class="">  541: =head2 inject
-</span><span class="">  542: 
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  543: Inject a mock dependency into a package.
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  544: 
-</span><span class="">  545:     inject(&#39;My::Module&#39;, &#39;Dependency&#39;, $mock_object);
-</span><span class="">  546:     inject &#39;My::Module::Dependency&#39; =&gt; $mock_object;
-</span><span class="">  547: 
-</span><span class="">  548: Injecting C&lt;undef&gt; is valid; use argument count (not definedness of the
-</span><span class="">  549: third argument) to distinguish shorthand from longhand.
+</span><span class="">  538: 	push @{ $mock_meta{$full_method} }, {
+</span><span class="">  539: 		type             =&gt; _T_SPY,
+</span><span class="">  540: 		installed_at     =&gt; _caller_info(),
+</span><span class="">  541: 		original_existed =&gt; $orig_existed,
+</span><span class="">  542: 	};
+</span><span class="">  543: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  544: 	return sub { @calls };
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  545: }
+</span><span class="">  546: 
+</span><span class="">  547: =head2 inject
+</span><span class="">  548: 
+</span><span class="">  549: Inject a mock dependency into a package.
 </span><span class="">  550: 
-</span><span class="">  551: =head3 API SPECIFICATION
-</span><span class="">  552: 
-</span><span class="">  553: =head4 Input (Params::Validate::Strict schema)
-</span><span class="">  554: 
-</span><span class="">  555:     package    -- Str
-</span><span class="">  556:     dependency -- Str
-</span><span class="">  557:     value      -- Any (including undef)
+</span><span class="">  551:     inject(&#39;My::Module&#39;, &#39;Dependency&#39;, $mock_object);
+</span><span class="">  552:     inject &#39;My::Module::Dependency&#39; =&gt; $mock_object;
+</span><span class="">  553: 
+</span><span class="">  554: Injecting C&lt;undef&gt; is valid; use argument count (not definedness of the
+</span><span class="">  555: third argument) to distinguish shorthand from longhand.
+</span><span class="">  556: 
+</span><span class="">  557: =head3 API SPECIFICATION
 </span><span class="">  558: 
-</span><span class="">  559: =head4 Output (Returns::Set schema)
+</span><span class="">  559: =head4 Input (Params::Validate::Strict schema)
 </span><span class="">  560: 
-</span><span class="">  561:     returns: undef
-</span><span class="">  562: 
-</span><span class="">  563: =head3 MESSAGES
+</span><span class="">  561:     package    -- Str
+</span><span class="">  562:     dependency -- Str
+</span><span class="">  563:     value      -- Any (including undef)
 </span><span class="">  564: 
-</span><span class="">  565:   &quot;Package and dependency are required for injection&quot; -- missing name
+</span><span class="">  565: =head4 Output (Returns::Set schema)
 </span><span class="">  566: 
-</span><span class="">  567: =head3 FORMAL SPECIFICATION
+</span><span class="">  567:     returns: undef
 </span><span class="">  568: 
-</span><span class="">  569:     inject &acirc;&#137;&#153;
-</span><span class="">  570:       &acirc;&#136;&#128; pkg : Str; dep : Str; val : Any &acirc;&#128;&cent;
-</span><span class="">  571:         pre  pkg &acirc;&#137;&nbsp; &#39;&#39; &acirc;&#136;&sect; dep &acirc;&#137;&nbsp; &#39;&#39;
-</span><span class="">  572:         post sym_table&#39;[&quot;${pkg}::${dep}&quot;].CODE = sub { val }
-</span><span class="">  573: 
-</span><span class="">  574: =cut
-</span><span class="">  575: 
-</span><span class="">  576: sub inject {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">577 → 582 → 588</span></span>  577: 	my ($package, $dependency, $mock_object);
-</span><span class="">  578: 
-</span><span class="">  579: 	# Discriminate shorthand (2 args) from longhand (3 args) by argument
-</span><span class="">  580: 	# count rather than definedness of the third arg so that inject(Pkg,
-</span><span class="">  581: 	# Dep, undef) -- injecting undef -- is correctly handled.
-</span><span class="">  582: 	if (@_ == 2 &amp;&amp; defined $_[0] &amp;&amp; $_[0] =~ /^(.*)::([^:]+)$/) {
-</span><span class="">  583: 		($package, $dependency, $mock_object) = ($1, $2, $_[1]);
-</span><span class="">  584: 	} else {
-</span><span class="">  585: 		($package, $dependency, $mock_object) = @_;
-</span><span class="">  586: 	}
-</span><span class="">  587: 
-</span><span class="">  588: 	croak &#39;Package and dependency are required for injection&#39;
-</span><span class="">  589: 		unless $package &amp;&amp; $dependency;
-</span><span class="">  590: 
-</span><span class="">  591: 	my $full = &quot;${package}::${dependency}&quot;;
-</span><span class="">  592: 
-</span><span class="">  593: 	my ($orig, $orig_existed);
-</span><span class="">  594: 	{
-</span><span class="">  595: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
-</span><span class="">  596: 		$orig_existed = defined(&amp;{$full}) ? 1 : 0;
-</span><span class="">  597: 		$orig         = \&amp;{$full};
-</span><span class="">  598: 	}
-</span><span class="">  599: 	push @{ $mocked{$full} }, $orig;
-</span><span class="">  600: 
-</span><span class="">  601: 	my $wrapper = sub { $mock_object };
-</span><span class="">  602: 
-</span><span class="">  603: 	{
-</span><span class="">  604: 		no warnings &#39;redefine&#39;;
-</span><span class="">  605: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
-</span><span class="">  606: 		*{$full} = $wrapper;
-</span><span class="">  607: 	}
+</span><span class="">  569: =head3 MESSAGES
+</span><span class="">  570: 
+</span><span class="">  571:   &quot;Package and dependency are required for injection&quot; -- missing name
+</span><span class="">  572: 
+</span><span class="">  573: =head3 FORMAL SPECIFICATION
+</span><span class="">  574: 
+</span><span class="">  575:     inject &acirc;&#137;&#153;
+</span><span class="">  576:       &acirc;&#136;&#128; pkg : Str; dep : Str; val : Any &acirc;&#128;&cent;
+</span><span class="">  577:         pre  pkg &acirc;&#137;&nbsp; &#39;&#39; &acirc;&#136;&sect; dep &acirc;&#137;&nbsp; &#39;&#39;
+</span><span class="">  578:         post sym_table&#39;[&quot;${pkg}::${dep}&quot;].CODE = sub { val }
+</span><span class="">  579: 
+</span><span class="">  580: =cut
+</span><span class="">  581: 
+</span><span class="">  582: sub inject {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">583 → 588 → 594</span></span>  583: 	my ($package, $dependency, $mock_object);
+</span><span class="">  584: 
+</span><span class="">  585: 	# Discriminate shorthand (2 args) from longhand (3 args) by argument
+</span><span class="">  586: 	# count rather than definedness of the third arg so that inject(Pkg,
+</span><span class="">  587: 	# Dep, undef) -- injecting undef -- is correctly handled.
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  588: 	if (@_ == 2 &amp;&amp; defined $_[0] &amp;&amp; $_[0] =~ /^(.*)::([^:]+)$/) {
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  589: 		($package, $dependency, $mock_object) = ($1, $2, $_[1]);
+</span><span class="">  590: 	} else {
+</span><span class="">  591: 		($package, $dependency, $mock_object) = @_;
+</span><span class="">  592: 	}
+</span><span class="">  593: 
+</span><span class="">  594: 	croak &#39;Package and dependency are required for injection&#39;
+</span><span class="">  595: 		unless $package &amp;&amp; $dependency;
+</span><span class="">  596: 
+</span><span class="">  597: 	my $full = &quot;${package}::${dependency}&quot;;
+</span><span class="">  598: 
+</span><span class="">  599: 	my ($orig, $orig_existed);
+</span><span class="">  600: 	{
+</span><span class="">  601: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
+</span><span class="">  602: 		$orig_existed = defined(&amp;{$full}) ? 1 : 0;
+</span><span class="">  603: 		$orig         = \&amp;{$full};
+</span><span class="">  604: 	}
+</span><span class="">  605: 	push @{ $mocked{$full} }, $orig;
+</span><span class="">  606: 
+</span><span class="">  607: 	my $wrapper = sub { $mock_object };
 </span><span class="">  608: 
-</span><span class="">  609: 	# inject() respects $TYPE so that inject_all() or any future wrapper
-</span><span class="">  610: 	# can label the layer differently (though &#39;inject&#39; is the sensible default).
-</span><span class="">  611: 	push @{ $mock_meta{$full} }, {
-</span><span class="">  612: 		type             =&gt; $TYPE // _T_INJECT,
-</span><span class="">  613: 		installed_at     =&gt; _caller_info(),
-</span><span class="">  614: 		original_existed =&gt; $orig_existed,
-</span><span class="">  615: 	};
-</span><span class="">  616: 
-</span><span class="">  617: 	return;
-</span><span class="">  618: }
-</span><span class="">  619: 
-</span><span class="">  620: =head2 inject_all
-</span><span class="">  621: 
-</span><span class="">  622: Inject multiple dependencies into a package in one call.
-</span><span class="">  623: 
-</span><span class="">  624:     inject_all(&#39;My::Service&#39;, {
-</span><span class="">  625:         DB     =&gt; $mock_db,
-</span><span class="">  626:         Logger =&gt; $mock_logger,
-</span><span class="">  627:     });
-</span><span class="">  628: 
-</span><span class="">  629: An empty hashref is a no-op. Each pair is equivalent to a separate
-</span><span class="">  630: C&lt;inject()&gt; call and participates in the same mock stack.
-</span><span class="">  631: 
-</span><span class="">  632: =head3 API SPECIFICATION
-</span><span class="">  633: 
-</span><span class="">  634: =head4 Input (Params::Validate::Strict schema)
-</span><span class="">  635: 
-</span><span class="">  636:     package      -- Str
-</span><span class="">  637:     dependencies -- HashRef
-</span><span class="">  638: 
-</span><span class="">  639: =head4 Output (Returns::Set schema)
-</span><span class="">  640: 
-</span><span class="">  641:     returns: undef
-</span><span class="">  642: 
-</span><span class="">  643: =head3 MESSAGES
+</span><span class="">  609: 	{
+</span><span class="">  610: 		no warnings &#39;redefine&#39;;
+</span><span class="">  611: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
+</span><span class="">  612: 		*{$full} = $wrapper;
+</span><span class="">  613: 	}
+</span><span class="">  614: 
+</span><span class="">  615: 	# inject() respects $TYPE so that inject_all() or any future wrapper
+</span><span class="">  616: 	# can label the layer differently (though &#39;inject&#39; is the sensible default).
+</span><span class="">  617: 	push @{ $mock_meta{$full} }, {
+</span><span class="">  618: 		type             =&gt; $TYPE // _T_INJECT,
+</span><span class="">  619: 		installed_at     =&gt; _caller_info(),
+</span><span class="">  620: 		original_existed =&gt; $orig_existed,
+</span><span class="">  621: 	};
+</span><span class="">  622: 
+</span><span class="">  623: 	return;
+</span><span class="">  624: }
+</span><span class="">  625: 
+</span><span class="">  626: =head2 inject_all
+</span><span class="">  627: 
+</span><span class="">  628: Inject multiple dependencies into a package in one call.
+</span><span class="">  629: 
+</span><span class="">  630:     inject_all(&#39;My::Service&#39;, {
+</span><span class="">  631:         DB     =&gt; $mock_db,
+</span><span class="">  632:         Logger =&gt; $mock_logger,
+</span><span class="">  633:     });
+</span><span class="">  634: 
+</span><span class="">  635: An empty hashref is a no-op. Each pair is equivalent to a separate
+</span><span class="">  636: C&lt;inject()&gt; call and participates in the same mock stack.
+</span><span class="">  637: 
+</span><span class="">  638: =head3 API SPECIFICATION
+</span><span class="">  639: 
+</span><span class="">  640: =head4 Input (Params::Validate::Strict schema)
+</span><span class="">  641: 
+</span><span class="">  642:     package      -- Str
+</span><span class="">  643:     dependencies -- HashRef
 </span><span class="">  644: 
-</span><span class="">  645:   &quot;inject_all requires a package name&quot;            -- undef or empty package
-</span><span class="">  646:   &quot;inject_all requires a hashref of dependencies&quot; -- second arg not a HashRef
-</span><span class="">  647: 
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  648: =head3 FORMAL SPECIFICATION
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  649: 
-</span><span class="">  650:     inject_all &acirc;&#137;&#153;
-</span><span class="">  651:       &acirc;&#136;&#128; pkg : Str; deps : HashRef &acirc;&#128;&cent;
-</span><span class="">  652:         post &acirc;&#136;&#128; (k,v) &acirc;&#136;&#136; deps &acirc;&#128;&cent; inject(pkg, k, v)
+</span><span class="">  645: =head4 Output (Returns::Set schema)
+</span><span class="">  646: 
+</span><span class="">  647:     returns: undef
+</span><span class="">  648: 
+</span><span class="">  649: =head3 MESSAGES
+</span><span class="">  650: 
+</span><span class="">  651:   &quot;inject_all requires a package name&quot;            -- undef or empty package
+</span><span class="">  652:   &quot;inject_all requires a hashref of dependencies&quot; -- second arg not a HashRef
 </span><span class="">  653: 
-</span><span class="">  654: =cut
+</span><span class="">  654: =head3 FORMAL SPECIFICATION
 </span><span class="">  655: 
-</span><span class="">  656: sub inject_all {
-</span><span class="">  657: 	my ($package, $deps) = @_;
-</span><span class="">  658: 
-</span><span class="">  659: 	croak &#39;inject_all requires a package name&#39;
-</span><span class="">  660: 		unless defined $package &amp;&amp; length $package;
+</span><span class="">  656:     inject_all &acirc;&#137;&#153;
+</span><span class="">  657:       &acirc;&#136;&#128; pkg : Str; deps : HashRef &acirc;&#128;&cent;
+</span><span class="">  658:         post &acirc;&#136;&#128; (k,v) &acirc;&#136;&#136; deps &acirc;&#128;&cent; inject(pkg, k, v)
+</span><span class="">  659: 
+</span><span class="">  660: =cut
 </span><span class="">  661: 
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  662: 	croak &#39;inject_all requires a hashref of dependencies&#39;
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  663: 		unless ref $deps eq &#39;HASH&#39;;
+</span><span class="">  662: sub inject_all {
+</span><span class="">  663: 	my ($package, $deps) = @_;
 </span><span class="">  664: 
-</span><span class="">  665: 	inject($package, $_, $deps-&gt;{$_}) for keys %$deps;
-</span><span class="">  666: 
-</span><span class="">  667: 	return;
-</span><span class="">  668: }
-</span><span class="">  669: 
-</span><span class="">  670: =head2 intercept_new
-</span><span class="">  671: 
-</span><span class="">  672: Intercept the C&lt;new&gt; constructor of a class.
-</span><span class="">  673: 
-</span><span class="">  674:     intercept_new &#39;My::Service&#39; =&gt; $stub_obj;
-</span><span class="">  675:     intercept_new &#39;My::Service&#39; =&gt; sub { My::Double-&gt;new(@_[1..$#_]) };
-</span><span class="">  676: 
-</span><span class="">  677: When given a plain value (including undef), every call to
-</span><span class="">  678: C&lt;&lt; My::Service-&gt;new &gt;&gt; returns that value. When given a coderef, every
-</span><span class="">  679: call invokes the coderef with the original arguments (including the class
-</span><span class="">  680: name as the first argument) and returns its result.
-</span><span class="">  681: 
-</span><span class="">  682: This is a thin wrapper around C&lt;mock()&gt;; C&lt;restore_all()&gt;, C&lt;unmock()&gt;,
-</span><span class="">  683: and C&lt;diagnose_mocks()&gt; all work identically.
-</span><span class="">  684: 
-</span><span class="">  685: =head3 API SPECIFICATION
-</span><span class="">  686: 
-</span><span class="">  687: =head4 Input (Params::Validate::Strict schema)
-</span><span class="">  688: 
-</span><span class="">  689:     class   -- Str (non-empty)
-</span><span class="">  690:     factory -- Any; CodeRef invoked per call, or scalar returned verbatim
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  691: 
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  692: =head4 Output (Returns::Set schema)
-</span><span class="">  693: 
-</span><span class="">  694:     returns: undef
-</span><span class="">  695: 
-</span><span class="">  696: =head3 MESSAGES
+</span><span class="">  665: 	croak &#39;inject_all requires a package name&#39;
+</span><span class="">  666: 		unless defined $package &amp;&amp; length $package;
+</span><span class="">  667: 
+</span><span class="">  668: 	croak &#39;inject_all requires a hashref of dependencies&#39;
+</span><span class="">  669: 		unless ref $deps eq &#39;HASH&#39;;
+</span><span class="">  670: 
+</span><span class="">  671: 	inject($package, $_, $deps-&gt;{$_}) for keys %$deps;
+</span><span class="">  672: 
+</span><span class="">  673: 	return;
+</span><span class="">  674: }
+</span><span class="">  675: 
+</span><span class="">  676: =head2 intercept_new
+</span><span class="">  677: 
+</span><span class="">  678: Intercept the C&lt;new&gt; constructor of a class.
+</span><span class="">  679: 
+</span><span class="">  680:     intercept_new &#39;My::Service&#39; =&gt; $stub_obj;
+</span><span class="">  681:     intercept_new &#39;My::Service&#39; =&gt; sub { My::Double-&gt;new(@_[1..$#_]) };
+</span><span class="">  682: 
+</span><span class="">  683: When given a plain value (including undef), every call to
+</span><span class="">  684: C&lt;&lt; My::Service-&gt;new &gt;&gt; returns that value. When given a coderef, every
+</span><span class="">  685: call invokes the coderef with the original arguments (including the class
+</span><span class="">  686: name as the first argument) and returns its result.
+</span><span class="">  687: 
+</span><span class="">  688: This is a thin wrapper around C&lt;mock()&gt;; C&lt;restore_all()&gt;, C&lt;unmock()&gt;,
+</span><span class="">  689: and C&lt;diagnose_mocks()&gt; all work identically.
+</span><span class="">  690: 
+</span><span class="">  691: =head3 API SPECIFICATION
+</span><span class="">  692: 
+</span><span class="">  693: =head4 Input (Params::Validate::Strict schema)
+</span><span class="">  694: 
+</span><span class="">  695:     class   -- Str (non-empty)
+</span><span class="">  696:     factory -- Any; CodeRef invoked per call, or scalar returned verbatim
 </span><span class="">  697: 
-</span><span class="">  698:   &quot;intercept_new requires a class name&quot;                    -- undef/empty class
-</span><span class="">  699:   &quot;intercept_new requires a replacement object or coderef&quot; -- factory missing
-</span><span class="">  700: 
-</span><span class="">  701: =head3 FORMAL SPECIFICATION
-</span><span class="">  702: 
-</span><span class="">  703:     intercept_new &acirc;&#137;&#153;
-</span><span class="">  704:       &acirc;&#136;&#128; class : Str; factory : Any &acirc;&#128;&cent;
-</span><span class="">  705:         pre  class &acirc;&#137;&nbsp; &#39;&#39; &acirc;&#136;&sect; @args &acirc;&#137;&yen; 2
-</span><span class="">  706:         let  rep = (factory : CodeRef) ? factory : sub { factory } &acirc;&#128;&cent;
-</span><span class="">  707:           post mock(&quot;${class}::new&quot;, rep)
+</span><span class="">  698: =head4 Output (Returns::Set schema)
+</span><span class="">  699: 
+</span><span class="">  700:     returns: undef
+</span><span class="">  701: 
+</span><span class="">  702: =head3 MESSAGES
+</span><span class="">  703: 
+</span><span class="">  704:   &quot;intercept_new requires a class name&quot;                    -- undef/empty class
+</span><span class="">  705:   &quot;intercept_new requires a replacement object or coderef&quot; -- factory missing
+</span><span class="">  706: 
+</span><span class="">  707: =head3 FORMAL SPECIFICATION
 </span><span class="">  708: 
-</span><span class="">  709: =cut
-</span><span class="">  710: 
-</span><span class="">  711: sub intercept_new {
-</span><span class="">  712: 	my ($class, $factory) = @_;
-</span><span class="">  713: 
-</span><span class="">  714: 	croak &#39;intercept_new requires a class name&#39;
-</span><span class="">  715: 		unless defined $class &amp;&amp; length $class;
-</span><span class="">  716: 	croak &#39;intercept_new requires a replacement object or coderef&#39;
-</span><span class="">  717: 		if @_ &lt; 2;
-</span><span class="">  718: 
-</span><span class="">  719: 	my $replacement = ref($factory) eq &#39;CODE&#39;
-</span><span class="">  720: 		? $factory
-</span><span class="">  721: 		: sub { $factory };
-</span><span class="">  722: 
-</span><span class="">  723: 	local $TYPE = _T_INTERCEPT_NEW;
-</span><span class="">  724: 	mock(&quot;${class}::new&quot;, $replacement);
-</span><span class="">  725: 
-</span><span class="">  726: 	return;
-</span><span class="">  727: }
+</span><span class="">  709:     intercept_new &acirc;&#137;&#153;
+</span><span class="">  710:       &acirc;&#136;&#128; class : Str; factory : Any &acirc;&#128;&cent;
+</span><span class="">  711:         pre  class &acirc;&#137;&nbsp; &#39;&#39; &acirc;&#136;&sect; @args &acirc;&#137;&yen; 2
+</span><span class="">  712:         let  rep = (factory : CodeRef) ? factory : sub { factory } &acirc;&#128;&cent;
+</span><span class="">  713:           post mock(&quot;${class}::new&quot;, rep)
+</span><span class="">  714: 
+</span><span class="">  715: =cut
+</span><span class="">  716: 
+</span><span class="">  717: sub intercept_new {
+</span><span class="">  718: 	my ($class, $factory) = @_;
+</span><span class="">  719: 
+</span><span class="">  720: 	croak &#39;intercept_new requires a class name&#39;
+</span><span class="">  721: 		unless defined $class &amp;&amp; length $class;
+</span><span class="">  722: 	croak &#39;intercept_new requires a replacement object or coderef&#39;
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  723: 		if @_ &lt; 2;
+</span><p> <b> Mutants (Total: 3, Killed: 3, Survived: 0)</b><p><span class="">  724: 
+</span><span class="">  725: 	my $replacement = ref($factory) eq &#39;CODE&#39;
+</span><span class="">  726: 		? $factory
+</span><span class="">  727: 		: sub { $factory };
 </span><span class="">  728: 
-</span><span class="">  729: =head2 restore_all
-</span><span class="">  730: 
-</span><span class="">  731: Restore all mocked methods and injected dependencies.
-</span><span class="">  732: 
-</span><span class="">  733:     restore_all();            # restore everything
-</span><span class="">  734:     restore_all &#39;My::Module&#39;; # restore only My::Module&#39;s mocks
-</span><span class="">  735: 
-</span><span class="">  736: When called with a package name, only mocks whose fully-qualified names
-</span><span class="">  737: begin with that package are restored. The call-order log is pruned to
-</span><span class="">  738: remove entries for the restored package.
-</span><span class="">  739: 
-</span><span class="">  740: =head3 API SPECIFICATION
+</span><span class="">  729: 	local $TYPE = _T_INTERCEPT_NEW;
+</span><span class="">  730: 	mock(&quot;${class}::new&quot;, $replacement);
+</span><span class="">  731: 
+</span><span class="">  732: 	return;
+</span><span class="">  733: }
+</span><span class="">  734: 
+</span><span class="">  735: =head2 restore_all
+</span><span class="">  736: 
+</span><span class="">  737: Restore all mocked methods and injected dependencies.
+</span><span class="">  738: 
+</span><span class="">  739:     restore_all();            # restore everything
+</span><span class="">  740:     restore_all &#39;My::Module&#39;; # restore only My::Module&#39;s mocks
 </span><span class="">  741: 
-</span><span class="">  742: =head4 Input (Params::Validate::Strict schema)
-</span><span class="">  743: 
-</span><span class="">  744:     package -- Str, optional
+</span><span class="">  742: When called with a package name, only mocks whose fully-qualified names
+</span><span class="">  743: begin with that package are restored. The call-order log is pruned to
+</span><span class="">  744: remove entries for the restored package.
 </span><span class="">  745: 
-</span><span class="">  746: =head4 Output (Returns::Set schema)
+</span><span class="">  746: =head3 API SPECIFICATION
 </span><span class="">  747: 
-</span><span class="">  748:     returns: undef
+</span><span class="">  748: =head4 Input (Params::Validate::Strict schema)
 </span><span class="">  749: 
-</span><span class="">  750: =head3 MESSAGES
+</span><span class="">  750:     package -- Str, optional
 </span><span class="">  751: 
-</span><span class="">  752: None. An unknown package is silently a no-op.
+</span><span class="">  752: =head4 Output (Returns::Set schema)
 </span><span class="">  753: 
-</span><span class="">  754: =head3 FORMAL SPECIFICATION
+</span><span class="">  754:     returns: undef
 </span><span class="">  755: 
-</span><span class="">  756:     restore_all &acirc;&#137;&#153;
-</span><span class="">  757:       global: mocked&#39; = {} &acirc;&#136;&sect; mock_meta&#39; = {} &acirc;&#136;&sect; call_log&#39; = []
-</span><span class="">  758:       scoped: &acirc;&#136;&#128; target &acirc;&#136;&#136; dom(mocked) &acirc;&#128;&cent; target =~ /^pkg::/ &acirc;&#135;&#146; unmock_all(target)
-</span><span class="">  759:               &acirc;&#136;&sect; call_log&#39; = [ e &acirc;&#136;&#136; call_log | e !~ /^pkg::/ ]
-</span><span class="">  760: 
-</span><span class="">  761: =cut
-</span><span class="">  762: 
-</span><span class="">  763: sub restore_all {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">764 → 766 → 781</span></span>  764: 	my $arg = $_[0];
-</span><span class="">  765: 
-</span><span class="">  766: 	if (defined $arg) {
-</span><span class="">  767: 		my $package = $arg;
+</span><span class="">  756: =head3 MESSAGES
+</span><span class="">  757: 
+</span><span class="">  758: None. An unknown package is silently a no-op.
+</span><span class="">  759: 
+</span><span class="">  760: =head3 FORMAL SPECIFICATION
+</span><span class="">  761: 
+</span><span class="">  762:     restore_all &acirc;&#137;&#153;
+</span><span class="">  763:       global: mocked&#39; = {} &acirc;&#136;&sect; mock_meta&#39; = {} &acirc;&#136;&sect; call_log&#39; = []
+</span><span class="">  764:       scoped: &acirc;&#136;&#128; target &acirc;&#136;&#136; dom(mocked) &acirc;&#128;&cent; target =~ /^pkg::/ &acirc;&#135;&#146; unmock_all(target)
+</span><span class="">  765:               &acirc;&#136;&sect; call_log&#39; = [ e &acirc;&#136;&#136; call_log | e !~ /^pkg::/ ]
+</span><span class="">  766: 
+</span><span class="">  767: =cut
 </span><span class="">  768: 
-</span><span class="">  769: 		for my $full_method (keys %mocked) {
-</span><span class="">  770: 			next unless $full_method =~ /^\Q$package\E::/;
-</span><span class="">  771: 			_drain_and_restore($full_method);
-</span><span class="">  772: 		}
-</span><span class="">  773: 
-</span><span class="">  774: 		# Remove call_log entries for the restored package
-</span><span class="">  775: 		@call_log = grep { $_ !~ /^\Q$package\E::/ } @call_log;
-</span><span class="">  776: 
-</span><span class="">  777: 		return;
-</span><span class="">  778: 	}
+</span><span class="">  769: sub restore_all {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">770 → 772 → 787</span></span>  770: 	my $arg = $_[0];
+</span><span class="">  771: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  772: 	if (defined $arg) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  773: 		my $package = $arg;
+</span><span class="">  774: 
+</span><span class="">  775: 		for my $full_method (keys %mocked) {
+</span><span class="">  776: 			next unless $full_method =~ /^\Q$package\E::/;
+</span><span class="">  777: 			_drain_and_restore($full_method);
+</span><span class="">  778: 		}
 </span><span class="">  779: 
-</span><span class="">  780: 	# Global restore: revert every tracked method to its saved state
-</span><span class="">  781: 	_drain_and_restore($_) for keys %mocked;
+</span><span class="">  780: 		# Remove call_log entries for the restored package
+</span><span class="">  781: 		@call_log = grep { $_ !~ /^\Q$package\E::/ } @call_log;
 </span><span class="">  782: 
-</span><span class="">  783: 	%mocked    = ();
-</span><span class="">  784: 	%mock_meta = ();
-</span><span class="">  785: 	@call_log  = ();
-</span><span class="">  786: 
-</span><span class="">  787: 	return;
-</span><span class="">  788: }
-</span><span class="">  789: 
-</span><span class="">  790: =head2 restore
-</span><span class="">  791: 
-</span><span class="">  792: Restore all mock layers for a single method target.
-</span><span class="">  793: 
-</span><span class="">  794:     restore &#39;My::Module::method&#39;;
+</span><span class="">  783: 		return;
+</span><span class="">  784: 	}
+</span><span class="">  785: 
+</span><span class="">  786: 	# Global restore: revert every tracked method to its saved state
+</span><span class="">  787: 	_drain_and_restore($_) for keys %mocked;
+</span><span class="">  788: 
+</span><span class="">  789: 	%mocked    = ();
+</span><span class="">  790: 	%mock_meta = ();
+</span><span class="">  791: 	@call_log  = ();
+</span><span class="">  792: 
+</span><span class="">  793: 	return;
+</span><span class="">  794: }
 </span><span class="">  795: 
-</span><span class="">  796: If the method was never mocked this is a no-op.
+</span><span class="">  796: =head2 restore
 </span><span class="">  797: 
-</span><span class="">  798: =head3 API SPECIFICATION
+</span><span class="">  798: Restore all mock layers for a single method target.
 </span><span class="">  799: 
-</span><span class="">  800: =head4 Input (Params::Validate::Strict schema)
+</span><span class="">  800:     restore &#39;My::Module::method&#39;;
 </span><span class="">  801: 
-</span><span class="">  802:     target -- Str
+</span><span class="">  802: If the method was never mocked this is a no-op.
 </span><span class="">  803: 
-</span><span class="">  804: =head4 Output (Returns::Set schema)
+</span><span class="">  804: =head3 API SPECIFICATION
 </span><span class="">  805: 
-</span><span class="">  806:     returns: undef
+</span><span class="">  806: =head4 Input (Params::Validate::Strict schema)
 </span><span class="">  807: 
-</span><span class="">  808: =head3 MESSAGES
+</span><span class="">  808:     target -- Str
 </span><span class="">  809: 
-</span><span class="">  810:   &quot;restore requires a target&quot; -- undef target
+</span><span class="">  810: =head4 Output (Returns::Set schema)
 </span><span class="">  811: 
-</span><span class="">  812: =head3 FORMAL SPECIFICATION
+</span><span class="">  812:     returns: undef
 </span><span class="">  813: 
-</span><span class="">  814:     restore &acirc;&#137;&#153;
-</span><span class="">  815:       &acirc;&#136;&#128; target : Str &acirc;&#128;&cent;
-</span><span class="">  816:         pre  defined(target)
-</span><span class="">  817:         post mocked[target] = []
-</span><span class="">  818: 
-</span><span class="">  819: =cut
-</span><span class="">  820: 
-</span><span class="">  821: sub restore {
-</span><span class="">  822: 	my $target = $_[0];
-</span><span class="">  823: 
-</span><span class="">  824: 	croak &#39;restore requires a target&#39; unless defined $target;
-</span><span class="">  825: 
-</span><span class="">  826: 	my ($package, $method) = _parse_target($target);
-</span><span class="">  827: 	my $full_method = &quot;${package}::${method}&quot;;
-</span><span class="">  828: 
-</span><span class="">  829: 	return unless exists $mocked{$full_method};
-</span><span class="">  830: 
-</span><span class="">  831: 	_drain_and_restore($full_method);
-</span><span class="">  832: 	delete $mocked{$full_method};
-</span><span class="">  833: 	delete $mock_meta{$full_method};
+</span><span class="">  814: =head3 MESSAGES
+</span><span class="">  815: 
+</span><span class="">  816:   &quot;restore requires a target&quot; -- undef target
+</span><span class="">  817: 
+</span><span class="">  818: =head3 FORMAL SPECIFICATION
+</span><span class="">  819: 
+</span><span class="">  820:     restore &acirc;&#137;&#153;
+</span><span class="">  821:       &acirc;&#136;&#128; target : Str &acirc;&#128;&cent;
+</span><span class="">  822:         pre  defined(target)
+</span><span class="">  823:         post mocked[target] = []
+</span><span class="">  824: 
+</span><span class="">  825: =cut
+</span><span class="">  826: 
+</span><span class="">  827: sub restore {
+</span><span class="">  828: 	my $target = $_[0];
+</span><span class="">  829: 
+</span><span class="">  830: 	croak &#39;restore requires a target&#39; unless defined $target;
+</span><span class="">  831: 
+</span><span class="">  832: 	my ($package, $method) = _parse_target($target);
+</span><span class="">  833: 	my $full_method = &quot;${package}::${method}&quot;;
 </span><span class="">  834: 
-</span><span class="">  835: 	return;
-</span><span class="">  836: }
-</span><span class="">  837: 
-</span><span class="">  838: =head2 mock_return
-</span><span class="">  839: 
-</span><span class="">  840: Mock a method to always return a fixed value.
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  841: 
-</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  842:     mock_return &#39;My::Module::method&#39; =&gt; 42;
+</span><span class="">  835: 	return unless exists $mocked{$full_method};
+</span><span class="">  836: 
+</span><span class="">  837: 	_drain_and_restore($full_method);
+</span><span class="">  838: 	delete $mocked{$full_method};
+</span><span class="">  839: 	delete $mock_meta{$full_method};
+</span><span class="">  840: 
+</span><span class="">  841: 	return;
+</span><span class="">  842: }
 </span><span class="">  843: 
-</span><span class="">  844: =head3 API SPECIFICATION
+</span><span class="">  844: =head2 mock_return
 </span><span class="">  845: 
-</span><span class="">  846: =head4 Input (Params::Validate::Strict schema)
+</span><span class="">  846: Mock a method to always return a fixed value.
 </span><span class="">  847: 
-</span><span class="">  848:     target -- Str
-</span><span class="">  849:     value  -- Any
-</span><span class="">  850: 
-</span><span class="">  851: =head4 Output (Returns::Set schema)
-</span><span class="">  852: 
-</span><span class="">  853:     returns: undef
-</span><span class="">  854: 
-</span><span class="">  855: =head3 MESSAGES
+</span><span class="">  848:     mock_return &#39;My::Module::method&#39; =&gt; 42;
+</span><span class="">  849: 
+</span><span class="">  850: =head3 API SPECIFICATION
+</span><span class="">  851: 
+</span><span class="">  852: =head4 Input (Params::Validate::Strict schema)
+</span><span class="">  853: 
+</span><span class="">  854:     target -- Str
+</span><span class="">  855:     value  -- Any
 </span><span class="">  856: 
-</span><span class="">  857:   &quot;mock_return requires a target and a value&quot; -- target undefined
+</span><span class="">  857: =head4 Output (Returns::Set schema)
 </span><span class="">  858: 
-</span><span class="">  859: =head3 FORMAL SPECIFICATION
+</span><span class="">  859:     returns: undef
 </span><span class="">  860: 
-</span><span class="">  861:     mock_return &acirc;&#137;&#153;
-</span><span class="">  862:       &acirc;&#136;&#128; target : Str; value : Any &acirc;&#128;&cent;
-</span><span class="">  863:         post sym_table&#39;[target].CODE = sub { value }
+</span><span class="">  861: =head3 MESSAGES
+</span><span class="">  862: 
+</span><span class="">  863:   &quot;mock_return requires a target and a value&quot; -- target undefined
 </span><span class="">  864: 
-</span><span class="">  865: =cut
+</span><span class="">  865: =head3 FORMAL SPECIFICATION
 </span><span class="">  866: 
-</span><span class="">  867: sub mock_return {
-</span><span class="">  868: 	my ($target, $value) = @_;
-</span><span class="">  869: 
-</span><span class="">  870: 	croak &#39;mock_return requires a target and a value&#39; unless defined $target;
-</span><span class="">  871: 
-</span><span class="">  872: 	local $TYPE = _T_MOCK_RETURN;
-</span><span class="">  873: 	mock $target =&gt; sub { $value };
-</span><span class="">  874: 
-</span><span class="">  875: 	return;
-</span><span class="">  876: }
+</span><span class="">  867:     mock_return &acirc;&#137;&#153;
+</span><span class="">  868:       &acirc;&#136;&#128; target : Str; value : Any &acirc;&#128;&cent;
+</span><span class="">  869:         post sym_table&#39;[target].CODE = sub { value }
+</span><span class="">  870: 
+</span><span class="">  871: =cut
+</span><span class="">  872: 
+</span><span class="">  873: sub mock_return {
+</span><span class="">  874: 	my ($target, $value) = @_;
+</span><span class="">  875: 
+</span><span class="">  876: 	croak &#39;mock_return requires a target and a value&#39; unless defined $target;
 </span><span class="">  877: 
-</span><span class="">  878: =head2 mock_exception
-</span><span class="">  879: 
-</span><span class="">  880: Mock a method to always throw an exception.
-</span><span class="">  881: 
-</span><span class="">  882:     mock_exception &#39;My::Module::method&#39; =&gt; &#39;something went wrong&#39;;
+</span><span class="">  878: 	local $TYPE = _T_MOCK_RETURN;
+</span><span class="">  879: 	mock $target =&gt; sub { $value };
+</span><span class="">  880: 
+</span><span class="">  881: 	return;
+</span><span class="">  882: }
 </span><span class="">  883: 
-</span><span class="">  884: =head3 API SPECIFICATION
+</span><span class="">  884: =head2 mock_exception
 </span><span class="">  885: 
-</span><span class="">  886: =head4 Input (Params::Validate::Strict schema)
+</span><span class="">  886: Mock a method to always throw an exception.
 </span><span class="">  887: 
-</span><span class="">  888:     target  -- Str
-</span><span class="">  889:     message -- Str
-</span><span class="">  890: 
-</span><span class="">  891: =head4 Output (Returns::Set schema)
-</span><span class="">  892: 
-</span><span class="">  893:     returns: undef
-</span><span class="">  894: 
-</span><span class="">  895: =head3 MESSAGES
+</span><span class="">  888:     mock_exception &#39;My::Module::method&#39; =&gt; &#39;something went wrong&#39;;
+</span><span class="">  889: 
+</span><span class="">  890: =head3 API SPECIFICATION
+</span><span class="">  891: 
+</span><span class="">  892: =head4 Input (Params::Validate::Strict schema)
+</span><span class="">  893: 
+</span><span class="">  894:     target  -- Str
+</span><span class="">  895:     message -- Str
 </span><span class="">  896: 
-</span><span class="">  897:   &quot;mock_exception requires a target and an exception message&quot; -- either missing
+</span><span class="">  897: =head4 Output (Returns::Set schema)
 </span><span class="">  898: 
-</span><span class="">  899: =head3 FORMAL SPECIFICATION
+</span><span class="">  899:     returns: undef
 </span><span class="">  900: 
-</span><span class="">  901:     mock_exception &acirc;&#137;&#153;
-</span><span class="">  902:       &acirc;&#136;&#128; target : Str; msg : Str &acirc;&#128;&cent;
-</span><span class="">  903:         post sym_table&#39;[target].CODE = sub { croak msg }
+</span><span class="">  901: =head3 MESSAGES
+</span><span class="">  902: 
+</span><span class="">  903:   &quot;mock_exception requires a target and an exception message&quot; -- either missing
 </span><span class="">  904: 
-</span><span class="">  905: =cut
+</span><span class="">  905: =head3 FORMAL SPECIFICATION
 </span><span class="">  906: 
-</span><span class="">  907: sub mock_exception {
-</span><span class="">  908: 	my ($target, $message) = @_;
-</span><span class="">  909: 
-</span><span class="">  910: 	croak &#39;mock_exception requires a target and an exception message&#39;
-</span><span class="">  911: 		unless defined $target &amp;&amp; defined $message;
+</span><span class="">  907:     mock_exception &acirc;&#137;&#153;
+</span><span class="">  908:       &acirc;&#136;&#128; target : Str; msg : Str &acirc;&#128;&cent;
+</span><span class="">  909:         post sym_table&#39;[target].CODE = sub { croak msg }
+</span><span class="">  910: 
+</span><span class="">  911: =cut
 </span><span class="">  912: 
-</span><span class="">  913: 	local $TYPE = _T_MOCK_EXCEPT;
-</span><span class="">  914: 	mock $target =&gt; sub { croak $message };
+</span><span class="">  913: sub mock_exception {
+</span><span class="">  914: 	my ($target, $message) = @_;
 </span><span class="">  915: 
-</span><span class="">  916: 	return;
-</span><span class="">  917: }
+</span><span class="">  916: 	croak &#39;mock_exception requires a target and an exception message&#39;
+</span><span class="">  917: 		unless defined $target &amp;&amp; defined $message;
 </span><span class="">  918: 
-</span><span class="">  919: =head2 mock_sequence
-</span><span class="">  920: 
-</span><span class="">  921: Mock a method to return a sequence of values over successive calls.
-</span><span class="">  922: The last value repeats when the sequence is exhausted.
-</span><span class="">  923: 
-</span><span class="">  924:     mock_sequence &#39;My::Module::method&#39; =&gt; (1, 2, 3);
-</span><span class="">  925: 
-</span><span class="">  926: =head3 API SPECIFICATION
-</span><span class="">  927: 
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  928: =head4 Input (Params::Validate::Strict schema)
-</span>
-					<details class="mutant-details">
-					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
-					<ul>
-				<li><b>BOOL_NEGATE_928_2: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
-
-								<div class="suggested-test">
-								<div class="suggest-label">🧪 Suggested Test</div>
-								<pre># Boolean branch test suggestion
-ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
-</pre>
-								</div>
-							</li><li><b>RETURN_UNDEF_928_2: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
-
-								<div class="suggested-test">
-								<div class="suggest-label">🧪 Suggested Test</div>
-								<pre># Return value assertion
-is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
-</pre>
-								</div>
-							</li></ul></details>
-<span class="">  929: 
-</span><span class="">  930:     target -- Str
-</span><span class="">  931:     values -- Array (one or more)
-</span><span class="">  932: 
-</span><span class="">  933: =head4 Output (Returns::Set schema)
-</span><span class="">  934: 
-</span><span class="">  935:     returns: undef
-</span><span class="">  936: 
-</span><span class="">  937: =head3 MESSAGES
+</span><span class="">  919: 	local $TYPE = _T_MOCK_EXCEPT;
+</span><span class="">  920: 	mock $target =&gt; sub { croak $message };
+</span><span class="">  921: 
+</span><span class="">  922: 	return;
+</span><span class="">  923: }
+</span><span class="">  924: 
+</span><span class="">  925: =head2 mock_sequence
+</span><span class="">  926: 
+</span><span class="">  927: Mock a method to return a sequence of values over successive calls.
+</span><span class="">  928: The last value repeats when the sequence is exhausted.
+</span><span class="">  929: 
+</span><span class="">  930:     mock_sequence &#39;My::Module::method&#39; =&gt; (1, 2, 3);
+</span><span class="">  931: 
+</span><span class="">  932: =head3 API SPECIFICATION
+</span><span class="">  933: 
+</span><span class="">  934: =head4 Input (Params::Validate::Strict schema)
+</span><span class="">  935: 
+</span><span class="">  936:     target -- Str
+</span><span class="">  937:     values -- Array (one or more)
 </span><span class="">  938: 
-</span><span class="">  939:   &quot;mock_sequence requires a target and at least one value&quot; -- empty value list
+</span><span class="">  939: =head4 Output (Returns::Set schema)
 </span><span class="">  940: 
-</span><span class="">  941: =head3 FORMAL SPECIFICATION
+</span><span class="">  941:     returns: undef
 </span><span class="">  942: 
-</span><span class="">  943:     mock_sequence &acirc;&#137;&#153;
-</span><span class="">  944:       &acirc;&#136;&#128; target : Str; values : Seq(Any) &acirc;&#128;&cent;
-</span><span class="">  945:         pre  |values| &acirc;&#137;&yen; 1
-</span><span class="">  946:         post let queue = values &acirc;&#128;&cent;
-</span><span class="">  947:           sym_table&#39;[target].CODE = sub { head(queue) if |queue|=1 else shift(queue) }
+</span><span class="">  943: =head3 MESSAGES
+</span><span class="">  944: 
+</span><span class="">  945:   &quot;mock_sequence requires a target and at least one value&quot; -- empty value list
+</span><span class="">  946: 
+</span><span class="">  947: =head3 FORMAL SPECIFICATION
 </span><span class="">  948: 
-</span><span class="">  949: =cut
-</span><span class="">  950: 
-</span><span class="">  951: sub mock_sequence {
-</span><span class="">  952: 	my ($target, @values) = @_;
-</span><span class="">  953: 
-</span><span class="">  954: 	croak &#39;mock_sequence requires a target and at least one value&#39;
-</span><span class="">  955: 		unless defined $target &amp;&amp; @values;
+</span><span class="">  949:     mock_sequence &acirc;&#137;&#153;
+</span><span class="">  950:       &acirc;&#136;&#128; target : Str; values : Seq(Any) &acirc;&#128;&cent;
+</span><span class="">  951:         pre  |values| &acirc;&#137;&yen; 1
+</span><span class="">  952:         post let queue = values &acirc;&#128;&cent;
+</span><span class="">  953:           sym_table&#39;[target].CODE = sub { head(queue) if |queue|=1 else shift(queue) }
+</span><span class="">  954: 
+</span><span class="">  955: =cut
 </span><span class="">  956: 
-</span><span class="">  957: 	my @queue = @values;
-</span><span class="">  958: 
-</span><span class="">  959: 	local $TYPE = _T_MOCK_SEQ;
-</span><span class="">  960: 	mock $target =&gt; sub {
-</span><span class="">  961: 		return $queue[0] if @queue == 1;
-</span><span class="">  962: 		return shift @queue;
-</span><span class="">  963: 	};
+</span><span class="">  957: sub mock_sequence {
+</span><span class="">  958: 	my ($target, @values) = @_;
+</span><span class="">  959: 
+</span><span class="">  960: 	croak &#39;mock_sequence requires a target and at least one value&#39;
+</span><span class="">  961: 		unless defined $target &amp;&amp; @values;
+</span><span class="">  962: 
+</span><span class="">  963: 	my @queue = @values;
 </span><span class="">  964: 
-</span><span class="">  965: 	return;
-</span><span class="">  966: }
-</span><span class="">  967: 
-</span><span class="">  968: =head2 mock_once
-</span><span class="">  969: 
-</span><span class="">  970: Install a mock that fires exactly once. After the first call the previous
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  971: implementation is automatically restored.
-</span>
-					<details class="mutant-details">
-					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
-					<ul>
-				<li><b>BOOL_NEGATE_971_2: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
-
-								<div class="suggested-test">
-								<div class="suggest-label">🧪 Suggested Test</div>
-								<pre># Boolean branch test suggestion
-ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
-</pre>
-								</div>
-							</li><li><b>RETURN_UNDEF_971_2: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
-
-								<div class="suggested-test">
-								<div class="suggest-label">🧪 Suggested Test</div>
-								<pre># Return value assertion
-is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
-</pre>
-								</div>
-							</li></ul></details>
-<span class="">  972: 
-</span><span class="">  973:     mock_once &#39;My::Module::method&#39; =&gt; sub { &#39;temporary&#39; };
-</span><span class="">  974: 
-</span><span class="">  975: =head3 API SPECIFICATION
-</span><span class="">  976: 
-</span><span class="">  977: =head4 Input (Params::Validate::Strict schema)
+</span><span class="">  965: 	local $TYPE = _T_MOCK_SEQ;
+</span><span class="">  966: 	mock $target =&gt; sub {
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  967: 		return $queue[0] if @queue == 1;
+</span><p> <b> Mutants (Total: 3, Killed: 3, Survived: 0)</b><p><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  968: 		return shift @queue;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  969: 	};
+</span><span class="">  970: 
+</span><span class="">  971: 	return;
+</span><span class="">  972: }
+</span><span class="">  973: 
+</span><span class="">  974: =head2 mock_once
+</span><span class="">  975: 
+</span><span class="">  976: Install a mock that fires exactly once. After the first call the previous
+</span><span class="">  977: implementation is automatically restored.
 </span><span class="">  978: 
-</span><span class="">  979:     target -- Str
-</span><span class="">  980:     code   -- CodeRef
-</span><span class="">  981: 
-</span><span class="">  982: =head4 Output (Returns::Set schema)
-</span><span class="">  983: 
-</span><span class="">  984:     returns: undef
-</span><span class="">  985: 
-</span><span class="">  986: =head3 MESSAGES
+</span><span class="">  979:     mock_once &#39;My::Module::method&#39; =&gt; sub { &#39;temporary&#39; };
+</span><span class="">  980: 
+</span><span class="">  981: =head3 API SPECIFICATION
+</span><span class="">  982: 
+</span><span class="">  983: =head4 Input (Params::Validate::Strict schema)
+</span><span class="">  984: 
+</span><span class="">  985:     target -- Str
+</span><span class="">  986:     code   -- CodeRef
 </span><span class="">  987: 
-</span><span class="">  988:   &quot;mock_once requires a target and a coderef&quot; -- missing or non-CODE factory
+</span><span class="">  988: =head4 Output (Returns::Set schema)
 </span><span class="">  989: 
-</span><span class="">  990: =head3 FORMAL SPECIFICATION
+</span><span class="">  990:     returns: undef
 </span><span class="">  991: 
-</span><span class="">  992:     mock_once &acirc;&#137;&#153;
-</span><span class="">  993:       &acirc;&#136;&#128; target : Str; code : CodeRef &acirc;&#128;&cent;
-</span><span class="">  994:         post sym_table&#39;[target] = sub {
-</span><span class="">  995:           result = code(@args)
-</span><span class="">  996:           unmock(target)
-</span><span class="">  997:           return result
-</span><span class="">  998:         }
-</span><span class="">  999: 
-</span><span class=""> 1000: =head3 PSEUDOCODE
-</span><span class=""> 1001: 
-</span><span class=""> 1002:     parse target &acirc;&#134;&#146; (package, method)
-</span><span class=""> 1003:     wrapper = sub {
-</span><span class=""> 1004:         result = code(@_)
-</span><span class=""> 1005:         unmock(package, method)   -- pop this very layer
-</span><span class=""> 1006:         return result
-</span><span class=""> 1007:     }
-</span><span class=""> 1008:     install wrapper via mock() with TYPE=&#39;mock_once&#39;
-</span><span class=""> 1009: 
-</span><span class=""> 1010: =cut
-</span><span class=""> 1011: 
-</span><span class=""> 1012: sub mock_once {
-</span><span class=""> 1013: 	my ($target, $code) = @_;
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1014: 
-</span><p> <b> Mutants (Total: 3, Killed: 3, Survived: 0)</b><p><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1015: 	croak &#39;mock_once requires a target and a coderef&#39;
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1016: 		unless defined $target &amp;&amp; ref($code) eq &#39;CODE&#39;;
+</span><span class="">  992: =head3 MESSAGES
+</span><span class="">  993: 
+</span><span class="">  994:   &quot;mock_once requires a target and a coderef&quot; -- missing or non-CODE factory
+</span><span class="">  995: 
+</span><span class="">  996: =head3 FORMAL SPECIFICATION
+</span><span class="">  997: 
+</span><span class="">  998:     mock_once &acirc;&#137;&#153;
+</span><span class="">  999:       &acirc;&#136;&#128; target : Str; code : CodeRef &acirc;&#128;&cent;
+</span><span class=""> 1000:         post sym_table&#39;[target] = sub {
+</span><span class=""> 1001:           result = code(@args)
+</span><span class=""> 1002:           unmock(target)
+</span><span class=""> 1003:           return result
+</span><span class=""> 1004:         }
+</span><span class=""> 1005: 
+</span><span class=""> 1006: =head3 PSEUDOCODE
+</span><span class=""> 1007: 
+</span><span class=""> 1008:     parse target &acirc;&#134;&#146; (package, method)
+</span><span class=""> 1009:     wrapper = sub {
+</span><span class=""> 1010:         result = code(@_)
+</span><span class=""> 1011:         unmock(package, method)   -- pop this very layer
+</span><span class=""> 1012:         return result
+</span><span class=""> 1013:     }
+</span><span class=""> 1014:     install wrapper via mock() with TYPE=&#39;mock_once&#39;
+</span><span class=""> 1015: 
+</span><span class=""> 1016: =cut
 </span><span class=""> 1017: 
-</span><span class=""> 1018: 	my ($package, $method) = _parse_target($target);
-</span><span class=""> 1019: 
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values."> 1020: 	my $wrapper = sub {
-</span>
-					<details class="mutant-details">
-					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
-					<ul>
-				<li><b>BOOL_NEGATE_1020_2: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
-
-								<div class="suggested-test">
-								<div class="suggest-label">🧪 Suggested Test</div>
-								<pre># Boolean branch test suggestion
-ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
-</pre>
-								</div>
-							</li><li><b>RETURN_UNDEF_1020_2: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
-
-								<div class="suggested-test">
-								<div class="suggest-label">🧪 Suggested Test</div>
-								<pre># Return value assertion
-is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
-</pre>
-								</div>
-							</li></ul></details>
-<span class=""> 1021: 		my @result = $code-&gt;(@_);
-</span><span class=""> 1022: 		Test::Mockingbird::unmock($package, $method);
-</span><span class=""> 1023: 		return wantarray ? @result : $result[0];
-</span><span class=""> 1024: 	};
+</span><span class=""> 1018: sub mock_once {
+</span><span class=""> 1019: 	my ($target, $code) = @_;
+</span><span class=""> 1020: 
+</span><span class=""> 1021: 	croak &#39;mock_once requires a target and a coderef&#39;
+</span><span class=""> 1022: 		unless defined $target &amp;&amp; ref($code) eq &#39;CODE&#39;;
+</span><span class=""> 1023: 
+</span><span class=""> 1024: 	my ($package, $method) = _parse_target($target);
 </span><span class=""> 1025: 
-</span><span class=""> 1026: 	local $TYPE = _T_MOCK_ONCE;
-</span><span class=""> 1027: 	mock $target =&gt; $wrapper;
-</span><span class=""> 1028: 
-</span><span class=""> 1029: 	return;
-</span><span class=""> 1030: }
+</span><span class=""> 1026: 	my $wrapper = sub {
+</span><span class=""> 1027: 		my @result = $code-&gt;(@_);
+</span><span class=""> 1028: 		Test::Mockingbird::unmock($package, $method);
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1029: 		return wantarray ? @result : $result[0];
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1030: 	};
 </span><span class=""> 1031: 
-</span><span class=""> 1032: =head2 assert_call_order
-</span><span class=""> 1033: 
-</span><span class=""> 1034: Assert that the named methods were called in left-to-right order.
-</span><span class=""> 1035: 
-</span><span class=""> 1036:     assert_call_order(&#39;A::fetch&#39;, &#39;B::process&#39;, &#39;C::save&#39;);
+</span><span class=""> 1032: 	local $TYPE = _T_MOCK_ONCE;
+</span><span class=""> 1033: 	mock $target =&gt; $wrapper;
+</span><span class=""> 1034: 
+</span><span class=""> 1035: 	return;
+</span><span class=""> 1036: }
 </span><span class=""> 1037: 
-</span><span class=""> 1038: Produces one TAP ok/not-ok line and returns a boolean. Intervening calls
-</span><span class=""> 1039: to other methods are ignored.
-</span><span class=""> 1040: 
-</span><span class=""> 1041: =head3 API SPECIFICATION
-</span><span class=""> 1042: 
-</span><span class=""> 1043: =head4 Input (Params::Validate::Strict schema)
-</span><span class=""> 1044: 
-</span><span class=""> 1045:     methods -- Array of Str (two or more fully-qualified names)
+</span><span class=""> 1038: =head2 assert_call_order
+</span><span class=""> 1039: 
+</span><span class=""> 1040: Assert that the named methods were called in left-to-right order.
+</span><span class=""> 1041: 
+</span><span class=""> 1042:     assert_call_order(&#39;A::fetch&#39;, &#39;B::process&#39;, &#39;C::save&#39;);
+</span><span class=""> 1043: 
+</span><span class=""> 1044: Produces one TAP ok/not-ok line and returns a boolean. Intervening calls
+</span><span class=""> 1045: to other methods are ignored.
 </span><span class=""> 1046: 
-</span><span class=""> 1047: =head4 Output (Returns::Set schema)
+</span><span class=""> 1047: =head3 API SPECIFICATION
 </span><span class=""> 1048: 
-</span><span class=""> 1049:     returns: Bool
+</span><span class=""> 1049: =head4 Input (Params::Validate::Strict schema)
 </span><span class=""> 1050: 
-</span><span class=""> 1051: =head3 MESSAGES
+</span><span class=""> 1051:     methods -- Array of Str (two or more fully-qualified names)
 </span><span class=""> 1052: 
-</span><span class=""> 1053:   &quot;assert_call_order requires at least two method names&quot; -- fewer than two given
+</span><span class=""> 1053: =head4 Output (Returns::Set schema)
 </span><span class=""> 1054: 
-</span><span class=""> 1055: =head3 FORMAL SPECIFICATION
+</span><span class=""> 1055:     returns: Bool
 </span><span class=""> 1056: 
-</span><span class=""> 1057:     assert_call_order &acirc;&#137;&#153;
-</span><span class=""> 1058:       &acirc;&#136;&#128; expected : Seq(Str) &acirc;&#128;&cent;
-</span><span class=""> 1059:         pre  |expected| &acirc;&#137;&yen; 2
-</span><span class=""> 1060:         post result = (&acirc;&#136;&#128; i &acirc;&#128;&cent; &acirc;&#136;&#131; p_i : &acirc;&#132;&#149; | p_0 &lt; p_1 &lt; &acirc;&#128;&brvbar; &acirc;&#136;&sect; call_log[p_i] = expected[i])
-</span><span class=""> 1061: 
-</span><span class=""> 1062: =cut
-</span><span class=""> 1063: 
-</span><span class=""> 1064: sub assert_call_order {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1065 → 1071 → 1078</span></span> 1065: 	my @expected = @_;
-</span><span class=""> 1066: 
-</span><span class=""> 1067: 	croak &#39;assert_call_order requires at least two method names&#39;
-</span><span class=""> 1068: 		unless @expected &gt;= 2;
+</span><span class=""> 1057: =head3 MESSAGES
+</span><span class=""> 1058: 
+</span><span class=""> 1059:   &quot;assert_call_order requires at least two method names&quot; -- fewer than two given
+</span><span class=""> 1060: 
+</span><span class=""> 1061: =head3 FORMAL SPECIFICATION
+</span><span class=""> 1062: 
+</span><span class=""> 1063:     assert_call_order &acirc;&#137;&#153;
+</span><span class=""> 1064:       &acirc;&#136;&#128; expected : Seq(Str) &acirc;&#128;&cent;
+</span><span class=""> 1065:         pre  |expected| &acirc;&#137;&yen; 2
+</span><span class=""> 1066:         post result = (&acirc;&#136;&#128; i &acirc;&#128;&cent; &acirc;&#136;&#131; p_i : &acirc;&#132;&#149; | p_0 &lt; p_1 &lt; &acirc;&#128;&brvbar; &acirc;&#136;&sect; call_log[p_i] = expected[i])
+</span><span class=""> 1067: 
+</span><span class=""> 1068: =cut
 </span><span class=""> 1069: 
-</span><span class=""> 1070: 	my $pos = 0;
-</span><span class=""> 1071: 	for my $logged (@call_log) {
-</span><span class=""> 1072: 		if ($logged eq $expected[$pos]) {
-</span><span class=""> 1073: 			$pos++;
-</span><span class=""> 1074: 			last if $pos == @expected;
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1075: 		}
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1076: 	}
-</span><span class=""> 1077: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1078 → 1081 → 1090</span></span> 1078: 	my $ok = ($pos == @expected);
-</span><span class=""> 1079: 
-</span><span class=""> 1080: 	require Test::More;
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values."> 1081: 	if ($ok) {
-</span>
-					<details class="mutant-details">
-					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
-					<ul>
-				<li><b>BOOL_NEGATE_1081_2: Negate boolean return expression</b><br>MEDIUM: Add tests asserting both true and false outcomes
-
-								<div class="suggested-test">
-								<div class="suggest-label">🧪 Suggested Test</div>
-								<pre># Boolean branch test suggestion
-ok( !func(INPUT), &#39;Verify boolean branch behaviour&#39; );
-</pre>
-								</div>
-							</li><li><b>RETURN_UNDEF_1081_2: Replace return expression with undef</b><br>LOW: Mutation survived, but impact may be minor
-
-								<div class="suggested-test">
-								<div class="suggest-label">🧪 Suggested Test</div>
-								<pre># Return value assertion
-is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
-</pre>
-								</div>
-							</li></ul></details>
-<span class=""> 1082: 		Test::More::pass(&quot;call order: &quot; . join(&#39; -&gt; &#39;, @expected));
-</span><span class=""> 1083: 	} else {
-</span><span class=""> 1084: 		Test::More::fail(&quot;call order: &quot; . join(&#39; -&gt; &#39;, @expected));
-</span><span class=""> 1085: 		Test::More::diag(
-</span><span class=""> 1086: 			&quot;Expected &#39;$expected[$pos]&#39; next but it was not in the call log&quot;
-</span><span class=""> 1087: 		);
-</span><span class=""> 1088: 	}
-</span><span class=""> 1089: 
-</span><span class=""> 1090: 	return $ok;
-</span><span class=""> 1091: }
-</span><span class=""> 1092: 
-</span><span class=""> 1093: =head2 clear_call_log
-</span><span class=""> 1094: 
-</span><span class=""> 1095: Clear the call-order log without restoring mocks or spies.
-</span><span class=""> 1096: 
-</span><span class=""> 1097:     clear_call_log();
+</span><span class=""> 1070: sub assert_call_order {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1071 → 1077 → 1084</span></span> 1071: 	my @expected = @_;
+</span><span class=""> 1072: 
+</span><span class=""> 1073: 	croak &#39;assert_call_order requires at least two method names&#39;
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1074: 		unless @expected &gt;= 2;
+</span><p> <b> Mutants (Total: 3, Killed: 3, Survived: 0)</b><p><span class=""> 1075: 
+</span><span class=""> 1076: 	my $pos = 0;
+</span><span class=""> 1077: 	for my $logged (@call_log) {
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1078: 		if ($logged eq $expected[$pos]) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1079: 			$pos++;
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1080: 			last if $pos == @expected;
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1081: 		}
+</span><span class=""> 1082: 	}
+</span><span class=""> 1083: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1084 → 1087 → 1096</span></span> 1084: 	my $ok = ($pos == @expected);
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1085: 
+</span><span class=""> 1086: 	require Test::More;
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1087: 	if ($ok) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1088: 		Test::More::pass(&quot;call order: &quot; . join(&#39; -&gt; &#39;, @expected));
+</span><span class=""> 1089: 	} else {
+</span><span class=""> 1090: 		Test::More::fail(&quot;call order: &quot; . join(&#39; -&gt; &#39;, @expected));
+</span><span class=""> 1091: 		Test::More::diag(
+</span><span class=""> 1092: 			&quot;Expected &#39;$expected[$pos]&#39; next but it was not in the call log&quot;
+</span><span class=""> 1093: 		);
+</span><span class=""> 1094: 	}
+</span><span class=""> 1095: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1096: 	return $ok;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1097: }
 </span><span class=""> 1098: 
-</span><span class=""> 1099: C&lt;restore_all()&gt; also clears the log automatically.
+</span><span class=""> 1099: =head2 clear_call_log
 </span><span class=""> 1100: 
-</span><span class=""> 1101: =head3 API SPECIFICATION
+</span><span class=""> 1101: Clear the call-order log without restoring mocks or spies.
 </span><span class=""> 1102: 
-</span><span class=""> 1103: =head4 Input (Params::Validate::Strict schema)
+</span><span class=""> 1103:     clear_call_log();
 </span><span class=""> 1104: 
-</span><span class=""> 1105:     none
+</span><span class=""> 1105: C&lt;restore_all()&gt; also clears the log automatically.
 </span><span class=""> 1106: 
-</span><span class=""> 1107: =head4 Output (Returns::Set schema)
+</span><span class=""> 1107: =head3 API SPECIFICATION
 </span><span class=""> 1108: 
-</span><span class=""> 1109:     returns: undef
+</span><span class=""> 1109: =head4 Input (Params::Validate::Strict schema)
 </span><span class=""> 1110: 
-</span><span class=""> 1111: =head3 FORMAL SPECIFICATION
+</span><span class=""> 1111:     none
 </span><span class=""> 1112: 
-</span><span class=""> 1113:     clear_call_log &acirc;&#137;&#153; post call_log&#39; = []
+</span><span class=""> 1113: =head4 Output (Returns::Set schema)
 </span><span class=""> 1114: 
-</span><span class=""> 1115: =cut
+</span><span class=""> 1115:     returns: undef
 </span><span class=""> 1116: 
-</span><span class=""> 1117: sub clear_call_log {
-</span><span class=""> 1118: 	@call_log = ();
-</span><span class=""> 1119: 	return;
-</span><span class=""> 1120: }
-</span><span class=""> 1121: 
-</span><span class=""> 1122: # _record_call -- Private helper
-</span><span class=""> 1123: #
-</span><span class=""> 1124: # Purpose:      Append a fully-qualified method name to the call-order log.
-</span><span class=""> 1125: #               Used by Test::Mockingbird::Async to participate in
-</span><span class=""> 1126: #               assert_call_order() without crossing the lexical boundary of
-</span><span class=""> 1127: #               @call_log.
-</span><span class=""> 1128: # Entry:        $_[0] -- Str, fully-qualified method name
-</span><span class=""> 1129: # Exit:         undef
-</span><span class=""> 1130: # Side effects: Appends to @call_log
-</span><span class=""> 1131: sub _record_call {
-</span><span class=""> 1132: 	push @call_log, $_[0];
-</span><span class=""> 1133: 	return;
-</span><span class=""> 1134: }
-</span><span class=""> 1135: 
-</span><span class=""> 1136: =head2 diagnose_mocks
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1137: 
-</span><p> <b> Mutants (Total: 3, Killed: 3, Survived: 0)</b><p><span class=""> 1138: Return a structured hashref of all currently active mock layers.
-</span><span class=""> 1139: 
-</span><span class=""> 1140:     my $diag = diagnose_mocks();
-</span><span class=""> 1141:     # $diag-&gt;{&#39;My::Pkg::method&#39;} = {
-</span><span class=""> 1142:     #   depth            =&gt; 1,
-</span><span class=""> 1143:     #   layers           =&gt; [ { type =&gt; &#39;mock_return&#39;, installed_at =&gt; &#39;...&#39; } ],
-</span><span class=""> 1144:     # }
+</span><span class=""> 1117: =head3 FORMAL SPECIFICATION
+</span><span class=""> 1118: 
+</span><span class=""> 1119:     clear_call_log &acirc;&#137;&#153; post call_log&#39; = []
+</span><span class=""> 1120: 
+</span><span class=""> 1121: =cut
+</span><span class=""> 1122: 
+</span><span class=""> 1123: sub clear_call_log {
+</span><span class=""> 1124: 	@call_log = ();
+</span><span class=""> 1125: 	return;
+</span><span class=""> 1126: }
+</span><span class=""> 1127: 
+</span><span class=""> 1128: # _record_call -- Private helper
+</span><span class=""> 1129: #
+</span><span class=""> 1130: # Purpose:      Append a fully-qualified method name to the call-order log.
+</span><span class=""> 1131: #               Used by Test::Mockingbird::Async to participate in
+</span><span class=""> 1132: #               assert_call_order() without crossing the lexical boundary of
+</span><span class=""> 1133: #               @call_log.
+</span><span class=""> 1134: # Entry:        $_[0] -- Str, fully-qualified method name
+</span><span class=""> 1135: # Exit:         undef
+</span><span class=""> 1136: # Side effects: Appends to @call_log
+</span><span class=""> 1137: sub _record_call {
+</span><span class=""> 1138: 	push @call_log, $_[0];
+</span><span class=""> 1139: 	return;
+</span><span class=""> 1140: }
+</span><span class=""> 1141: 
+</span><span class=""> 1142: =head2 diagnose_mocks
+</span><span class=""> 1143: 
+</span><span class=""> 1144: Return a structured hashref of all currently active mock layers.
 </span><span class=""> 1145: 
-</span><span class=""> 1146: =head3 API SPECIFICATION
-</span><span class=""> 1147: 
-</span><span class=""> 1148: =head4 Input (Params::Validate::Strict schema)
-</span><span class=""> 1149: 
-</span><span class=""> 1150:     none
+</span><span class=""> 1146:     my $diag = diagnose_mocks();
+</span><span class=""> 1147:     # $diag-&gt;{&#39;My::Pkg::method&#39;} = {
+</span><span class=""> 1148:     #   depth            =&gt; 1,
+</span><span class=""> 1149:     #   layers           =&gt; [ { type =&gt; &#39;mock_return&#39;, installed_at =&gt; &#39;...&#39; } ],
+</span><span class=""> 1150:     # }
 </span><span class=""> 1151: 
-</span><span class=""> 1152: =head4 Output (Returns::Set schema)
+</span><span class=""> 1152: =head3 API SPECIFICATION
 </span><span class=""> 1153: 
-</span><span class=""> 1154:     returns: HashRef
+</span><span class=""> 1154: =head4 Input (Params::Validate::Strict schema)
 </span><span class=""> 1155: 
-</span><span class=""> 1156: =head3 FORMAL SPECIFICATION
+</span><span class=""> 1156:     none
 </span><span class=""> 1157: 
-</span><span class=""> 1158:     diagnose_mocks &acirc;&#137;&#153;
-</span><span class=""> 1159:       returns { target &acirc;&#134;&brvbar; { depth, layers } | target &acirc;&#136;&#136; dom(mocked) }
-</span><span class=""> 1160: 
-</span><span class=""> 1161: =cut
-</span><span class=""> 1162: 
-</span><span class=""> 1163: sub diagnose_mocks {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1164 → 1166 → 1177</span></span> 1164: 	my %report;
-</span><span class=""> 1165: 
-</span><span class=""> 1166: 	for my $full_method (sort keys %mocked) {
-</span><span class=""> 1167: 		my $layers = $mock_meta{$full_method} // [];
-</span><span class=""> 1168: 		$report{$full_method} = {
-</span><span class=""> 1169: 			depth            =&gt; scalar @{ $mocked{$full_method} },
-</span><span class=""> 1170: 			layers           =&gt; [ @$layers ],
-</span><span class=""> 1171: 			# original_existed reflects whether the method existed before the
-</span><span class=""> 1172: 			# FIRST mock layer was installed (stored in the bottom-most meta entry)
-</span><span class=""> 1173: 			original_existed =&gt; (@$layers &amp;&amp; $layers-&gt;[0]{original_existed}) ? 1 : 0,
-</span><span class=""> 1174: 		};
-</span><span class=""> 1175: 	}
-</span><span class=""> 1176: 
-</span><span class=""> 1177: 	return \%report;
-</span><span class=""> 1178: }
-</span><span class=""> 1179: 
-</span><span class=""> 1180: =head2 diagnose_mocks_pretty
-</span><span class=""> 1181: 
-</span><span class=""> 1182: Return a human-readable multi-line string of all active mock layers.
-</span><span class=""> 1183: 
-</span><span class=""> 1184: =head3 API SPECIFICATION
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1185: 
-</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1186: =head4 Input (Params::Validate::Strict schema)
+</span><span class=""> 1158: =head4 Output (Returns::Set schema)
+</span><span class=""> 1159: 
+</span><span class=""> 1160:     returns: HashRef
+</span><span class=""> 1161: 
+</span><span class=""> 1162: =head3 FORMAL SPECIFICATION
+</span><span class=""> 1163: 
+</span><span class=""> 1164:     diagnose_mocks &acirc;&#137;&#153;
+</span><span class=""> 1165:       returns { target &acirc;&#134;&brvbar; { depth, layers } | target &acirc;&#136;&#136; dom(mocked) }
+</span><span class=""> 1166: 
+</span><span class=""> 1167: =cut
+</span><span class=""> 1168: 
+</span><span class=""> 1169: sub diagnose_mocks {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1170 → 1172 → 1183</span></span> 1170: 	my %report;
+</span><span class=""> 1171: 
+</span><span class=""> 1172: 	for my $full_method (sort keys %mocked) {
+</span><span class=""> 1173: 		my $layers = $mock_meta{$full_method} // [];
+</span><span class=""> 1174: 		$report{$full_method} = {
+</span><span class=""> 1175: 			depth            =&gt; scalar @{ $mocked{$full_method} },
+</span><span class=""> 1176: 			layers           =&gt; [ @$layers ],
+</span><span class=""> 1177: 			# original_existed reflects whether the method existed before the
+</span><span class=""> 1178: 			# FIRST mock layer was installed (stored in the bottom-most meta entry)
+</span><span class=""> 1179: 			original_existed =&gt; (@$layers &amp;&amp; $layers-&gt;[0]{original_existed}) ? 1 : 0,
+</span><span class=""> 1180: 		};
+</span><span class=""> 1181: 	}
+</span><span class=""> 1182: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1183: 	return \%report;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1184: }
+</span><span class=""> 1185: 
+</span><span class=""> 1186: =head2 diagnose_mocks_pretty
 </span><span class=""> 1187: 
-</span><span class=""> 1188:     none
+</span><span class=""> 1188: Return a human-readable multi-line string of all active mock layers.
 </span><span class=""> 1189: 
-</span><span class=""> 1190: =head4 Output (Returns::Set schema)
+</span><span class=""> 1190: =head3 API SPECIFICATION
 </span><span class=""> 1191: 
-</span><span class=""> 1192:     returns: Str
+</span><span class=""> 1192: =head4 Input (Params::Validate::Strict schema)
 </span><span class=""> 1193: 
-</span><span class=""> 1194: =head3 FORMAL SPECIFICATION
+</span><span class=""> 1194:     none
 </span><span class=""> 1195: 
-</span><span class=""> 1196:     diagnose_mocks_pretty &acirc;&#137;&#153; stringify(diagnose_mocks())
+</span><span class=""> 1196: =head4 Output (Returns::Set schema)
 </span><span class=""> 1197: 
-</span><span class=""> 1198: =cut
+</span><span class=""> 1198:     returns: Str
 </span><span class=""> 1199: 
-</span><span class=""> 1200: sub diagnose_mocks_pretty {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1201 → 1204 → 1216</span></span> 1201: 	my $diag = diagnose_mocks();
-</span><span class=""> 1202: 	my @out;
+</span><span class=""> 1200: =head3 FORMAL SPECIFICATION
+</span><span class=""> 1201: 
+</span><span class=""> 1202:     diagnose_mocks_pretty &acirc;&#137;&#153; stringify(diagnose_mocks())
 </span><span class=""> 1203: 
-</span><span class=""> 1204: 	for my $full_method (sort keys %$diag) {
-</span><span class=""> 1205: 		my $entry = $diag-&gt;{$full_method};
-</span><span class=""> 1206: 		push @out, &quot;$full_method:&quot;;
-</span><span class=""> 1207: 		push @out, &quot;  depth: $entry-&gt;{depth}&quot;;
-</span><span class=""> 1208: 		push @out, &quot;  original_existed: $entry-&gt;{original_existed}&quot;;
-</span><span class=""> 1209: 		for my $layer (@{ $entry-&gt;{layers} }) {
-</span><span class=""> 1210: 			push @out, sprintf &quot;  - type: %-14s installed_at: %s&quot;,
-</span><span class=""> 1211: 				$layer-&gt;{type}, $layer-&gt;{installed_at};
-</span><span class=""> 1212: 		}
-</span><span class=""> 1213: 		push @out, &#39;&#39;;
-</span><span class=""> 1214: 	}
-</span><span class=""> 1215: 
-</span><span class=""> 1216: 	return join &quot;\n&quot;, @out;
-</span><span class=""> 1217: }
-</span><span class=""> 1218: 
-</span><span class=""> 1219: # _drain_and_restore -- Private helper
-</span><span class=""> 1220: #
-</span><span class=""> 1221: # Purpose:      Pop all layers from the mock stack for a single target and
-</span><span class=""> 1222: #               restore the bottom-most saved coderef to the symbol table.
-</span><span class=""> 1223: #               Does NOT clean up %mocked or %mock_meta -- callers must do
-</span><span class=""> 1224: #               that themselves.
-</span><span class=""> 1225: # Entry:        $_[0] -- Str, fully-qualified method name
-</span><span class=""> 1226: # Exit:         undef
-</span><span class=""> 1227: # Side effects: Modifies the symbol table for the target.
-</span><span class=""> 1228: sub _drain_and_restore {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1229 → 1232 → 1239</span></span> 1229: 	my $full_method = $_[0];
-</span><span class=""> 1230: 
-</span><span class=""> 1231: 	my $final_prev;
-</span><span class=""> 1232: 	while (@{ $mocked{$full_method} }) {
-</span><span class=""> 1233: 		$final_prev = pop @{ $mocked{$full_method} };
-</span><span class=""> 1234: 	}
-</span><span class=""> 1235: 
-</span><span class=""> 1236: 	# Restore the original (bottom of stack) to the SAME GV that compiled
-</span><span class=""> 1237: 	# calls hold.  We never delete the GV because compiled direct-call ops
-</span><span class=""> 1238: 	# cache the GV at compile time; a new GV would be invisible to them.
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1239 → 1239 → 1245</span></span> 1239: 	if (defined $final_prev) {
-</span><span class=""> 1240: 		no warnings &#39;redefine&#39;;
-</span><span class=""> 1241: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
-</span><span class=""> 1242: 		*{$full_method} = $final_prev;
-</span><span class=""> 1243: 	}
-</span><span class=""> 1244: 
-</span><span class=""> 1245: 	return;
-</span><span class=""> 1246: }
-</span><span class=""> 1247: 
-</span><span class=""> 1248: # _parse_target -- Private helper
-</span><span class=""> 1249: #
-</span><span class=""> 1250: # Purpose:      Normalise both shorthand (&#39;Pkg::method&#39;) and longhand
-</span><span class=""> 1251: #               (&#39;Pkg&#39;, &#39;method&#39;) call forms into a ($package, $method) pair.
-</span><span class=""> 1252: # Entry:        @_ -- one arg for shorthand, two args for longhand
-</span><span class=""> 1253: # Exit:         ($package, $method) -- list of two strings
-</span><span class=""> 1254: # Side effects: none
-</span><span class=""> 1255: sub _parse_target {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1256 → 1259 → 1263</span></span> 1256: 	my ($arg1, $arg2) = @_;
-</span><span class=""> 1257: 
-</span><span class=""> 1258: 	# Shorthand: single &#39;Pkg::method&#39; string -- arg2 is absent (undef)
-</span><span class=""> 1259: 	if (defined $arg1 &amp;&amp; !defined $arg2 &amp;&amp; $arg1 =~ /^(.*)::([^:]+)$/) {
-</span><span class=""> 1260: 		return ($1, $2);
-</span><span class=""> 1261: 	}
-</span><span class=""> 1262: 
-</span><span class=""> 1263: 	return ($arg1, $arg2);
-</span><span class=""> 1264: }
-</span><span class=""> 1265: 
-</span><span class=""> 1266: # _caller_info -- Private helper
-</span><span class=""> 1267: #
-</span><span class=""> 1268: # Purpose:      Walk up the call stack to find the first frame outside any
-</span><span class=""> 1269: #               Test::Mockingbird namespace.  Returns a human-readable
-</span><span class=""> 1270: #               &quot;file line N&quot; string for use in installed_at diagnostics.
-</span><span class=""> 1271: #               This ensures that sugar functions (mock_return, mock_once,
-</span><span class=""> 1272: #               etc.) report the user&#39;s call site, not their own location.
-</span><span class=""> 1273: # Entry:        none
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1274: # Exit:         Str, e.g. &quot;t/my_test.t line 42&quot;
-</span><p> <b> Mutants (Total: 3, Killed: 3, Survived: 0)</b><p><span class=""> 1275: # Side effects: none
-</span><span class=""> 1276: sub _caller_info {
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1277 → 1278 → 1282</span></span> 1277: 	my $level = 1;
-</span><span class=""> 1278: 	while (my @info = caller($level)) {
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1279: 		last unless $info[0] =~ /^Test::Mockingbird/;
-</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1280: 		$level++;
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1281: 	}
-</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1282: 	my @info = caller($level);
-</span><span class=""> 1283: 	return defined $info[1] ? &quot;$info[1] line $info[2]&quot; : &#39;(unknown)&#39;;
-</span><span class=""> 1284: }
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1285: 
-</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1286: # _get_prototype -- Private helper
-</span><span class=""> 1287: #
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1288: # Purpose:      Return the prototype string of a named sub, if any.
-</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1289: # Entry:        $_[0] -- Str, fully-qualified sub name
-</span><span class=""> 1290: # Exit:         Str or undef
-</span><span class=""> 1291: # Side effects: none
-</span><span class=""> 1292: sub _get_prototype {
-</span><span class=""> 1293: 	my $full = $_[0];
-</span><span class=""> 1294: 
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1295: 	croak &quot;Invalid fully-qualified name &#39;$full&#39;&quot;
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1296: 		unless $full =~ /^[A-Za-z_]\w*(?:::\w+)+$/;
-</span><span class=""> 1297: 
-</span><span class=""> 1298: 	my ($pkg, $sub) = $full =~ /^(.*)::([^:]+)$/;
-</span><span class=""> 1299: 	my $code = $pkg-&gt;can($sub) or return;
-</span><span class=""> 1300: 	return prototype($code);
-</span><span class=""> 1301: }
-</span><span class=""> 1302: 
-</span><span class=""> 1303: =head1 SUPPORT
-</span><span class=""> 1304: 
-</span><span class=""> 1305: Please report bugs at L&lt;https://github.com/nigelhorne/Test-Mockingbird/issues&gt;.
-</span><span class=""> 1306: 
-</span><span class=""> 1307: =head1 AUTHOR
-</span><span class=""> 1308: 
-</span><span class=""> 1309: Nigel Horne, C&lt;&lt; &lt;njh at nigelhorne.com&gt; &gt;&gt;
+</span><span class=""> 1204: =cut
+</span><span class=""> 1205: 
+</span><span class=""> 1206: sub diagnose_mocks_pretty {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1207 → 1210 → 1222</span></span> 1207: 	my $diag = diagnose_mocks();
+</span><span class=""> 1208: 	my @out;
+</span><span class=""> 1209: 
+</span><span class=""> 1210: 	for my $full_method (sort keys %$diag) {
+</span><span class=""> 1211: 		my $entry = $diag-&gt;{$full_method};
+</span><span class=""> 1212: 		push @out, &quot;$full_method:&quot;;
+</span><span class=""> 1213: 		push @out, &quot;  depth: $entry-&gt;{depth}&quot;;
+</span><span class=""> 1214: 		push @out, &quot;  original_existed: $entry-&gt;{original_existed}&quot;;
+</span><span class=""> 1215: 		for my $layer (@{ $entry-&gt;{layers} }) {
+</span><span class=""> 1216: 			push @out, sprintf &quot;  - type: %-14s installed_at: %s&quot;,
+</span><span class=""> 1217: 				$layer-&gt;{type}, $layer-&gt;{installed_at};
+</span><span class=""> 1218: 		}
+</span><span class=""> 1219: 		push @out, &#39;&#39;;
+</span><span class=""> 1220: 	}
+</span><span class=""> 1221: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1222: 	return join &quot;\n&quot;, @out;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1223: }
+</span><span class=""> 1224: 
+</span><span class=""> 1225: # _drain_and_restore -- Private helper
+</span><span class=""> 1226: #
+</span><span class=""> 1227: # Purpose:      Pop all layers from the mock stack for a single target and
+</span><span class=""> 1228: #               restore the bottom-most saved coderef to the symbol table.
+</span><span class=""> 1229: #               Does NOT clean up %mocked or %mock_meta -- callers must do
+</span><span class=""> 1230: #               that themselves.
+</span><span class=""> 1231: # Entry:        $_[0] -- Str, fully-qualified method name
+</span><span class=""> 1232: # Exit:         undef
+</span><span class=""> 1233: # Side effects: Modifies the symbol table for the target.
+</span><span class=""> 1234: sub _drain_and_restore {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1235 → 1238 → 1245</span></span> 1235: 	my $full_method = $_[0];
+</span><span class=""> 1236: 
+</span><span class=""> 1237: 	my $final_prev;
+</span><span class=""> 1238: 	while (@{ $mocked{$full_method} }) {
+</span><span class=""> 1239: 		$final_prev = pop @{ $mocked{$full_method} };
+</span><span class=""> 1240: 	}
+</span><span class=""> 1241: 
+</span><span class=""> 1242: 	# Restore the original (bottom of stack) to the SAME GV that compiled
+</span><span class=""> 1243: 	# calls hold.  We never delete the GV because compiled direct-call ops
+</span><span class=""> 1244: 	# cache the GV at compile time; a new GV would be invisible to them.
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1245 → 1245 → 1251</span></span> 1245: 	if (defined $final_prev) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1246: 		no warnings &#39;redefine&#39;;
+</span><span class=""> 1247: 		no strict &#39;refs&#39;;    ## no critic (ProhibitNoStrict)
+</span><span class=""> 1248: 		*{$full_method} = $final_prev;
+</span><span class=""> 1249: 	}
+</span><span class=""> 1250: 
+</span><span class=""> 1251: 	return;
+</span><span class=""> 1252: }
+</span><span class=""> 1253: 
+</span><span class=""> 1254: # _parse_target -- Private helper
+</span><span class=""> 1255: #
+</span><span class=""> 1256: # Purpose:      Normalise both shorthand (&#39;Pkg::method&#39;) and longhand
+</span><span class=""> 1257: #               (&#39;Pkg&#39;, &#39;method&#39;) call forms into a ($package, $method) pair.
+</span><span class=""> 1258: # Entry:        @_ -- one arg for shorthand, two args for longhand
+</span><span class=""> 1259: # Exit:         ($package, $method) -- list of two strings
+</span><span class=""> 1260: # Side effects: none
+</span><span class=""> 1261: sub _parse_target {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1262 → 1265 → 1269</span></span> 1262: 	my ($arg1, $arg2) = @_;
+</span><span class=""> 1263: 
+</span><span class=""> 1264: 	# Shorthand: single &#39;Pkg::method&#39; string -- arg2 is absent (undef)
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1265: 	if (defined $arg1 &amp;&amp; !defined $arg2 &amp;&amp; $arg1 =~ /^(.*)::([^:]+)$/) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class=""> 1266: 		return ($1, $2);
+</span><span class=""> 1267: 	}
+</span><span class=""> 1268: 
+</span><span class=""> 1269: 	return ($arg1, $arg2);
+</span><span class=""> 1270: }
+</span><span class=""> 1271: 
+</span><span class=""> 1272: # _caller_info -- Private helper
+</span><span class=""> 1273: #
+</span><span class=""> 1274: # Purpose:      Walk up the call stack to find the first frame outside any
+</span><span class=""> 1275: #               Test::Mockingbird namespace.  Returns a human-readable
+</span><span class=""> 1276: #               &quot;file line N&quot; string for use in installed_at diagnostics.
+</span><span class=""> 1277: #               This ensures that sugar functions (mock_return, mock_once,
+</span><span class=""> 1278: #               etc.) report the user&#39;s call site, not their own location.
+</span><span class=""> 1279: # Entry:        none
+</span><span class=""> 1280: # Exit:         Str, e.g. &quot;t/my_test.t line 42&quot;
+</span><span class=""> 1281: # Side effects: none
+</span><span class=""> 1282: sub _caller_info {
+</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">1283 → 1284 → 1288</span></span> 1283: 	my $level = 1;
+</span><span class=""> 1284: 	while (my @info = caller($level)) {
+</span><span class=""> 1285: 		last unless $info[0] =~ /^Test::Mockingbird/;
+</span><span class=""> 1286: 		$level++;
+</span><span class=""> 1287: 	}
+</span><span class=""> 1288: 	my @info = caller($level);
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1289: 	return defined $info[1] ? &quot;$info[1] line $info[2]&quot; : &#39;(unknown)&#39;;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1290: }
+</span><span class=""> 1291: 
+</span><span class=""> 1292: # _get_prototype -- Private helper
+</span><span class=""> 1293: #
+</span><span class=""> 1294: # Purpose:      Return the prototype string of a named sub, if any.
+</span><span class=""> 1295: # Entry:        $_[0] -- Str, fully-qualified sub name
+</span><span class=""> 1296: # Exit:         Str or undef
+</span><span class=""> 1297: # Side effects: none
+</span><span class=""> 1298: sub _get_prototype {
+</span><span class=""> 1299: 	my $full = $_[0];
+</span><span class=""> 1300: 
+</span><span class=""> 1301: 	# All components (package segments and the sub name itself) must start
+</span><span class=""> 1302: 	# with a letter or underscore -- Perl identifiers cannot begin with a digit.
+</span><span class=""> 1303: 	croak &quot;Invalid fully-qualified name &#39;$full&#39;&quot;
+</span><span class=""> 1304: 		unless $full =~ /^[A-Za-z_]\w*(?:::[A-Za-z_]\w*)+$/;
+</span><span class=""> 1305: 
+</span><span class=""> 1306: 	my ($pkg, $sub) = $full =~ /^(.*)::([^:]+)$/;
+</span><span class=""> 1307: 	my $code = $pkg-&gt;can($sub) or return;
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1308: 	return prototype($code);
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1309: }
 </span><span class=""> 1310: 
-</span><span class=""> 1311: =head1 SEE ALSO
+</span><span class=""> 1311: =head1 SUPPORT
 </span><span class=""> 1312: 
-</span><span class=""> 1313: =over 4
+</span><span class=""> 1313: Please report bugs at L&lt;https://github.com/nigelhorne/Test-Mockingbird/issues&gt;.
 </span><span class=""> 1314: 
-</span><span class=""> 1315: =item * L&lt;Test Dashboard|https://nigelhorne.github.io/Test-Mockingbird/coverage/&gt;
+</span><span class=""> 1315: =head1 AUTHOR
 </span><span class=""> 1316: 
-</span><span class=""> 1317: =item * L&lt;Test::Mockingbird::Async&gt;
+</span><span class=""> 1317: Nigel Horne, C&lt;&lt; &lt;njh at nigelhorne.com&gt; &gt;&gt;
 </span><span class=""> 1318: 
-</span><span class=""> 1319: =item * L&lt;Test::Mockingbird::DeepMock&gt;
+</span><span class=""> 1319: =head1 SEE ALSO
 </span><span class=""> 1320: 
-</span><span class=""> 1321: =item * L&lt;Test::Mockingbird::TimeTravel&gt;
+</span><span class=""> 1321: =over 4
 </span><span class=""> 1322: 
-</span><span class=""> 1323: =back
+</span><span class=""> 1323: =item * L&lt;Test Dashboard|https://nigelhorne.github.io/Test-Mockingbird/coverage/&gt;
 </span><span class=""> 1324: 
-</span><span class=""> 1325: =head1 REPOSITORY
+</span><span class=""> 1325: =item * L&lt;Test::Mockingbird::Async&gt;
 </span><span class=""> 1326: 
-</span><span class=""> 1327: L&lt;https://github.com/nigelhorne/Test-Mockingbird&gt;
+</span><span class=""> 1327: =item * L&lt;Test::Mockingbird::DeepMock&gt;
 </span><span class=""> 1328: 
-</span><span class=""> 1329: =head1 LICENCE AND COPYRIGHT
+</span><span class=""> 1329: =item * L&lt;Test::Mockingbird::TimeTravel&gt;
 </span><span class=""> 1330: 
-</span><span class=""> 1331: Copyright 2025-2026 Nigel Horne.
+</span><span class=""> 1331: =back
 </span><span class=""> 1332: 
-</span><span class=""> 1333: Usage is subject to GPL2 licence terms.
+</span><span class=""> 1333: =head1 REPOSITORY
 </span><span class=""> 1334: 
-</span><span class=""> 1335: =cut
+</span><span class=""> 1335: L&lt;https://github.com/nigelhorne/Test-Mockingbird&gt;
 </span><span class=""> 1336: 
-</span><span class=""> 1337: 1;
+</span><span class=""> 1337: =head1 LICENCE AND COPYRIGHT
 </span><span class=""> 1338: 
-</span><span class=""> 1339: package Test::Mockingbird::Guard;
+</span><span class=""> 1339: Copyright 2025-2026 Nigel Horne.
 </span><span class=""> 1340: 
-</span><span class=""> 1341: # Guard object returned by mock_scoped.  Stores a list of fully-qualified
-</span><span class=""> 1342: # method names and calls unmock() on each when destroyed.
-</span><span class=""> 1343: 
-</span><span class=""> 1344: sub new {
-</span><span class=""> 1345: 	my ($class, @full_methods) = @_;
-</span><span class=""> 1346: 	return bless { full_methods =&gt; \@full_methods }, $class;
-</span><span class=""> 1347: }
+</span><span class=""> 1341: Usage is subject to the GPL2 licence terms.
+</span><span class=""> 1342: If you use it,
+</span><span class=""> 1343: please let me know.
+</span><span class=""> 1344: 
+</span><span class=""> 1345: =cut
+</span><span class=""> 1346: 
+</span><span class=""> 1347: 1;
 </span><span class=""> 1348: 
-</span><span class=""> 1349: sub DESTROY {
-</span><span class=""> 1350: 	my $self = $_[0];
-</span><span class=""> 1351: 	Test::Mockingbird::unmock($_) for @{ $self-&gt;{full_methods} };
-</span><span class=""> 1352: 	return;
-</span><span class=""> 1353: }
-</span><span class=""> 1354: 
-</span><span class=""> 1355: 1;
+</span><span class=""> 1349: package Test::Mockingbird::Guard;
+</span><span class=""> 1350: 
+</span><span class=""> 1351: # Guard object returned by mock_scoped.  Stores a list of fully-qualified
+</span><span class=""> 1352: # method names and calls unmock() on each when destroyed.
+</span><span class=""> 1353: 
+</span><span class=""> 1354: sub new {
+</span><span class=""> 1355: 	my ($class, @full_methods) = @_;
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."> 1356: 	return bless { full_methods =&gt; \@full_methods }, $class;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class=""> 1357: }
+</span><span class=""> 1358: 
+</span><span class=""> 1359: sub DESTROY {
+</span><span class=""> 1360: 	my $self = $_[0];
+</span><span class=""> 1361: 	Test::Mockingbird::unmock($_) for @{ $self-&gt;{full_methods} };
+</span><span class=""> 1362: 	return;
+</span><span class=""> 1363: }
+</span><span class=""> 1364: 
+</span><span class=""> 1365: 1;
 </span></pre>
 
 <script>
