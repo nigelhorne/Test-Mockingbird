@@ -775,6 +775,10 @@ sub restore_all {
 		for my $full_method (keys %mocked) {
 			next unless $full_method =~ /^\Q$package\E::/;
 			_drain_and_restore($full_method);
+			# _drain_and_restore explicitly skips hash cleanup; do it here
+			# to match the behaviour of the global form (%mocked = (); etc.).
+			delete $mocked{$full_method};
+			delete $mock_meta{$full_method};
 		}
 
 		# Remove call_log entries for the restored package

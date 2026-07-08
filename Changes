@@ -4,6 +4,15 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
 
   [Bug fixes]
 
+  - Fixed restore_all($pkg) scoped form: after draining the mock stack for a
+    package's methods, the corresponding keys were not removed from %mocked
+    and %mock_meta.  This caused diagnose_mocks() to continue reporting those
+    methods as active even after restore_all('Pkg') had fully restored the
+    original implementations.  Fixed by adding delete $mocked{$key} and
+    delete $mock_meta{$key} inside the per-method loop, matching the behaviour
+    of the global restore_all() form.  Discovered by a new integration test
+    in t/integration.t.
+
   - Fixed "Prototype mismatch" warnings emitted by mock() when replacing a
     function that carries a Perl prototype (such as the () no-args prototype).
     The existing set_prototype() call correctly equates prototypes before the
