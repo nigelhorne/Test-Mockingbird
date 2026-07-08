@@ -143,12 +143,12 @@ warnings.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     target      -- Str, 'Pkg::method' or ('Pkg', 'method')
     replacement -- CodeRef
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: undef
 
@@ -170,11 +170,11 @@ whether a method is callable. See ["LIMITATIONS"](#limitations).
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     target -- Str, 'Pkg::method' or ('Pkg', 'method')
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: undef
 
@@ -207,11 +207,11 @@ All mocked methods are restored when `$g` goes out of scope.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     args -- four recognised forms (see above)
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: Test::Mockingbird::Guard
 
@@ -241,25 +241,17 @@ prototype preservation. Wrapping a prototyped function emits a
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     target -- Str, 'Pkg::method' or ('Pkg', 'method')
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: CodeRef   # yields list of call records on invocation
 
 ### MESSAGES
 
     "Package and method are required for spying" -- target missing or incomplete
-
-### FORMAL SPECIFICATION
-
-    spy ≙
-      ∀ target : Str •
-        pre  defined(target)
-        post sym_table'[target].CODE = wrapper(orig)
-             ∧ wrapper: @args → (calls' = calls ⌢ ⟨[target, @args]⟩ ∧ orig(@args))
 
 ## inject
 
@@ -273,26 +265,19 @@ third argument) to distinguish shorthand from longhand.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     package    -- Str
     dependency -- Str
     value      -- Any (including undef)
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: undef
 
 ### MESSAGES
 
     "Package and dependency are required for injection" -- missing name
-
-### FORMAL SPECIFICATION
-
-    inject ≙
-      ∀ pkg : Str; dep : Str; val : Any •
-        pre  pkg ≠ '' ∧ dep ≠ ''
-        post sym_table'["${pkg}::${dep}"].CODE = sub { val }
 
 ## inject\_all
 
@@ -308,12 +293,12 @@ An empty hashref is a no-op. Each pair is equivalent to a separate
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     package      -- Str
     dependencies -- HashRef
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: undef
 
@@ -345,12 +330,12 @@ and `diagnose_mocks()` all work identically.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     class   -- Str (non-empty)
     factory -- Any; CodeRef invoked per call, or scalar returned verbatim
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: undef
 
@@ -380,17 +365,13 @@ remove entries for the restored package.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     package -- Str, optional
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: undef
-
-### MESSAGES
-
-None. An unknown package is silently a no-op.
 
 ### FORMAL SPECIFICATION
 
@@ -409,11 +390,11 @@ If the method was never mocked this is a no-op.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     target -- Str
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: undef
 
@@ -436,12 +417,12 @@ Mock a method to always return a fixed value.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     target -- Str
     value  -- Any
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: undef
 
@@ -463,12 +444,12 @@ Mock a method to always throw an exception.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     target  -- Str
     message -- Str
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: undef
 
@@ -491,12 +472,12 @@ The last value repeats when the sequence is exhausted.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     target -- Str
     values -- Array (one or more)
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: undef
 
@@ -521,12 +502,12 @@ implementation is automatically restored.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     target -- Str
     code   -- CodeRef
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: undef
 
@@ -565,11 +546,11 @@ to other methods are ignored.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     methods -- Array of Str (two or more fully-qualified names)
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: Bool
 
@@ -594,11 +575,11 @@ Clear the call-order log without restoring mocks or spies.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     none
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: undef
 
@@ -618,11 +599,11 @@ Return a structured hashref of all currently active mock layers.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     none
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: HashRef
 
@@ -637,11 +618,11 @@ Return a human-readable multi-line string of all active mock layers.
 
 ### API SPECIFICATION
 
-#### Input (Params::Validate::Strict schema)
+#### Input
 
     none
 
-#### Output (Returns::Set schema)
+#### Output
 
     returns: Str
 
@@ -694,6 +675,21 @@ Nigel Horne, `<njh at nigelhorne.com>`
       install all mocks via mock()
       ∧ return Guard(full_methods)
       ∧ Guard.DESTROY ⇒ ∀ m ∈ full_methods • unmock(m)
+
+## spy
+
+    spy ≙
+      ∀ target : Str •
+        pre  defined(target)
+        post sym_table'[target].CODE = wrapper(orig)
+             ∧ wrapper: @args → (calls' = calls ⌢ ⟨[target, @args]⟩ ∧ orig(@args))
+
+## inject
+
+    inject ≙
+      ∀ pkg : Str; dep : Str; val : Any •
+        pre  pkg ≠ '' ∧ dep ≠ ''
+        post sym_table'["${pkg}::${dep}"].CODE = sub { val }
 
 # LICENCE AND COPYRIGHT
 

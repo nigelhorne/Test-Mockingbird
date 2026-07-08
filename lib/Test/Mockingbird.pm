@@ -207,12 +207,12 @@ warnings.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     target      -- Str, 'Pkg::method' or ('Pkg', 'method')
     replacement -- CodeRef
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: undef
 
@@ -293,11 +293,11 @@ whether a method is callable. See L</LIMITATIONS>.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     target -- Str, 'Pkg::method' or ('Pkg', 'method')
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: undef
 
@@ -372,11 +372,11 @@ All mocked methods are restored when C<$g> goes out of scope.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     args -- four recognised forms (see above)
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: Test::Mockingbird::Guard
 
@@ -457,25 +457,17 @@ C<Prototype mismatch> warning.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     target -- Str, 'Pkg::method' or ('Pkg', 'method')
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: CodeRef   # yields list of call records on invocation
 
 =head3 MESSAGES
 
   "Package and method are required for spying" -- target missing or incomplete
-
-=head3 FORMAL SPECIFICATION
-
-    spy ≙
-      ∀ target : Str •
-        pre  defined(target)
-        post sym_table'[target].CODE = wrapper(orig)
-             ∧ wrapper: @args → (calls' = calls ⌢ ⟨[target, @args]⟩ ∧ orig(@args))
 
 =cut
 
@@ -533,26 +525,19 @@ third argument) to distinguish shorthand from longhand.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     package    -- Str
     dependency -- Str
     value      -- Any (including undef)
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: undef
 
 =head3 MESSAGES
 
   "Package and dependency are required for injection" -- missing name
-
-=head3 FORMAL SPECIFICATION
-
-    inject ≙
-      ∀ pkg : Str; dep : Str; val : Any •
-        pre  pkg ≠ '' ∧ dep ≠ ''
-        post sym_table'["${pkg}::${dep}"].CODE = sub { val }
 
 =cut
 
@@ -614,12 +599,12 @@ C<inject()> call and participates in the same mock stack.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     package      -- Str
     dependencies -- HashRef
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: undef
 
@@ -667,12 +652,12 @@ and C<diagnose_mocks()> all work identically.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     class   -- Str (non-empty)
     factory -- Any; CodeRef invoked per call, or scalar returned verbatim
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: undef
 
@@ -722,17 +707,13 @@ remove entries for the restored package.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     package -- Str, optional
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: undef
-
-=head3 MESSAGES
-
-None. An unknown package is silently a no-op.
 
 =head3 FORMAL SPECIFICATION
 
@@ -784,11 +765,11 @@ If the method was never mocked this is a no-op.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     target -- Str
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: undef
 
@@ -830,12 +811,12 @@ Mock a method to always return a fixed value.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     target -- Str
     value  -- Any
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: undef
 
@@ -870,12 +851,12 @@ Mock a method to always throw an exception.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     target  -- Str
     message -- Str
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: undef
 
@@ -912,12 +893,12 @@ The last value repeats when the sequence is exhausted.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     target -- Str
     values -- Array (one or more)
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: undef
 
@@ -961,12 +942,12 @@ implementation is automatically restored.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     target -- Str
     code   -- CodeRef
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: undef
 
@@ -1027,11 +1008,11 @@ to other methods are ignored.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     methods -- Array of Str (two or more fully-qualified names)
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: Bool
 
@@ -1087,11 +1068,11 @@ C<restore_all()> also clears the log automatically.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     none
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: undef
 
@@ -1132,11 +1113,11 @@ Return a structured hashref of all currently active mock layers.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     none
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: HashRef
 
@@ -1170,11 +1151,11 @@ Return a human-readable multi-line string of all active mock layers.
 
 =head3 API SPECIFICATION
 
-=head4 Input (Params::Validate::Strict schema)
+=head4 Input
 
     none
 
-=head4 Output (Returns::Set schema)
+=head4 Output
 
     returns: Str
 
@@ -1238,7 +1219,6 @@ sub _drain_and_restore {
 #               ('Pkg', 'method') call forms into a ($package, $method) pair.
 # Entry:        @_ -- one arg for shorthand, two args for longhand
 # Exit:         ($package, $method) -- list of two strings
-# Side effects: none
 sub _parse_target {
 	my ($arg1, $arg2) = @_;
 
@@ -1259,7 +1239,6 @@ sub _parse_target {
 #               etc.) report the user's call site, not their own location.
 # Entry:        none
 # Exit:         Str, e.g. "t/my_test.t line 42"
-# Side effects: none
 sub _caller_info {
 	my $level = 1;
 	while (my @info = caller($level)) {
@@ -1272,10 +1251,10 @@ sub _caller_info {
 
 # _get_prototype -- Private helper
 #
-# Purpose:      Return the prototype string of a named sub, if any.
+# Return the prototype string of a named sub, if any.
+#
 # Entry:        $_[0] -- Str, fully-qualified sub name
 # Exit:         Str or undef
-# Side effects: none
 sub _get_prototype {
 	my $full = $_[0];
 
@@ -1341,6 +1320,21 @@ L<https://github.com/nigelhorne/Test-Mockingbird>
       install all mocks via mock()
       ∧ return Guard(full_methods)
       ∧ Guard.DESTROY ⇒ ∀ m ∈ full_methods • unmock(m)
+
+=head2 spy
+
+    spy ≙
+      ∀ target : Str •
+        pre  defined(target)
+        post sym_table'[target].CODE = wrapper(orig)
+             ∧ wrapper: @args → (calls' = calls ⌢ ⟨[target, @args]⟩ ∧ orig(@args))
+
+=head2 inject
+
+    inject ≙
+      ∀ pkg : Str; dep : Str; val : Any •
+        pre  pkg ≠ '' ∧ dep ≠ ''
+        post sym_table'["${pkg}::${dep}"].CODE = sub { val }
 
 =head1 LICENCE AND COPYRIGHT
 

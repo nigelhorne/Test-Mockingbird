@@ -28,14 +28,15 @@ t/function.t
 t/gv.t
 t/inject.t
 t/inject_all.t
-t/intercept_new.t
 t/integration.t
+t/intercept_new.t
 t/kwalitee.t
 t/locales.t
 t/manifest.t
 t/mock.t
 t/mock_scoped.t
 t/mock_scoped_multi.t
+t/mutant_killers.t
 t/object.t
 t/pod-cm.t
 t/pod-coverage.t
