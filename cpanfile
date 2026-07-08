@@ -8,10 +8,9 @@ requires 'ExtUtils::MakeMaker', '6.64';
 requires 'Test::Deep';
 requires 'Test::More';
 
-recommends 'Future', '0.33';
-
 on 'test' => sub {
 	requires 'Class::Simple';
+	requires 'IPC::System::Simple';
 	requires 'Readonly';
 	requires 'Test::DescribeMe';
 	requires 'Test::Memory::Cycle';

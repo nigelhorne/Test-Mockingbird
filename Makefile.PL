@@ -48,6 +48,7 @@ WriteMakefile(
 		'Test::More'          => 0,
 	}, TEST_REQUIRES => {
 		'Class::Simple' => 0,
+		'IPC::System::Simple' => 0,
 		'Readonly' => 0,
 		'Test::DescribeMe' => 0,
 		'Test::Memory::Cycle' => 0,
