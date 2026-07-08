@@ -241,8 +241,8 @@ pre details.mutant-details ul {
 <body>
 <button class="toggle" onclick="toggleTheme()">🌙 Toggle Theme</button>
 <h1>lib/Test/Mockingbird/TimeTravel.pm</h1>
-<div class="nav"><a href="Async.pm.html">⬅ Previous</a> <a href="../../../../index.html">Index</a>
- <a href="../Mockingbird.pm.html">Next ➡</a></div><div class='summary'>
+<div class="nav"><a href="DeepMock.pm.html">⬅ Previous</a> <a href="../../../../index.html">Index</a>
+</div><div class='summary'>
 <strong>Structural Coverage (Approximate)</strong><p>
 TER1 (Statement): 100.00%<br>
 TER2 (Branch): 100.00%<br>
@@ -334,11 +334,11 @@ Approximate LCSAJ segments: 31<br>
 </span><span class="">   42: 
 </span><span class="">   43: =head1 VERSION
 </span><span class="">   44: 
-</span><span class="">   45: Version 0.11
+</span><span class="">   45: Version 0.10
 </span><span class="">   46: 
 </span><span class="">   47: =cut
 </span><span class="">   48: 
-</span><span class="">   49: our $VERSION = &#39;0.11&#39;;
+</span><span class="">   49: our $VERSION = &#39;0.10&#39;;
 </span><span class="">   50: 
 </span><span class="">   51: =head1 SYNOPSIS
 </span><span class="">   52: 
@@ -416,8 +416,8 @@ Approximate LCSAJ segments: 31<br>
 </span><span class="">  124: =cut
 </span><span class="">  125: 
 </span><span class="">  126: sub now () {
-</span><span class="">  127: 	return $ACTIVE ? $CURRENT_EPOCH : CORE::time();
-</span><span class="">  128: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  127: 	return $ACTIVE ? $CURRENT_EPOCH : CORE::time();
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  128: }
 </span><span class="">  129: 
 </span><span class="">  130: =head2 freeze_time
 </span><span class="">  131: 
@@ -452,8 +452,8 @@ Approximate LCSAJ segments: 31<br>
 </span><span class="">  160: 	$CURRENT_EPOCH = _parse_timestamp($ts);
 </span><span class="">  161: 	$BASE_EPOCH    = $CURRENT_EPOCH;
 </span><span class="">  162: 	$ACTIVE        = 1;
-</span><span class="">  163: 	return $CURRENT_EPOCH;
-</span><span class="">  164: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  163: 	return $CURRENT_EPOCH;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  164: }
 </span><span class="">  165: 
 </span><span class="">  166: =head2 travel_to
 </span><span class="">  167: 
@@ -488,8 +488,8 @@ Approximate LCSAJ segments: 31<br>
 </span><span class="">  196: sub travel_to {
 </span><span class="">  197: 	croak &#39;travel_to() called while TimeTravel is inactive&#39; unless $ACTIVE;
 </span><span class="">  198: 	$CURRENT_EPOCH = _parse_timestamp($_[0]);
-</span><span class="">  199: 	return $CURRENT_EPOCH;
-</span><span class="">  200: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  199: 	return $CURRENT_EPOCH;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  200: }
 </span><span class="">  201: 
 </span><span class="">  202: =head2 advance_time
 </span><span class="">  203: 
@@ -528,14 +528,14 @@ Approximate LCSAJ segments: 31<br>
 </span><span class="">  236: 	croak &#39;advance_time() called while TimeTravel is inactive&#39; unless $ACTIVE;
 </span><span class="">  237: 	my ($amount, $unit) = @_;
 </span><span class="">  238: 	$CURRENT_EPOCH += _unit_to_seconds($amount, $unit);
-</span><span class="">  239: 	return $CURRENT_EPOCH;
-</span><span class="">  240: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  239: 	return $CURRENT_EPOCH;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  240: }
 </span><span class="">  241: 
 </span><span class="">  242: =head2 rewind_time
 </span><span class="">  243: 
 </span><span class="">  244: Rewind the frozen clock by a duration.
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  245: 
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  246:     rewind_time(30);           # 30 seconds
+</span><span class="">  245: 
+</span><span class="">  246:     rewind_time(30);           # 30 seconds
 </span><span class="">  247:     rewind_time(1 =&gt; &#39;hour&#39;);  # 1 hour
 </span><span class="">  248: 
 </span><span class="">  249: Croaks if called while TimeTravel is inactive.
@@ -567,8 +567,8 @@ Approximate LCSAJ segments: 31<br>
 </span><span class="">  275: 	croak &#39;rewind_time() called while TimeTravel is inactive&#39; unless $ACTIVE;
 </span><span class="">  276: 	my ($amount, $unit) = @_;
 </span><span class="">  277: 	$CURRENT_EPOCH -= _unit_to_seconds($amount, $unit);
-</span><span class="">  278: 	return $CURRENT_EPOCH;
-</span><span class="">  279: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  278: 	return $CURRENT_EPOCH;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  279: }
 </span><span class="">  280: 
 </span><span class="">  281: =head2 restore_all
 </span><span class="">  282: 
@@ -648,8 +648,8 @@ Approximate LCSAJ segments: 31<br>
 </span><span class="">  356: 	croak &#39;with_frozen_time() requires a timestamp&#39;
 </span><span class="">  357: 		unless defined $ts;
 </span><span class="">  358: 
-</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  359: 	# Save state so nested calls restore correctly
-</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  360: 	my ($prev_active, $prev_epoch, $prev_base) =
+</span><span class="">  359: 	# Save state so nested calls restore correctly
+</span><span class="">  360: 	my ($prev_active, $prev_epoch, $prev_base) =
 </span><span class="">  361: 		($ACTIVE, $CURRENT_EPOCH, $BASE_EPOCH);
 </span><span class="">  362: 
 </span><span class="">  363: 	$CURRENT_EPOCH = _parse_timestamp($ts);
@@ -670,8 +670,8 @@ Approximate LCSAJ segments: 31<br>
 </span><span class="">  378: 	# Re-throw as croak to stay consistent with the rest of this module
 </span><span class="">  379: 	croak $err if $err;
 </span><span class="">  380: 
-</span><span class="">  381: 	return wantarray ? @ret : $ret[0];
-</span><span class="">  382: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  381: 	return wantarray ? @ret : $ret[0];
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  382: }
 </span><span class="">  383: 
 </span><span class="">  384: # _parse_timestamp -- Private
 </span><span class="">  385: #
@@ -690,22 +690,22 @@ Approximate LCSAJ segments: 31<br>
 </span><span class="">  398: 	$ts =~ s/^\s+|\s+$//g;   # trim whitespace
 </span><span class="">  399: 
 </span><span class="">  400: 	# Raw epoch integer -- return unchanged
-</span><span class="">  401: 	return $ts if $ts =~ /^\d+$/;
-</span><span class="">  402: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  401: 	return $ts if $ts =~ /^\d+$/;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  402: 
 </span><span class="">  403: 	# ISO8601 UTC: YYYY-MM-DDTHH:MM:SSZ
-</span><span class="">  404: 	if ($ts =~ /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/) {
-</span><span class="">  405: 		return timegm($6, $5, $4, $3, $2 - 1, $1);
-</span><span class="">  406: 	}
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  404: 	if ($ts =~ /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  405: 		return timegm($6, $5, $4, $3, $2 - 1, $1);
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  406: 	}
 </span><span class="">  407: 
 </span><span class="">  408: 	# Space-separated: YYYY-MM-DD HH:MM:SS
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">409 → 409 → 414</span></span>  409: 	if ($ts =~ /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/) {
-</span><span class="">  410: 		return timegm($6, $5, $4, $3, $2 - 1, $1);
-</span><span class="">  411: 	}
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">409 → 409 → 414</span></span>  409: 	if ($ts =~ /^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  410: 		return timegm($6, $5, $4, $3, $2 - 1, $1);
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  411: 	}
 </span><span class="">  412: 
 </span><span class="">  413: 	# Date-only: YYYY-MM-DD interpreted as midnight UTC
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">414 → 414 → 418</span></span>  414: 	if ($ts =~ /^(\d{4})-(\d{2})-(\d{2})$/) {
-</span><span class="">  415: 		return timegm(0, 0, 0, $3, $2 - 1, $1);
-</span><span class="">  416: 	}
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">414 → 414 → 418</span></span>  414: 	if ($ts =~ /^(\d{4})-(\d{2})-(\d{2})$/) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  415: 		return timegm(0, 0, 0, $3, $2 - 1, $1);
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  416: 	}
 </span><span class="">  417: 
 </span><span class="">  418: 	croak &quot;Invalid timestamp format for TimeTravel: $ts&quot;;
 </span><span class="">  419: }
@@ -723,14 +723,14 @@ Approximate LCSAJ segments: 31<br>
 </span><span class="">  431: sub _unit_to_seconds {
 </span><span class="">  432: 	my ($amount, $unit) = @_;
 </span><span class="">  433: 
-</span><span class="">  434: 	return $amount unless defined $unit;
-</span><span class="">  435: 
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  434: 	return $amount unless defined $unit;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  435: 
 </span><span class="">  436: 	my $key = lc $unit;
 </span><span class="">  437: 	croak &quot;Unknown time unit &#39;$unit&#39;&quot;
 </span><span class="">  438: 		unless exists $SECONDS_PER_UNIT{$key};
 </span><span class="">  439: 
-</span><span class="">  440: 	return $amount * $SECONDS_PER_UNIT{$key};
-</span><span class="">  441: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  440: 	return $amount * $SECONDS_PER_UNIT{$key};
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  441: }
 </span><span class="">  442: 
 </span><span class="">  443: =head1 SUPPORT
 </span><span class="">  444: 

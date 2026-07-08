@@ -242,7 +242,7 @@ pre details.mutant-details ul {
 <button class="toggle" onclick="toggleTheme()">🌙 Toggle Theme</button>
 <h1>lib/Test/Mockingbird/DeepMock.pm</h1>
 <div class="nav"><a href="../Mockingbird.pm.html">⬅ Previous</a> <a href="../../../../index.html">Index</a>
-</div><div class='summary'>
+ <a href="TimeTravel.pm.html">Next ➡</a></div><div class='summary'>
 <strong>Structural Coverage (Approximate)</strong><p>
 TER1 (Statement): 100.00%<br>
 TER2 (Branch): 98.28%<br>
@@ -309,11 +309,11 @@ Approximate LCSAJ segments: 59<br>
 </span><span class="">   17: 
 </span><span class="">   18: =head1 VERSION
 </span><span class="">   19: 
-</span><span class="">   20: Version 0.11
+</span><span class="">   20: Version 0.10
 </span><span class="">   21: 
 </span><span class="">   22: =cut
 </span><span class="">   23: 
-</span><span class="">   24: our $VERSION = &#39;0.11&#39;;
+</span><span class="">   24: our $VERSION = &#39;0.10&#39;;
 </span><span class="">   25: 
 </span><span class="">   26: =head1 SYNOPSIS
 </span><span class="">   27: 
@@ -485,8 +485,8 @@ Approximate LCSAJ segments: 59<br>
 </span><span class="">  193: 
 </span><span class="">  194: 	{
 </span><span class="">  195: 		local $@;
-</span><span class="">  196: 		if ($ctx) {
-</span><span class="">  197: 			@list_ret   = eval { $code-&gt;() };
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  196: 		if ($ctx) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  197: 			@list_ret   = eval { $code-&gt;() };
 </span><span class="">  198: 		} elsif (defined $ctx) {
 </span><span class="">  199: 			$scalar_ret = eval { $code-&gt;() };
 </span><span class="">  200: 		} else {
@@ -505,8 +505,8 @@ Approximate LCSAJ segments: 59<br>
 </span><span class="">  213: 
 </span><span class="">  214: 	croak $err if $err;
 </span><span class="">  215: 
-</span><span class="">  216: 	return $ctx ? @list_ret : $scalar_ret;
-</span><span class="">  217: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  216: 	return $ctx ? @list_ret : $scalar_ret;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  217: }
 </span><span class="">  218: 
 </span><span class="">  219: # _normalize_target -- Private
 </span><span class="">  220: #
@@ -518,8 +518,8 @@ Approximate LCSAJ segments: 59<br>
 </span><span class="">  226: # Exit:         ($package, $method)
 </span><span class="">  227: # Side effects: none
 </span><span class="">  228: sub _normalize_target {
-</span><span class="">  229: 	return Test::Mockingbird::_parse_target(@_);
-</span><span class="">  230: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  229: 	return Test::Mockingbird::_parse_target(@_);
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  230: }
 </span><span class="">  231: 
 </span><span class="">  232: # _install_mocks -- Private
 </span><span class="">  233: #
@@ -543,8 +543,8 @@ Approximate LCSAJ segments: 59<br>
 </span><span class="">  251: 		my $full   = &quot;${pkg}::${method}&quot;;
 </span><span class="">  252: 		my $type   = $m-&gt;{type} // &#39;mock&#39;;
 </span><span class="">  253: 
-</span><span class="">  254: 		if ($type eq &#39;mock&#39;) {
-</span><span class="">  255: 			croak &quot;mock type requires &#39;with&#39; coderef&quot;
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  254: 		if ($type eq &#39;mock&#39;) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  255: 			croak &quot;mock type requires &#39;with&#39; coderef&quot;
 </span><span class="">  256: 				unless defined $m-&gt;{with} &amp;&amp; ref $m-&gt;{with} eq &#39;CODE&#39;;
 </span><span class="">  257: 
 </span><span class="">  258: 			Test::Mockingbird::mock($pkg, $method, $m-&gt;{with});
@@ -565,8 +565,8 @@ Approximate LCSAJ segments: 59<br>
 </span><span class="">  273: 		push @installed, $full;
 </span><span class="">  274: 	}
 </span><span class="">  275: 
-</span><span class="">  276: 	return @installed;
-</span><span class="">  277: }
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  276: 	return @installed;
+</span><p> <b> Mutants (Total: 2, Killed: 2, Survived: 0)</b><p><span class="">  277: }
 </span><span class="">  278: 
 </span><span class="">  279: # _run_expectations -- Private
 </span><span class="">  280: #
@@ -592,14 +592,14 @@ Approximate LCSAJ segments: 59<br>
 </span><span class="">  300: 		my @calls = $spy-&gt;();   # [ full_method, @args ]
 </span><span class="">  301: 
 </span><span class="">  302: 		# ---- call count -----------------------------------------------
-</span><span class="">  303: 		if (defined $exp-&gt;{calls}) {
-</span><span class="">  304: 			Test::More::is(scalar @calls, $exp-&gt;{calls},
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  303: 		if (defined $exp-&gt;{calls}) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  304: 			Test::More::is(scalar @calls, $exp-&gt;{calls},
 </span><span class="">  305: 				&quot;DeepMock: calls for $tag&quot;);
 </span><span class="">  306: 		}
 </span><span class="">  307: 
 </span><span class="">  308: 		# ---- args_like (regex matching) --------------------------------
-</span><span class="">  309: 		if (my $args_like = $exp-&gt;{args_like}) {
-</span><span class="">  310: 			for my $i (0 .. $#$args_like) {
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  309: 		if (my $args_like = $exp-&gt;{args_like}) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  310: 			for my $i (0 .. $#$args_like) {
 </span><span class="">  311: 				my $patterns = $args_like-&gt;[$i];
 </span><span class="">  312: 				my $call     = $calls[$i] // [];
 </span><span class="">  313: 				my @args     = @{$call}[1 .. $#$call];
@@ -613,8 +613,8 @@ Approximate LCSAJ segments: 59<br>
 </span><span class="">  321: 		}
 </span><span class="">  322: 
 </span><span class="">  323: 		# ---- args_eq (exact matching) ----------------------------------
-</span><span class="">  324: 		if (my $args_eq = $exp-&gt;{args_eq}) {
-</span><span class="">  325: 			for my $i (0 .. $#$args_eq) {
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  324: 		if (my $args_eq = $exp-&gt;{args_eq}) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  325: 			for my $i (0 .. $#$args_eq) {
 </span><span class="">  326: 				my $expected = $args_eq-&gt;[$i];
 </span><span class="">  327: 				my $call     = $calls[$i] // [];
 </span><span class="">  328: 				my @args     = @{$call}[1 .. $#$call];
@@ -626,8 +626,8 @@ Approximate LCSAJ segments: 59<br>
 </span><span class="">  334: 		}
 </span><span class="">  335: 
 </span><span class="">  336: 		# ---- args_deeply (structural) ----------------------------------
-</span><span class="">  337: 		if (my $args_deeply = $exp-&gt;{args_deeply}) {
-</span><span class="">  338: 			require Test::Deep;
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  337: 		if (my $args_deeply = $exp-&gt;{args_deeply}) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  338: 			require Test::Deep;
 </span><span class="">  339: 			for my $i (0 .. $#$args_deeply) {
 </span><span class="">  340: 				my $expected = $args_deeply-&gt;[$i];
 </span><span class="">  341: 				my $call     = $calls[$i] // [];
@@ -640,8 +640,8 @@ Approximate LCSAJ segments: 59<br>
 </span><span class="">  348: 		}
 </span><span class="">  349: 
 </span><span class="">  350: 		# ---- never (assert zero calls) ---------------------------------
-</span><span class="">  351: 		if ($exp-&gt;{never}) {
-</span><span class="">  352: 			Test::More::is(scalar @calls, 0, &quot;DeepMock: $tag was never called&quot;);
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  351: 		if ($exp-&gt;{never}) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  352: 			Test::More::is(scalar @calls, 0, &quot;DeepMock: $tag was never called&quot;);
 </span><span class="">  353: 		}
 </span><span class="">  354: 	}
 </span><span class="">  355: 
@@ -671,13 +671,13 @@ Approximate LCSAJ segments: 59<br>
 </span><span class="">  379: 	Test::Mockingbird::TimeTravel::travel_to($time-&gt;{travel})
 </span><span class="">  380: 		if exists $time-&gt;{travel};
 </span><span class="">  381: 
-</span><span class="">  382: 	if (exists $time-&gt;{advance}) {
-</span><span class="">  383: 		my ($amount, $unit) = @{ $time-&gt;{advance} };
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic.">  382: 	if (exists $time-&gt;{advance}) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  383: 		my ($amount, $unit) = @{ $time-&gt;{advance} };
 </span><span class="">  384: 		Test::Mockingbird::TimeTravel::advance_time($amount, $unit);
 </span><span class="">  385: 	}
 </span><span class="">  386: 
-</span><span class=""><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">387 → 387 → 392</span></span>  387: 	if (exists $time-&gt;{rewind}) {
-</span><span class="">  388: 		my ($amount, $unit) = @{ $time-&gt;{rewind} };
+</span><span class="killed tooltip" data-tooltip="Mutations here were killed. Tests are effectively covering this logic."><span class="lcsaj-tip"><span class="lcsaj-dot">●</span><span class="lcsaj-tip-text">387 → 387 → 392</span></span>  387: 	if (exists $time-&gt;{rewind}) {
+</span><p> <b> Mutants (Total: 1, Killed: 1, Survived: 0)</b><p><span class="">  388: 		my ($amount, $unit) = @{ $time-&gt;{rewind} };
 </span><span class="">  389: 		Test::Mockingbird::TimeTravel::rewind_time($amount, $unit);
 </span><span class="">  390: 	}
 </span><span class="">  391: 
