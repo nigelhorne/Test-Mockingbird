@@ -16,8 +16,6 @@
 use strict;
 use warnings;
 
-use lib "$ENV{HOME}/src/njh/Test-Returns/lib";
-
 use Test::Most;
 use Test::Returns;
 use Scalar::Util qw(refaddr);
