@@ -218,15 +218,6 @@ warnings.
 
   "Package, method and replacement are required" -- target or coderef missing
 
-=head3 FORMAL SPECIFICATION
-
-    mock ≙
-      ∀ target : Str; replacement : CodeRef •
-        pre  target ≠ '' ∧ defined(replacement)
-        post mocked'[target] = ⟨saved(target)⟩ ⌢ mocked[target]
-             ∧ sym_table'[target].CODE = replacement
-             ∧ prototype(replacement) = prototype(saved(target))
-
 =cut
 
 sub mock {
@@ -1337,6 +1328,17 @@ Nigel Horne, C<< <njh at nigelhorne.com> >>
 =head1 REPOSITORY
 
 L<https://github.com/nigelhorne/Test-Mockingbird>
+
+=head1 FORMAL SPECIFICATION
+
+=head2 mock
+
+    mock ≙
+      ∀ target : Str; replacement : CodeRef •
+        pre  target ≠ '' ∧ defined(replacement)
+        post mocked'[target] = ⟨saved(target)⟩ ⌢ mocked[target]
+             ∧ sym_table'[target].CODE = replacement
+             ∧ prototype(replacement) = prototype(saved(target))
 
 =head1 LICENCE AND COPYRIGHT
 
