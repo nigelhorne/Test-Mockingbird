@@ -515,7 +515,7 @@ is( func(VALUE_AT_BOUNDARY), EXPECTED, &#39;Test boundary behaviour&#39; );
 								</div>
 							</li></ul></details>
 <span class="">  212: 		# Pass pre-built Futures through unchanged; wrap plain values
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  213: 		return (ref $item &amp;&amp; $item-&gt;isa(&#39;Future&#39;)) ? $item : Future-&gt;done($item);
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  213: 		return (ref $item &amp;&amp; $item-&gt;isa(&#39;Future&#39;)) ? $item : Future-&gt;done($item);
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
@@ -581,7 +581,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  255: 	my $wrapper = sub {
 </span><span class="">  256: 		my $future = Future-&gt;done(@values);
 </span><span class="">  257: 		Test::Mockingbird::unmock($package, $method);
-</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  258: 		return $future;
+</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  258: 		return $future;
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
@@ -679,7 +679,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  332: 		my $future    = $orig-&gt;(@call_args);
 </span><span class="">  333: 		push @calls, { args =&gt; [$full_method, @call_args], future =&gt; $future };
 </span><span class="">  334: 		Test::Mockingbird::_record_call($full_method);
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  335: 		return $future;
+</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  335: 		return $future;
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
@@ -706,7 +706,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  338: 	local $Test::Mockingbird::TYPE = &#39;async_spy&#39;;
 </span><span class="">  339: 	Test::Mockingbird::mock($full_method, $wrapper);
 </span><span class="">  340: 
-</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  341: 	return sub { @calls };
+</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  341: 	return sub { @calls };
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
