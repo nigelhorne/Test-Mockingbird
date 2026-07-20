@@ -313,11 +313,11 @@ Approximate LCSAJ segments: 17<br>
 </span><span class="">   21: 
 </span><span class="">   22: =head1 VERSION
 </span><span class="">   23: 
-</span><span class="">   24: Version 0.11
+</span><span class="">   24: Version 0.12
 </span><span class="">   25: 
 </span><span class="">   26: =cut
 </span><span class="">   27: 
-</span><span class="">   28: our $VERSION = &#39;0.11&#39;;
+</span><span class="">   28: our $VERSION = &#39;0.12&#39;;
 </span><span class="">   29: 
 </span><span class="">   30: =head1 SYNOPSIS
 </span><span class="">   31: 
@@ -581,7 +581,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  255: 	my $wrapper = sub {
 </span><span class="">  256: 		my $future = Future-&gt;done(@values);
 </span><span class="">  257: 		Test::Mockingbird::unmock($package, $method);
-</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  258: 		return $future;
+</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  258: 		return $future;
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
@@ -706,7 +706,7 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  338: 	local $Test::Mockingbird::TYPE = &#39;async_spy&#39;;
 </span><span class="">  339: 	Test::Mockingbird::mock($full_method, $wrapper);
 </span><span class="">  340: 
-</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  341: 	return sub { @calls };
+</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  341: 	return sub { @calls };
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
@@ -742,33 +742,37 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  353: 
 </span><span class="">  354: =head1 SUPPORT
 </span><span class="">  355: 
-</span><span class="">  356: Please report bugs at L&lt;https://github.com/nigelhorne/Test-Mockingbird/issues&gt;.
+</span><span class="">  356: This module is provided as-is without any warranty.
 </span><span class="">  357: 
-</span><span class="">  358: =head1 AUTHOR
+</span><span class="">  358: Please report bugs at L&lt;https://github.com/nigelhorne/Test-Mockingbird/issues&gt;.
 </span><span class="">  359: 
-</span><span class="">  360: Nigel Horne, C&lt;&lt; &lt;njh at nigelhorne.com&gt; &gt;&gt;
+</span><span class="">  360: =head1 AUTHOR
 </span><span class="">  361: 
-</span><span class="">  362: =head1 SEE ALSO
+</span><span class="">  362: Nigel Horne, C&lt;&lt; &lt;njh at nigelhorne.com&gt; &gt;&gt;
 </span><span class="">  363: 
-</span><span class="">  364: =over 4
+</span><span class="">  364: =head1 SEE ALSO
 </span><span class="">  365: 
-</span><span class="">  366: =item * L&lt;Test::Mockingbird&gt;
+</span><span class="">  366: =over 4
 </span><span class="">  367: 
-</span><span class="">  368: =item * L&lt;Test::Mockingbird::DeepMock&gt;
+</span><span class="">  368: =item * L&lt;Test::Mockingbird&gt;
 </span><span class="">  369: 
-</span><span class="">  370: =item * L&lt;Future&gt;
+</span><span class="">  370: =item * L&lt;Test::Mockingbird::DeepMock&gt;
 </span><span class="">  371: 
-</span><span class="">  372: =back
+</span><span class="">  372: =item * L&lt;Future&gt;
 </span><span class="">  373: 
-</span><span class="">  374: =head1 LICENCE AND COPYRIGHT
+</span><span class="">  374: =back
 </span><span class="">  375: 
-</span><span class="">  376: Copyright 2026 Nigel Horne.
+</span><span class="">  376: =head1 LICENCE AND COPYRIGHT
 </span><span class="">  377: 
-</span><span class="">  378: Usage is subject to GPL2 licence terms.
+</span><span class="">  378: Copyright 2026 Nigel Horne.
 </span><span class="">  379: 
-</span><span class="">  380: =cut
-</span><span class="">  381: 
-</span><span class="">  382: 1;
+</span><span class="">  380: Usage is subject to the GPL2 licence terms.
+</span><span class="">  381: If you use it,
+</span><span class="">  382: please let me know.
+</span><span class="">  383: 
+</span><span class="">  384: =cut
+</span><span class="">  385: 
+</span><span class="">  386: 1;
 </span></pre>
 
 <script>
