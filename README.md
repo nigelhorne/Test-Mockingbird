@@ -213,15 +213,6 @@ Uses the same LIFO mock stack as `mock()`: `unmock()` peels one layer,
 
     "Package, method and hook are required for before()" -- target or hook missing or non-CODE
 
-### FORMAL SPECIFICATION
-
-    before ≙
-      ∀ target : Str; hook : CodeRef •
-        pre  target ≠ '' ∧ ref(hook) = 'CODE'
-        let orig = sym_table[target].CODE •
-          post sym_table'[target].CODE = wrapper
-               ∧ wrapper(@args) ≙ hook(@args); orig(@args)
-
 ## after
 
 Run a hook after a method and return the original's value.
@@ -256,18 +247,6 @@ Uses the same LIFO mock stack as `mock()`: `unmock()` peels one layer,
 ### MESSAGES
 
     "Package, method and hook are required for after()" -- target or hook missing or non-CODE
-
-### FORMAL SPECIFICATION
-
-    after ≙
-      ∀ target : Str; hook : CodeRef •
-        pre  target ≠ '' ∧ ref(hook) = 'CODE'
-        let orig = sym_table[target].CODE •
-          post sym_table'[target].CODE = wrapper
-               ∧ wrapper(@args) ≙
-                   let ret = orig(@args) •
-                   hook(@args);
-                   ret
 
 ## around
 
@@ -312,15 +291,6 @@ Uses the same LIFO mock stack as `mock()`: `unmock()` peels one layer,
 ### MESSAGES
 
     "Package, method and hook are required for around()" -- target or hook missing or non-CODE
-
-### FORMAL SPECIFICATION
-
-    around ≙
-      ∀ target : Str; hook : CodeRef •
-        pre  target ≠ '' ∧ ref(hook) = 'CODE'
-        let orig = sym_table[target].CODE •
-          post sym_table'[target].CODE = wrapper
-               ∧ wrapper(@args) ≙ hook(orig, @args)
 
 ## mock\_scoped
 
@@ -857,6 +827,36 @@ Nigel Horne, `<njh at nigelhorne.com>`
 ## diagnose\_mocks\_pretty
 
     diagnose_mocks_pretty ≙ stringify(diagnose_mocks())
+
+## before
+
+    before ≙
+      ∀ target : Str; hook : CodeRef •
+        pre  target ≠ '' ∧ ref(hook) = 'CODE'
+        let orig = sym_table[target].CODE •
+          post sym_table'[target].CODE = wrapper
+               ∧ wrapper(@args) ≙ hook(@args); orig(@args)
+
+## after
+
+    after ≙
+      ∀ target : Str; hook : CodeRef •
+        pre  target ≠ '' ∧ ref(hook) = 'CODE'
+        let orig = sym_table[target].CODE •
+          post sym_table'[target].CODE = wrapper
+               ∧ wrapper(@args) ≙
+                   let ret = orig(@args) •
+                   hook(@args);
+                   ret
+
+## around
+
+    around ≙
+      ∀ target : Str; hook : CodeRef •
+        pre  target ≠ '' ∧ ref(hook) = 'CODE'
+        let orig = sym_table[target].CODE •
+          post sym_table'[target].CODE = wrapper
+               ∧ wrapper(@args) ≙ hook(orig, @args)
 
 # LICENCE AND COPYRIGHT
 

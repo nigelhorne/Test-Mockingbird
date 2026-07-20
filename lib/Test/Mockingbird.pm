@@ -384,15 +384,6 @@ C<'before'>.
 
   "Package, method and hook are required for before()" -- target or hook missing or non-CODE
 
-=head3 FORMAL SPECIFICATION
-
-    before ≙
-      ∀ target : Str; hook : CodeRef •
-        pre  target ≠ '' ∧ ref(hook) = 'CODE'
-        let orig = sym_table[target].CODE •
-          post sym_table'[target].CODE = wrapper
-               ∧ wrapper(@args) ≙ hook(@args); orig(@args)
-
 =cut
 
 sub before {
@@ -466,18 +457,6 @@ C<'after'>.
 =head3 MESSAGES
 
   "Package, method and hook are required for after()" -- target or hook missing or non-CODE
-
-=head3 FORMAL SPECIFICATION
-
-    after ≙
-      ∀ target : Str; hook : CodeRef •
-        pre  target ≠ '' ∧ ref(hook) = 'CODE'
-        let orig = sym_table[target].CODE •
-          post sym_table'[target].CODE = wrapper
-               ∧ wrapper(@args) ≙
-                   let ret = orig(@args) •
-                   hook(@args);
-                   ret
 
 =cut
 
@@ -565,15 +544,6 @@ C<'around'>.
 =head3 MESSAGES
 
   "Package, method and hook are required for around()" -- target or hook missing or non-CODE
-
-=head3 FORMAL SPECIFICATION
-
-    around ≙
-      ∀ target : Str; hook : CodeRef •
-        pre  target ≠ '' ∧ ref(hook) = 'CODE'
-        let orig = sym_table[target].CODE •
-          post sym_table'[target].CODE = wrapper
-               ∧ wrapper(@args) ≙ hook(orig, @args)
 
 =cut
 
@@ -1618,6 +1588,36 @@ L<https://github.com/nigelhorne/Test-Mockingbird>
 =head2 diagnose_mocks_pretty
 
     diagnose_mocks_pretty ≙ stringify(diagnose_mocks())
+
+=head2 before
+
+    before ≙
+      ∀ target : Str; hook : CodeRef •
+        pre  target ≠ '' ∧ ref(hook) = 'CODE'
+        let orig = sym_table[target].CODE •
+          post sym_table'[target].CODE = wrapper
+               ∧ wrapper(@args) ≙ hook(@args); orig(@args)
+
+=head2 after
+
+    after ≙
+      ∀ target : Str; hook : CodeRef •
+        pre  target ≠ '' ∧ ref(hook) = 'CODE'
+        let orig = sym_table[target].CODE •
+          post sym_table'[target].CODE = wrapper
+               ∧ wrapper(@args) ≙
+                   let ret = orig(@args) •
+                   hook(@args);
+                   ret
+
+=head2 around
+
+    around ≙
+      ∀ target : Str; hook : CodeRef •
+        pre  target ≠ '' ∧ ref(hook) = 'CODE'
+        let orig = sym_table[target].CODE •
+          post sym_table'[target].CODE = wrapper
+               ∧ wrapper(@args) ≙ hook(orig, @args)
 
 =head1 LICENCE AND COPYRIGHT
 
