@@ -182,6 +182,146 @@ whether a method is callable. See ["LIMITATIONS"](#limitations).
 
     "Package and method are required for unmocking" -- target missing
 
+## before
+
+Run a hook before a method, then call the original and return its value.
+
+    before 'My::Module::method' => sub { my @args = @_; ... };
+    before('My::Module', 'method', sub { ... });
+
+The hook receives the same `@_` that the original would have received. Its
+return value is discarded. The original is always called and its return value
+is passed to the caller unchanged. Context (list / scalar / void) is
+preserved.
+
+Uses the same LIFO mock stack as `mock()`: `unmock()` peels one layer,
+`restore_all()` drains all. `diagnose_mocks()` records the layer type as
+`'before'`.
+
+### API SPECIFICATION
+
+#### Input
+
+    target -- Str, 'Pkg::method' or ('Pkg', 'method')
+    hook   -- CodeRef; receives (@original_args), return value discarded
+
+#### Output
+
+    returns: undef
+
+### MESSAGES
+
+    "Package, method and hook are required for before()" -- target or hook missing or non-CODE
+
+### FORMAL SPECIFICATION
+
+    before ≙
+      ∀ target : Str; hook : CodeRef •
+        pre  target ≠ '' ∧ ref(hook) = 'CODE'
+        let orig = sym_table[target].CODE •
+          post sym_table'[target].CODE = wrapper
+               ∧ wrapper(@args) ≙ hook(@args); orig(@args)
+
+## after
+
+Run a hook after a method and return the original's value.
+
+    after 'My::Module::method' => sub { my @args = @_; ... };
+    after('My::Module', 'method', sub { ... });
+
+The original is called first. Its return value is captured, then the hook is
+called with the same `@_` that the original received. The hook's return
+value is discarded and the original's return value is passed to the caller
+unchanged. Context (list / scalar / void) is preserved.
+
+If the original throws, the exception propagates immediately and the hook is
+**not** called. Use `around()` if you need to run code unconditionally after
+the original.
+
+Uses the same LIFO mock stack as `mock()`: `unmock()` peels one layer,
+`restore_all()` drains all. `diagnose_mocks()` records the layer type as
+`'after'`.
+
+### API SPECIFICATION
+
+#### Input
+
+    target -- Str, 'Pkg::method' or ('Pkg', 'method')
+    hook   -- CodeRef; receives (@original_args), return value discarded
+
+#### Output
+
+    returns: undef
+
+### MESSAGES
+
+    "Package, method and hook are required for after()" -- target or hook missing or non-CODE
+
+### FORMAL SPECIFICATION
+
+    after ≙
+      ∀ target : Str; hook : CodeRef •
+        pre  target ≠ '' ∧ ref(hook) = 'CODE'
+        let orig = sym_table[target].CODE •
+          post sym_table'[target].CODE = wrapper
+               ∧ wrapper(@args) ≙
+                   let ret = orig(@args) •
+                   hook(@args);
+                   ret
+
+## around
+
+Replace a method with a hook that receives the original coderef as its first
+argument.
+
+    around 'My::Module::method' => sub {
+        my ($orig, @args) = @_;
+        my $result = $orig->(@args);   # call original
+        return $result * 2;            # modify return value
+    };
+
+    around('My::Module', 'method', sub {
+        my ($orig, @args) = @_;
+        return $orig->(@args);
+    });
+
+The hook receives `($orig_coderef, @original_args)`. It may call `$orig`
+zero or more times with any arguments. Its return value becomes the return
+value of the method. The hook is responsible for context handling when that
+matters.
+
+`around()` is the preferred alternative to `mock()` when you need to call
+through to the original: it captures the original and passes it as the first
+argument, avoiding the boilerplate of a separate `\&{...}` capture.
+
+Uses the same LIFO mock stack as `mock()`: `unmock()` peels one layer,
+`restore_all()` drains all. `diagnose_mocks()` records the layer type as
+`'around'`.
+
+### API SPECIFICATION
+
+#### Input
+
+    target -- Str, 'Pkg::method' or ('Pkg', 'method')
+    hook   -- CodeRef; receives ($orig_coderef, @original_args)
+
+#### Output
+
+    returns: undef
+
+### MESSAGES
+
+    "Package, method and hook are required for around()" -- target or hook missing or non-CODE
+
+### FORMAL SPECIFICATION
+
+    around ≙
+      ∀ target : Str; hook : CodeRef •
+        pre  target ≠ '' ∧ ref(hook) = 'CODE'
+        let orig = sym_table[target].CODE •
+          post sym_table'[target].CODE = wrapper
+               ∧ wrapper(@args) ≙ hook(orig, @args)
+
 ## mock\_scoped
 
 Create a scoped mock that restores automatically when the guard goes out of scope.
@@ -590,6 +730,33 @@ Nigel Horne, `<njh at nigelhorne.com>`
           post mocked'[target] = tail(mocked[target])
                ∧ sym_table'[target].CODE = prev
                ∧ mock_meta'[target] = tail(mock_meta[target])
+
+## before
+
+    before ≙
+      ∀ target : Str; hook : CodeRef •
+        pre  target ≠ '' ∧ ref(hook) = 'CODE'
+        let orig = sym_table[target].CODE •
+          post sym_table'[target].CODE = wrapper
+               ∧ wrapper(@args) ≙ hook(@args); orig(@args)
+
+## after
+
+    after ≙
+      ∀ target : Str; hook : CodeRef •
+        pre  target ≠ '' ∧ ref(hook) = 'CODE'
+        let orig = sym_table[target].CODE •
+          post sym_table'[target].CODE = wrapper
+               ∧ wrapper(@args) ≙ let ret = orig(@args) • hook(@args); ret
+
+## around
+
+    around ≙
+      ∀ target : Str; hook : CodeRef •
+        pre  target ≠ '' ∧ ref(hook) = 'CODE'
+        let orig = sym_table[target].CODE •
+          post sym_table'[target].CODE = wrapper
+               ∧ wrapper(@args) ≙ hook(orig, @args)
 
 ## mock\_scoped
 
