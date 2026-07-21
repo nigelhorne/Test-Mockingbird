@@ -4,6 +4,12 @@ use strict;
 use warnings;
 use 5.016003;
 
+# TODO: Add $ENV{TEST_MOCKINGBIRD_DEBUG} tracing flag that emits one line to
+#       STDERR on each mock/unmock/restore_all operation (name, type, caller
+#       location).  diagnose_mocks() covers post-hoc inspection; this would add
+#       real-time per-operation tracing for troubleshooting complex stacking
+#       scenarios.  Inspired by Function::Override's PERL_FUNCTION_OVERRIDE_DEBUG.
+
 use Carp       qw(croak carp);
 use Exporter   'import';
 use Scalar::Util ();
@@ -979,17 +985,6 @@ C<grep>) require a literal code block at the call site and cannot be wrapped.
   "mock_core: '$name' is not an overridable Perl builtin"      -- unknown builtin
   "mock_core: cannot build CORE::$name delegator: ..."         -- eval failed
 
-=head3 FORMAL SPECIFICATION
-
-    mock_core ≙
-      ∀ name : Str; replacement : CodeRef •
-        pre  _is_core_overridable(name) ∧ ref(replacement) = 'CODE'
-        let  call_core = eval("sub { CORE::name(@_) }") •
-        let  wrapper   = sub { replacement(call_core, @_) } •
-          post CORE::GLOBAL::name.CODE = wrapper
-               ∧ prototype(wrapper) = prototype(CORE::name)
-               ∧ mocked'["CORE::GLOBAL::name"] = ⟨wrapper⟩ ⌢ mocked["CORE::GLOBAL::name"]
-
 =cut
 
 sub mock_core {
@@ -1582,12 +1577,11 @@ sub _get_prototype {
 
 # _is_core_overridable -- Private helper
 #
-# Purpose:      Determine whether a bare name refers to a CORE builtin that
-#               Perl allows packages to shadow with a user sub.
+# Determine whether a bare name refers to a CORE builtin that
+#       Perl allows packages to shadow with a user sub.
 # Entry:        $_[0] -- Str, simple identifier (no 'CORE::' prefix)
 # Exit:         Bool -- true if prototype("CORE::$name") succeeds (even if
 #               the returned prototype is undef, meaning "no prototype")
-# Side effects: none
 sub _is_core_overridable {
 	my $name = $_[0];
 	local $@;
@@ -1595,13 +1589,9 @@ sub _is_core_overridable {
 	return !$@;
 }
 
-# TODO: Add $ENV{TEST_MOCKINGBIRD_DEBUG} tracing flag that emits one line to
-#       STDERR on each mock/unmock/restore_all operation (name, type, caller
-#       location).  diagnose_mocks() covers post-hoc inspection; this would add
-#       real-time per-operation tracing for troubleshooting complex stacking
-#       scenarios.  Inspired by Function::Override's PERL_FUNCTION_OVERRIDE_DEBUG.
-
 =head1 SUPPORT
+
+This module is provided as-is without any warranty.
 
 Please report bugs at L<https://github.com/nigelhorne/Test-Mockingbird/issues>.
 
@@ -1814,6 +1804,17 @@ L<https://github.com/nigelhorne/Test-Mockingbird>
         let orig = sym_table[target].CODE •
           post sym_table'[target].CODE = wrapper
                ∧ wrapper(@args) ≙ hook(orig, @args)
+
+=head2 mock_core
+
+    mock_core ≙
+      ∀ name : Str; replacement : CodeRef •
+        pre  _is_core_overridable(name) ∧ ref(replacement) = 'CODE'
+        let  call_core = eval("sub { CORE::name(@_) }") •
+        let  wrapper   = sub { replacement(call_core, @_) } •
+          post CORE::GLOBAL::name.CODE = wrapper
+               ∧ prototype(wrapper) = prototype(CORE::name)
+               ∧ mocked'["CORE::GLOBAL::name"] = ⟨wrapper⟩ ⌢ mocked["CORE::GLOBAL::name"]
 
 =head1 LICENCE AND COPYRIGHT
 

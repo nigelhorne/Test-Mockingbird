@@ -505,17 +505,6 @@ target.  `diagnose_mocks()` records the layer type as `'mock_core'`.
     "mock_core: '$name' is not an overridable Perl builtin"      -- unknown builtin
     "mock_core: cannot build CORE::$name delegator: ..."         -- eval failed
 
-### FORMAL SPECIFICATION
-
-    mock_core ≙
-      ∀ name : Str; replacement : CodeRef •
-        pre  _is_core_overridable(name) ∧ ref(replacement) = 'CODE'
-        let  call_core = eval("sub { CORE::name(@_) }") •
-        let  wrapper   = sub { replacement(call_core, @_) } •
-          post CORE::GLOBAL::name.CODE = wrapper
-               ∧ prototype(wrapper) = prototype(CORE::name)
-               ∧ mocked'["CORE::GLOBAL::name"] = ⟨wrapper⟩ ⌢ mocked["CORE::GLOBAL::name"]
-
 ## restore\_all
 
 Restore all mocked methods and injected dependencies.
@@ -732,6 +721,8 @@ Return a human-readable multi-line string of all active mock layers.
 
 # SUPPORT
 
+This module is provided as-is without any warranty.
+
 Please report bugs at [https://github.com/nigelhorne/Test-Mockingbird/issues](https://github.com/nigelhorne/Test-Mockingbird/issues).
 
 # AUTHOR
@@ -936,6 +927,17 @@ Nigel Horne, `<njh at nigelhorne.com>`
         let orig = sym_table[target].CODE •
           post sym_table'[target].CODE = wrapper
                ∧ wrapper(@args) ≙ hook(orig, @args)
+
+## mock\_core
+
+    mock_core ≙
+      ∀ name : Str; replacement : CodeRef •
+        pre  _is_core_overridable(name) ∧ ref(replacement) = 'CODE'
+        let  call_core = eval("sub { CORE::name(@_) }") •
+        let  wrapper   = sub { replacement(call_core, @_) } •
+          post CORE::GLOBAL::name.CODE = wrapper
+               ∧ prototype(wrapper) = prototype(CORE::name)
+               ∧ mocked'["CORE::GLOBAL::name"] = ⟨wrapper⟩ ⌢ mocked["CORE::GLOBAL::name"]
 
 # LICENCE AND COPYRIGHT
 
