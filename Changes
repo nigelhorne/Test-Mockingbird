@@ -1,6 +1,6 @@
 Revision history for Test::Mockingbird - Advanced mocking library for Perl with support for dependency injection and spies
 
-0.13
+0.13	Sun Aug  2 05:28:58 PM EDT 2026
 
   [Enhancements]
 
@@ -33,6 +33,7 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
     for stat wrapper, LIFO stacking with unmock, unmock restores real builtin,
     diagnose_mocks type, CORE:: prefix stripping, freshly compiled module
     interception, argument error paths, and identifier/builtin validation.
+  - Don't use Test::Returns, since it cycles back to Test::Mockingbird
 
 0.12	Mon Jul 20 11:01:43 EDT 2026
 
