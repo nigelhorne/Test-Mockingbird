@@ -729,6 +729,7 @@ sub spy {
 	my $wrapper = sub {
 		push @calls,    [ $full_method, @_ ];
 		push @call_log, $full_method;
+		# FIXME: check for recursive calls
 		return $orig->(@_);
 	};
 
