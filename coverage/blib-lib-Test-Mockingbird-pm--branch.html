@@ -20,80 +20,83 @@ https://pjcj.net
 <h1>Branch Coverage</h1>
 <table>
 <tr><td class="h" align="right">File:</td><td align="left">blib/lib/Test/Mockingbird.pm</td></tr>
-<tr><td class="h" align="right">Coverage:</td><td align="left" class="c2">96.4%</td></tr>
+<tr><td class="h" align="right">Coverage:</td><td align="left" class="c2">99.3%</td></tr>
 </table>
 <div><br/></div>
 <table>
 <tr><th>line</th><th>%</th><th colspan="2">coverage</th><th>branch</th></tr>
-<tr><td class="h"><a id="L245">245</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg3 and $arg1 =~ /^(.*)::([^:]+)$/u) { }</td></tr>
-<tr><td class="h"><a id="L251">251</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $package and $method and $replacement</td></tr>
-<tr><td class="h"><a id="L266">266</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">defined $original ? :</td></tr>
-<tr><td class="h"><a id="L267">267</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $orig_proto)</td></tr>
-<tr><td class="h"><a id="L326">326</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg2 and $arg1 =~ /^(.*)::([^:]+)$/u) { }</td></tr>
-<tr><td class="h"><a id="L332">332</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $package and $method</td></tr>
-<tr><td class="h"><a id="L338">338</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless exists $mocked{$full_method} and @{$mocked{$full_method};}</td></tr>
-<tr><td class="h"><a id="L348">348</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless (@{$mocked{$full_method};})</td></tr>
-<tr><td class="h"><a id="L393">393</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg3 and $arg1 =~ /^(.*)::([^:]+)$/u) { }</td></tr>
-<tr><td class="h"><a id="L399">399</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $package and $method and ref $hook eq &quot;CODE&quot;</td></tr>
-<tr><td class="h"><a id="L409">409</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (wantarray) { }</td></tr>
+<tr><td class="h"><a id="L328">328</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg3 and $arg1 =~ /^(.*)::([^:]+)$/u) { }</td></tr>
+<tr><td class="h"><a id="L334">334</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless _is_name($package) and _is_name($method) and $replacement</td></tr>
+<tr><td class="h"><a id="L340">340</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless ref $replacement eq &quot;CODE&quot;</td></tr>
+<tr><td class="h"><a id="L355">355</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">defined $original ? :</td></tr>
+<tr><td class="h"><a id="L356">356</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $orig_proto)</td></tr>
+<tr><td class="h"><a id="L415">415</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg2 and $arg1 =~ /^(.*)::([^:]+)$/u) { }</td></tr>
+<tr><td class="h"><a id="L421">421</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless _is_name($package) and _is_name($method)</td></tr>
+<tr><td class="h"><a id="L427">427</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless exists $mocked{$full_method} and @{$mocked{$full_method};}</td></tr>
+<tr><td class="h"><a id="L437">437</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless (@{$mocked{$full_method};})</td></tr>
+<tr><td class="h"><a id="L482">482</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg3 and $arg1 =~ /^(.*)::([^:]+)$/u) { }</td></tr>
+<tr><td class="h"><a id="L488">488</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless _is_name($package) and _is_name($method) and ref $hook eq &quot;CODE&quot;</td></tr>
+<tr><td class="h"><a id="L498">498</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (wantarray) { }</td></tr>
 <tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif (defined wantarray) { }</td></tr>
-<tr><td class="h"><a id="L463">463</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg3 and $arg1 =~ /^(.*)::([^:]+)$/u) { }</td></tr>
-<tr><td class="h"><a id="L469">469</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $package and $method and ref $hook eq &quot;CODE&quot;</td></tr>
-<tr><td class="h"><a id="L478">478</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (wantarray) { }</td></tr>
+<tr><td class="h"><a id="L552">552</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg3 and $arg1 =~ /^(.*)::([^:]+)$/u) { }</td></tr>
+<tr><td class="h"><a id="L558">558</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless _is_name($package) and _is_name($method) and ref $hook eq &quot;CODE&quot;</td></tr>
+<tr><td class="h"><a id="L567">567</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (wantarray) { }</td></tr>
 <tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif (defined wantarray) { }</td></tr>
-<tr><td class="h"><a id="L546">546</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg3 and $arg1 =~ /^(.*)::([^:]+)$/u) { }</td></tr>
-<tr><td class="h"><a id="L552">552</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $package and $method and ref $hook eq &quot;CODE&quot;</td></tr>
-<tr><td class="h"><a id="L609">609</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (@args == 2 and ref $args[1] eq &#39;CODE&#39;) { }</td></tr>
+<tr><td class="h"><a id="L635">635</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg3 and $arg1 =~ /^(.*)::([^:]+)$/u) { }</td></tr>
+<tr><td class="h"><a id="L641">641</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless _is_name($package) and _is_name($method) and ref $hook eq &quot;CODE&quot;</td></tr>
+<tr><td class="h"><a id="L698">698</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (@args == 2 and ref $args[1] eq &#39;CODE&#39;) { }</td></tr>
 <tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif (@args == 3 and not ref $args[1] and ref $args[2] eq &#39;CODE&#39;) { }</td></tr>
 <tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif (@args &gt;= 4 and @args % 2 == 0 and ref $args[1] eq &#39;CODE&#39;) { }</td></tr>
 <tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif (@args &gt;= 5 and @args % 2 == 1 and ref $args[2] eq &#39;CODE&#39;) { }</td></tr>
-<tr><td class="h"><a id="L620">620</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless ref $code eq &quot;CODE&quot;</td></tr>
-<tr><td class="h"><a id="L631">631</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless ref $code eq &quot;CODE&quot;</td></tr>
-<tr><td class="h"><a id="L685">685</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $package and $method</td></tr>
-<tr><td class="h"><a id="L710">710</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $orig_proto)</td></tr>
-<tr><td class="h"><a id="L763">763</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (@_ == 2 and defined $_[0] and $_[0] =~ /^(.*)::([^:]+)$/u) { }</td></tr>
-<tr><td class="h"><a id="L769">769</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $package and $dependency</td></tr>
-<tr><td class="h"><a id="L829">829</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $package and length $package</td></tr>
-<tr><td class="h"><a id="L832">832</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless ref $deps eq &quot;HASH&quot;</td></tr>
-<tr><td class="h"><a id="L876">876</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $class and length $class</td></tr>
-<tr><td class="h"><a id="L878">878</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if @_ &lt; 2</td></tr>
-<tr><td class="h"><a id="L883">883</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">ref $factory eq &#39;CODE&#39; ? :</td></tr>
-<tr><td class="h"><a id="L959">959</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $name and ref $replacement eq &quot;CODE&quot;</td></tr>
-<tr><td class="h"><a id="L964">964</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $name =~ /^\w+$/u</td></tr>
-<tr><td class="h"><a id="L966">966</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless _is_core_overridable($name)</td></tr>
-<tr><td class="h"><a id="L977">977</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">defined $core_proto &amp;&amp; $core_proto eq &#39;_&#39; ? :</td></tr>
-<tr><td class="h"><a id="L979">979</a></td><td class="c0">50</td><td class="c0">T</td><td class="c3">F</td><td class="s">if $@</td></tr>
-<tr><td class="h"><a id="L989">989</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">defined $core_proto ? :</td></tr>
-<tr><td class="h"><a id="L999">999</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">defined &amp;{$full;} ? :</td></tr>
-<tr><td class="h"><a id="L1006">1006</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">$orig_existed ? :</td></tr>
-<tr><td class="h"><a id="L1051">1051</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg)</td></tr>
-<tr><td class="h"><a id="L1055">1055</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $full_method =~ /^\Q$package\E::/u</td></tr>
-<tr><td class="h"><a id="L1106">1106</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $target</td></tr>
-<tr><td class="h"><a id="L1111">1111</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless exists $mocked{$full_method}</td></tr>
-<tr><td class="h"><a id="L1146">1146</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $target</td></tr>
-<tr><td class="h"><a id="L1180">1180</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $target and defined $message</td></tr>
-<tr><td class="h"><a id="L1216">1216</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $target and @values</td></tr>
-<tr><td class="h"><a id="L1223">1223</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if @queue == 1</td></tr>
-<tr><td class="h"><a id="L1267">1267</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $target and ref $code eq &quot;CODE&quot;</td></tr>
-<tr><td class="h"><a id="L1275">1275</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">wantarray ? :</td></tr>
-<tr><td class="h"><a id="L1312">1312</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless @expected &gt;= 2</td></tr>
-<tr><td class="h"><a id="L1317">1317</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if ($logged eq $expected[$pos])</td></tr>
-<tr><td class="h"><a id="L1319">1319</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $pos == @expected</td></tr>
-<tr><td class="h"><a id="L1326">1326</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if ($ok) { }</td></tr>
-<tr><td class="h"><a id="L1409">1409</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">@$layers &amp;&amp; $layers-&gt;[0]{&#39;original_existed&#39;} ? :</td></tr>
-<tr><td class="h"><a id="L1488">1488</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">defined &amp;{$full;} ? :</td></tr>
-<tr><td class="h"><a id="L1489">1489</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">exists &amp;{$full;} ? :</td></tr>
-<tr><td class="h"><a id="L1509">1509</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $prev) { }</td></tr>
+<tr><td class="h"><a id="L709">709</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless ref $code eq &quot;CODE&quot;</td></tr>
+<tr><td class="h"><a id="L720">720</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless ref $code eq &quot;CODE&quot;</td></tr>
+<tr><td class="h"><a id="L774">774</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless _is_name($package) and _is_name($method)</td></tr>
+<tr><td class="h"><a id="L800">800</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $orig_proto)</td></tr>
+<tr><td class="h"><a id="L857">857</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (@_ == 2) { }</td></tr>
+<tr><td class="h"><a id="L858">858</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if defined $_[0]</td></tr>
+<tr><td class="h"><a id="L864">864</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless _is_name($package) and _is_name($dependency)</td></tr>
+<tr><td class="h"><a id="L924">924</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $package and length $package</td></tr>
+<tr><td class="h"><a id="L927">927</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless ref $deps eq &quot;HASH&quot;</td></tr>
+<tr><td class="h"><a id="L971">971</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $class and length $class</td></tr>
+<tr><td class="h"><a id="L973">973</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if @_ &lt; 2</td></tr>
+<tr><td class="h"><a id="L978">978</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">ref $factory eq &#39;CODE&#39; ? :</td></tr>
+<tr><td class="h"><a id="L1059">1059</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $name and ref $replacement eq &quot;CODE&quot;</td></tr>
+<tr><td class="h"><a id="L1064">1064</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $name =~ /^\w+$/u</td></tr>
+<tr><td class="h"><a id="L1066">1066</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless _is_core_overridable($name)</td></tr>
+<tr><td class="h"><a id="L1080">1080</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">defined $core_proto ? :</td></tr>
+<tr><td class="h"><a id="L1090">1090</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">defined &amp;{$full;} ? :</td></tr>
+<tr><td class="h"><a id="L1097">1097</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">$orig_existed ? :</td></tr>
+<tr><td class="h"><a id="L1143">1143</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg)</td></tr>
+<tr><td class="h"><a id="L1147">1147</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $full_method =~ /^\Q$package\E::/u</td></tr>
+<tr><td class="h"><a id="L1198">1198</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $target</td></tr>
+<tr><td class="h"><a id="L1203">1203</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless exists $mocked{$full_method}</td></tr>
+<tr><td class="h"><a id="L1238">1238</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $target</td></tr>
+<tr><td class="h"><a id="L1272">1272</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $target and defined $message</td></tr>
+<tr><td class="h"><a id="L1308">1308</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $target and @values</td></tr>
+<tr><td class="h"><a id="L1315">1315</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if @queue == 1</td></tr>
+<tr><td class="h"><a id="L1359">1359</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless defined $target and ref $code eq &quot;CODE&quot;</td></tr>
+<tr><td class="h"><a id="L1367">1367</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">wantarray ? :</td></tr>
+<tr><td class="h"><a id="L1404">1404</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless @expected &gt;= 2</td></tr>
+<tr><td class="h"><a id="L1409">1409</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if ($logged eq $expected[$pos])</td></tr>
+<tr><td class="h"><a id="L1411">1411</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $pos == @expected</td></tr>
+<tr><td class="h"><a id="L1418">1418</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if ($ok) { }</td></tr>
+<tr><td class="h"><a id="L1501">1501</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">@$layers &amp;&amp; $layers-&gt;[0]{&#39;original_existed&#39;} ? :</td></tr>
+<tr><td class="h"><a id="L1580">1580</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">defined &amp;{$full;} ? :</td></tr>
+<tr><td class="h"><a id="L1581">1581</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">exists &amp;{$full;} ? :</td></tr>
+<tr><td class="h"><a id="L1601">1601</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $prev) { }</td></tr>
 <tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif ($full =~ /^CORE::GLOBAL::([^:]+)$/u) { }</td></tr>
-<tr><td class="h"><a id="L1556">1556</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if exists &amp;{$full;}</td></tr>
-<tr><td class="h"><a id="L1560">1560</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless my $code = _inherited_method($package, $method)</td></tr>
-<tr><td class="h"><a id="L1578">1578</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">unless $package eq &quot;UNIVERSAL&quot;</td></tr>
-<tr><td class="h"><a id="L1582">1582</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if defined &amp;{&quot;${class}::$method&quot;;}</td></tr>
-<tr><td class="h"><a id="L1598">1598</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg2 and $arg1 =~ /^(.*)::([^:]+)$/u)</td></tr>
-<tr><td class="h"><a id="L1617">1617</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $info[0] =~ /^Test::Mockingbird/u</td></tr>
-<tr><td class="h"><a id="L1621">1621</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">defined $info[1] ? :</td></tr>
-<tr><td class="h"><a id="L1635">1635</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $full =~ /^[A-Za-z_]\w*(?:::[A-Za-z_]\w*)+$/u</td></tr>
-<tr><td class="h"><a id="L1639">1639</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless my $code = $pkg-&gt;can($sub)</td></tr>
+<tr><td class="h"><a id="L1648">1648</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if exists &amp;{$full;}</td></tr>
+<tr><td class="h"><a id="L1652">1652</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless my $code = _inherited_method($package, $method)</td></tr>
+<tr><td class="h"><a id="L1670">1670</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $package eq &quot;UNIVERSAL&quot;</td></tr>
+<tr><td class="h"><a id="L1674">1674</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if defined &amp;{&quot;${class}::$method&quot;;}</td></tr>
+<tr><td class="h"><a id="L1690">1690</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $arg1 and not defined $arg2 and $arg1 =~ /^(.*)::([^:]+)$/u)</td></tr>
+<tr><td class="h"><a id="L1709">1709</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $info[0] =~ /^Test::Mockingbird/u</td></tr>
+<tr><td class="h"><a id="L1713">1713</a></td><td class="c0">50</td><td class="c3">T</td><td class="c0">F</td><td class="s">defined $info[1] ? :</td></tr>
+<tr><td class="h"><a id="L1727">1727</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless $full =~ /^[A-Za-z_]\w*(?:::[A-Za-z_]\w*)+$/u</td></tr>
+<tr><td class="h"><a id="L1731">1731</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">unless my $code = $pkg-&gt;can($sub)</td></tr>
+<tr><td class="h"><a id="L1757">1757</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if (defined $proto and $proto eq &#39;_&#39;) { }</td></tr>
+<tr><td class="h"></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">elsif (defined $proto and $proto =~ /^((?:\\?[\$_*])*);?((?:\\?[\$_*])*)$/u) { }</td></tr>
+<tr><td class="h"><a id="L1778">1778</a></td><td class="c3">100</td><td class="c3">T</td><td class="c3">F</td><td class="s">if $sub</td></tr>
 </table>
 </body>
 </html>
