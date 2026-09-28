@@ -315,15 +315,10 @@ sub async_spy {
 
 	my $full_method = "${package}::${method}";
 
-	# Capture current implementation so the wrapper can delegate to it.
-	# mock() will also capture it independently for stack bookkeeping;
-	# both captures see the same coderef at this point.
-	my $orig;
-	{
-		## no critic (ProhibitNoStrict)
-		no strict 'refs';
-		$orig = \&{$full_method};
-	}
+	# Resolve what the wrapper delegates to (the parent's implementation
+	# for an inherited method).  mock() separately saves the CODE slot for
+	# stack bookkeeping.
+	my $orig = Test::Mockingbird::_call_through($package, $method);
 
 	my @calls;
 

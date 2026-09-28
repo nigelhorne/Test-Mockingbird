@@ -74,23 +74,13 @@ Each installed layer records:
 
 # LIMITATIONS
 
-- `->can()` may return truthy after unmocking a never-existed method
+- Call-through to an inherited method does not consult `AUTOLOAD`
 
-    Perl's typeglob (GV) system auto-vivifies a GV entry the first time
-    `\&{$full_method}` is called internally (in `mock()`, `spy()`, or
-    `inject()`). After unmocking, this GV entry remains in the stash with an
-    "undefined sub" placeholder in the CODE slot. `Package->can('method')`
-    tests the GV's existence in the stash, not whether the CODE slot is defined,
-    so it may still return a truthy value.
-
-    To test whether a sub is callable, use `defined(&Package::method)` rather
-    than `Package->can('method')`. `defined(&...)` correctly returns false
-    for the placeholder stub. Calling the stub dies with `"Undefined subroutine"`.
-
-    Deleting the GV from the stash (via `delete $stash{method}`) would make
-    `->can()` return false but would break subsequent mock/inject stacking:
-    compiled direct calls (`Package::method()`) cache the GV at compile time,
-    so a new GV installed after a delete is invisible to those compiled calls.
+    When `spy()`, `before()`, `after()`, `around()` or `async_spy()` wrap a
+    method the package does not declare itself, they call through to the first
+    implementation found in the package's parent classes (looked up at call
+    time, so a later mock of the parent is seen). If there is none they die with
+    `"Undefined subroutine"`; an `AUTOLOAD` is not tried.
 
 - Prototype mismatch warning from `spy()`
 
@@ -134,8 +124,17 @@ Replace a method with a coderef.
     mock 'My::Module::method' => sub { 'mocked' };
 
 Mocks stack in LIFO order. Each `mock()` call saves the current CODE slot
-(or the auto-vivified undef stub if the method does not exist) and installs
-the replacement. `unmock()` pops one layer; `restore_all()` drains all.
+(or notes that there is none, if the package does not declare the method)
+and installs the replacement. `unmock()` pops one layer; `restore_all()`
+drains all.
+
+A method the package only inherits can be mocked in that package alone:
+
+    mock 'My::Child::greet' => sub { 'mocked' };   # My::Parent unaffected
+    unmock 'My::Child::greet';                      # inherits again
+
+Removing the last layer empties the package's CODE slot, so method lookup
+reaches the parent class again, exactly as before the mock.
 
 If the original carries a Perl prototype, the same prototype is stamped onto
 the replacement coderef before installation, suppressing `Prototype mismatch`
@@ -163,10 +162,12 @@ Restore the previous implementation of a mocked method (one layer).
     unmock('My::Module', 'method');
     unmock 'My::Module::method';
 
-If the method did not exist before it was mocked, the original undef-stub
-is restored so that calling the method dies with `"Undefined subroutine"`.
-Note: `->can()` may still return truthy; use `defined(&...)` to test
-whether a method is callable. See ["LIMITATIONS"](#limitations).
+If the package did not declare the method before it was mocked, removing
+the last layer empties its CODE slot: an inherited method is found through
+`@ISA` again, and a method defined nowhere is once more undefined (a direct
+call dies with `"Undefined subroutine"` and `->can()` returns false).
+The typeglob itself and its other slots (e.g. a package variable of the same
+name) are kept, so previously compiled direct calls still see later mocks.
 
 ### API SPECIFICATION
 

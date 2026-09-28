@@ -13,6 +13,7 @@ use 5.016003;
 use Carp       qw(croak carp);
 use Exporter   'import';
 use Scalar::Util ();
+use mro ();
 
 # Internal type-name constants -- eliminate magic strings.
 # These constants are used wherever a layer type is recorded in %mock_meta.
@@ -62,7 +63,7 @@ our @EXPORT = qw(
 our $TYPE;
 
 # Internal mocking state -- module-level lexicals.
-my %mocked;    # full_method => [ stack of coderefs (or undef stubs) ]
+my %mocked;    # full_method => [ stack of saved coderefs; undef = no sub was declared ]
 my %mock_meta; # full_method => [ { type => ..., installed_at => ... }, ... ]
 my @call_log;  # ordered log of every spied call
 
@@ -148,23 +149,13 @@ Each installed layer records:
 
 =over 4
 
-=item C<< ->can() >> may return truthy after unmocking a never-existed method
+=item Call-through to an inherited method does not consult C<AUTOLOAD>
 
-Perl's typeglob (GV) system auto-vivifies a GV entry the first time
-C<\&{$full_method}> is called internally (in C<mock()>, C<spy()>, or
-C<inject()>). After unmocking, this GV entry remains in the stash with an
-"undefined sub" placeholder in the CODE slot. C<< Package->can('method') >>
-tests the GV's existence in the stash, not whether the CODE slot is defined,
-so it may still return a truthy value.
-
-To test whether a sub is callable, use C<defined(&Package::method)> rather
-than C<< Package->can('method') >>. C<defined(&...)> correctly returns false
-for the placeholder stub. Calling the stub dies with C<"Undefined subroutine">.
-
-Deleting the GV from the stash (via C<delete $stash{method}>) would make
-C<< ->can() >> return false but would break subsequent mock/inject stacking:
-compiled direct calls (C<Package::method()>) cache the GV at compile time,
-so a new GV installed after a delete is invisible to those compiled calls.
+When C<spy()>, C<before()>, C<after()>, C<around()> or C<async_spy()> wrap a
+method the package does not declare itself, they call through to the first
+implementation found in the package's parent classes (looked up at call
+time, so a later mock of the parent is seen). If there is none they die with
+C<"Undefined subroutine">; an C<AUTOLOAD> is not tried.
 
 =item Prototype mismatch warning from C<spy()>
 
@@ -212,8 +203,17 @@ Replace a method with a coderef.
     mock 'My::Module::method' => sub { 'mocked' };
 
 Mocks stack in LIFO order. Each C<mock()> call saves the current CODE slot
-(or the auto-vivified undef stub if the method does not exist) and installs
-the replacement. C<unmock()> pops one layer; C<restore_all()> drains all.
+(or notes that there is none, if the package does not declare the method)
+and installs the replacement. C<unmock()> pops one layer; C<restore_all()>
+drains all.
+
+A method the package only inherits can be mocked in that package alone:
+
+    mock 'My::Child::greet' => sub { 'mocked' };   # My::Parent unaffected
+    unmock 'My::Child::greet';                      # inherits again
+
+Removing the last layer empties the package's CODE slot, so method lookup
+reaches the parent class again, exactly as before the mock.
 
 If the original carries a Perl prototype, the same prototype is stamped onto
 the replacement coderef before installation, suppressing C<Prototype mismatch>
@@ -253,21 +253,17 @@ sub mock {
 
 	my $full_method = "${package}::${method}";
 
-	# Capture the current CODE slot (or the undef-stub if the method does
-	# not yet exist).  We always capture via \& so that on restore we
-	# write back to the SAME GV that compiled direct calls hold, rather
-	# than deleting the GV and creating a new one that compiled ops miss.
-	my ($original, $orig_existed);
-	{
-		no strict 'refs';    ## no critic (ProhibitNoStrict)
-		$orig_existed = defined(&{$full_method}) ? 1 : 0;
-		$original     = \&{$full_method};
-	}
+	# Capture the current CODE slot.  When no sub of that name has been
+	# declared in the package, undef is saved instead: on restore the CODE
+	# slot is emptied (see _restore_slot) so that inherited methods resolve
+	# through @ISA again.  Restoration always writes back to the SAME GV that
+	# compiled direct calls hold, never deleting it.
+	my ($orig_existed, $original) = _capture_slot($full_method);
 	push @{ $mocked{$full_method} }, $original;
 
 	# Stamp the prototype onto the replacement to avoid Perl warning about
 	# "Prototype mismatch" when the original had a prototype.
-	my $orig_proto = prototype($original);
+	my $orig_proto = defined $original ? prototype($original) : undef;
 	if (defined $orig_proto) {
 		&Scalar::Util::set_prototype($replacement, $orig_proto);
 	}
@@ -300,10 +296,12 @@ Restore the previous implementation of a mocked method (one layer).
     unmock('My::Module', 'method');
     unmock 'My::Module::method';
 
-If the method did not exist before it was mocked, the original undef-stub
-is restored so that calling the method dies with C<"Undefined subroutine">.
-Note: C<< ->can() >> may still return truthy; use C<defined(&...)> to test
-whether a method is callable. See L</LIMITATIONS>.
+If the package did not declare the method before it was mocked, removing
+the last layer empties its CODE slot: an inherited method is found through
+C<@ISA> again, and a method defined nowhere is once more undefined (a direct
+call dies with C<"Undefined subroutine"> and C<< ->can() >> returns false).
+The typeglob itself and its other slots (e.g. a package variable of the same
+name) are kept, so previously compiled direct calls still see later mocks.
 
 =head3 API SPECIFICATION
 
@@ -339,19 +337,7 @@ sub unmock {
 	# Nothing to do if this method was never mocked
 	return unless exists $mocked{$full_method} && @{ $mocked{$full_method} };
 
-	my $prev = pop @{ $mocked{$full_method} };
-
-	if (defined $prev) {
-		no warnings 'redefine';
-		no strict 'refs';    ## no critic (ProhibitNoStrict)
-		*{$full_method} = $prev;
-	} elsif ($full_method =~ /^CORE::GLOBAL::/) {
-		# No prior CORE::GLOBAL override existed (mock_core pushed undef).
-		# Delete the stash entry so the real CORE builtin is reachable.
-		my ($bname) = ($full_method =~ /::([^:]+)$/);
-		no strict 'refs';    ## no critic (ProhibitNoStrict)
-		delete $CORE::GLOBAL::{$bname};
-	}
+	_restore_slot($full_method, pop @{ $mocked{$full_method} });
 
 	# Pop exactly one meta entry to mirror the mock stack.
 	# Earlier code deleted the entire key; that wiped meta for all layers
@@ -414,11 +400,7 @@ sub before {
 		unless $package && $method && ref($hook) eq 'CODE';
 
 	my $full_method = "${package}::${method}";
-	my $orig;
-	{
-		no strict 'refs';    ## no critic (ProhibitNoStrict)
-		$orig = \&{$full_method};
-	}
+	my $orig = _call_through($package, $method);
 
 	local $TYPE = _T_BEFORE;
 	mock($package, $method, sub {
@@ -488,11 +470,7 @@ sub after {
 		unless $package && $method && ref($hook) eq 'CODE';
 
 	my $full_method = "${package}::${method}";
-	my $orig;
-	{
-		no strict 'refs';    ## no critic (ProhibitNoStrict)
-		$orig = \&{$full_method};
-	}
+	my $orig = _call_through($package, $method);
 
 	local $TYPE = _T_AFTER;
 	mock($package, $method, sub {
@@ -575,11 +553,7 @@ sub around {
 		unless $package && $method && ref($hook) eq 'CODE';
 
 	my $full_method = "${package}::${method}";
-	my $orig;
-	{
-		no strict 'refs';    ## no critic (ProhibitNoStrict)
-		$orig = \&{$full_method};
-	}
+	my $orig = _call_through($package, $method);
 
 	local $TYPE = _T_AROUND;
 	mock($package, $method, sub { $hook->($orig, @_) });
@@ -713,16 +687,12 @@ sub spy {
 
 	my $full_method = "${package}::${method}";
 
-	# Capture current implementation (or undef stub if none exists).
-	# We never delete the GV; we always restore by assigning back to *{},
-	# preserving the GV so compiled direct calls remain valid.
-	my ($orig, $orig_existed);
-	{
-		no strict 'refs';    ## no critic (ProhibitNoStrict)
-		$orig_existed = defined(&{$full_method}) ? 1 : 0;
-		$orig         = \&{$full_method};
-	}
-	push @{ $mocked{$full_method} }, $orig;
+	# Save the current CODE slot for restoration (see mock()), and resolve
+	# what the wrapper calls through to -- which, for a method the package
+	# only inherits, is the parent's implementation.
+	my ($orig_existed, $saved) = _capture_slot($full_method);
+	push @{ $mocked{$full_method} }, $saved;
+	my $orig = _call_through($package, $method);
 
 	my @calls;
 
@@ -801,12 +771,7 @@ sub inject {
 
 	my $full = "${package}::${dependency}";
 
-	my ($orig, $orig_existed);
-	{
-		no strict 'refs';    ## no critic (ProhibitNoStrict)
-		$orig_existed = defined(&{$full}) ? 1 : 0;
-		$orig         = \&{$full};
-	}
+	my ($orig_existed, $orig) = _capture_slot($full);
 	push @{ $mocked{$full} }, $orig;
 
 	my $wrapper = sub { $mock_object };
@@ -1500,22 +1465,121 @@ sub _drain_and_restore {
 		$final_prev = pop @{ $mocked{$full_method} };
 	}
 
-	# Restore the original (bottom of stack) to the SAME GV that compiled
-	# calls hold.  We never delete the GV because compiled direct-call ops
-	# cache the GV at compile time; a new GV would be invisible to them.
-	if (defined $final_prev) {
-		no warnings 'redefine';
-		no strict 'refs';    ## no critic (ProhibitNoStrict)
-		*{$full_method} = $final_prev;
-	} elsif ($full_method =~ /^CORE::GLOBAL::/) {
+	_restore_slot($full_method, $final_prev);
+
+	return;
+}
+
+# _capture_slot -- Private helper
+#
+# Purpose:      Snapshot a target's CODE slot before a layer is installed.
+# Entry:        $_[0] -- Str, fully-qualified sub name
+# Exit:         ($existed, $saved) -- $existed is 1 if a sub with a body is
+#               installed, else 0.  $saved is a reference to the current
+#               CODE slot, or undef if no sub of that name has been declared
+#               at all.  In the undef case \&{...} is deliberately NOT taken:
+#               it would auto-vivify an empty stub, and restoring that stub
+#               would shadow any inherited method of the same name.
+# Side effects: None.
+sub _capture_slot {
+	my $full = $_[0];
+
+	no strict 'refs';    ## no critic (ProhibitNoStrict)
+	my $existed = defined(&{$full}) ? 1 : 0;
+	my $saved   = exists(&{$full}) ? \&{$full} : undef;
+
+	return ($existed, $saved);
+}
+
+# _restore_slot -- Private helper
+#
+# Purpose:      Put a saved CODE slot back (the inverse of _capture_slot).
+# Entry:        $_[0] -- Str, fully-qualified sub name
+#               $_[1] -- CodeRef saved by _capture_slot, or undef
+# Exit:         undef
+# Side effects: Modifies the symbol table for the target.  The GV itself is
+#               never deleted (except under CORE::GLOBAL, below) because
+#               compiled direct-call ops cache the GV at compile time; a new
+#               GV would be invisible to them.
+sub _restore_slot {
+	my ($full, $prev) = @_;
+
+	no strict 'refs';    ## no critic (ProhibitNoStrict)
+
+	if (defined $prev) {
+		no warnings 'redefine', 'prototype';
+		*{$full} = $prev;
+	} elsif ($full =~ /^CORE::GLOBAL::([^:]+)$/) {
 		# No prior CORE::GLOBAL override existed (mock_core pushed undef).
 		# Delete the stash entry entirely so Perl's builtin lookup falls back
-		# to the real CORE function.  Reinstating the undef-stub CV is not
+		# to the real CORE function.  Reinstating an undef-stub CV is not
 		# sufficient: Perl treats any non-NULL CV in CORE::GLOBAL as an active
 		# user override, so the real builtin would never be reached.
-		my ($bname) = ($full_method =~ /::([^:]+)$/);
+		delete $CORE::GLOBAL::{$1};
+	} else {
+		# No sub was declared before the first layer went on.  Empty the CODE
+		# slot while keeping the GV and its other slots, so that method lookup
+		# falls through to @ISA again and a direct call dies with
+		# "Undefined subroutine".  Assigning undef to a glob empties every
+		# slot, so the non-CODE ones are saved and put back.
+		my ($package) = $full =~ /^(.*)::[^:]+$/;
+		my $gv   = \*{$full};
+		my %keep = map { $_ => *{$gv}{$_} }
+			grep { defined *{$gv}{$_} } qw(SCALAR ARRAY HASH IO FORMAT);
+		undef *{$gv};
+		*{$gv} = $keep{$_} for keys %keep;
+		mro::method_changed_in($package);
+	}
+
+	return;
+}
+
+# _call_through -- Private helper
+#
+# Purpose:      Return the coderef a call-through wrapper (spy, before,
+#               after, around, async_spy) should delegate to.
+# Entry:        $_[0] -- Str, package; $_[1] -- Str, method
+# Exit:         CodeRef.  If a sub of that name is declared in the package it
+#               is returned directly.  Otherwise a delegator is returned that,
+#               at call time, finds the method in the package's parent classes
+#               (as Perl's own method lookup would once the wrapper is
+#               removed) and croaks "Undefined subroutine" if there is none.
+#               Taking \&{...} here instead would return a stub that re-enters
+#               the wrapper through the GV and loops forever.
+# Side effects: None.
+sub _call_through {
+	my ($package, $method) = @_;
+	my $full = "${package}::${method}";
+
+	{
 		no strict 'refs';    ## no critic (ProhibitNoStrict)
-		delete $CORE::GLOBAL::{$bname};
+		return \&{$full} if exists &{$full};
+	}
+
+	return sub {
+		my $code = _inherited_method($package, $method)
+			or croak "Undefined subroutine &$full called";
+		goto &$code;
+	};
+}
+
+# _inherited_method -- Private helper
+#
+# Purpose:      Find a method in a package's ancestors, skipping the package
+#               itself.
+# Entry:        $_[0] -- Str, package; $_[1] -- Str, method
+# Exit:         CodeRef of the first defined ancestor implementation in
+#               method resolution order (UNIVERSAL last), or undef if none.
+# Side effects: None.
+sub _inherited_method {
+	my ($package, $method) = @_;
+
+	my (undef, @ancestors) = @{ mro::get_linear_isa($package) };
+	push @ancestors, 'UNIVERSAL' unless $package eq 'UNIVERSAL';
+
+	no strict 'refs';    ## no critic (ProhibitNoStrict)
+	for my $class (@ancestors) {
+		return \&{"${class}::${method}"} if defined &{"${class}::${method}"};
 	}
 
 	return;
