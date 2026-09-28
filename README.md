@@ -6,7 +6,7 @@ async Future mocking
 
 # VERSION
 
-Version 0.13
+Version 0.14
 
 # SYNOPSIS
 
@@ -57,15 +57,9 @@ call-order verification, and constructor interception for Perl test suites.
 
 # DIAGNOSTICS
 
-## diagnose\_mocks
-
-Returns a structured hashref of all active mock layers.
-
-## diagnose\_mocks\_pretty
-
-Returns a human-readable multi-line string of all active mock layers.
-
-## Diagnostic Metadata
+["diagnose\_mocks"](#diagnose_mocks) returns a structured hashref of all active mock layers;
+["diagnose\_mocks\_pretty"](#diagnose_mocks_pretty) returns the same as a human-readable multi-line
+string.
 
 Each installed layer records:
 
@@ -73,6 +67,20 @@ Each installed layer records:
     installed_at  -- file and line number of the outermost user call site
 
 # LIMITATIONS
+
+- A misspelled method name is mocked without complaint
+
+    `mock 'My::Module::fecth' => sub { ... }` installs a new sub called
+    `fecth`; the real `fetch` is left untouched and a test relying on the mock
+    may pass for the wrong reason.  Check with `can` (or `diagnose_mocks()`)
+    when a mock seems to have no effect.
+
+- Names with non-ASCII characters
+
+    Package and method names are used as given, so any name Perl accepts under
+    `use utf8` (e.g. `Café::prix`) can be mocked, spied on, injected and
+    restored.  `mock_core()` only accepts ASCII builtin names, which covers
+    every Perl builtin.
 
 - Call-through to an inherited method does not consult `AUTOLOAD`
 
@@ -153,7 +161,10 @@ warnings.
 
 ### MESSAGES
 
-    "Package, method and replacement are required" -- target or coderef missing
+    "Package, method and replacement are required for mocking"
+        -- package, method or replacement missing (undef, '' or false)
+    "mock: replacement for 'Pkg::method' must be a coderef"
+        -- replacement is a string or a non-CODE reference
 
 ## unmock
 
@@ -382,7 +393,8 @@ third argument) to distinguish shorthand from longhand.
 
 ### MESSAGES
 
-    "Package and dependency are required for injection" -- missing name
+    "Package and dependency are required for injection" -- missing name, or a
+        two-argument call whose target has no '::'
 
 ## inject\_all
 
@@ -464,7 +476,11 @@ Override a CORE Perl builtin globally via `CORE::GLOBAL`.
 
 The replacement receives `($call_builtin, @original_args)`, mirroring the
 `around()` API.  `$call_builtin` is a coderef that calls `CORE::$name`
-directly, bypassing any other `CORE::GLOBAL` override.
+directly, bypassing any other `CORE::GLOBAL` override.  Builtins with a
+fixed argument list, such as `time`, `index` and `substr`, get their
+arguments passed by position.  A few builtins take arguments that no coderef
+can pass on (`tie`, `pos`, `dbmopen`, `dbmclose`): they can still be
+mocked, but calling `$call_builtin` croaks.
 
 The override is installed in `CORE::GLOBAL::$name`, which is Perl's
 documented mechanism for intercepting named builtins.  It affects all
@@ -504,7 +520,8 @@ target.  `diagnose_mocks()` records the layer type as `'mock_core'`.
     "mock_core requires a builtin name and a replacement coderef" -- wrong arg types
     "mock_core: '$name' is not a valid identifier"               -- name has punctuation
     "mock_core: '$name' is not an overridable Perl builtin"      -- unknown builtin
-    "mock_core: cannot build CORE::$name delegator: ..."         -- eval failed
+    "mock_core: cannot call through to CORE::$name: ..."         -- $call_builtin
+        called for a builtin whose arguments cannot be delegated
 
 ## restore\_all
 
@@ -513,9 +530,10 @@ Restore all mocked methods and injected dependencies.
     restore_all();            # restore everything
     restore_all 'My::Module'; # restore only My::Module's mocks
 
-When called with a package name, only mocks whose fully-qualified names
-begin with that package are restored. The call-order log is pruned to
-remove entries for the restored package.
+When called with a package name, the mocks in that package **and its
+sub-packages** are restored: `restore_all('My::Module')` also restores
+`My::Module::Helper::fn`, but not `My::ModuleX::fn`. The call-order log is
+pruned the same way.
 
 ### API SPECIFICATION
 
@@ -743,61 +761,69 @@ Nigel Horne, `<njh at nigelhorne.com>`
 
 # FORMAL SPECIFICATION
 
+Notation: `mocked[t]` is the saved-slot stack for target `t` (head = most
+recent), `sym[t].CODE` its CODE slot, `declared(t)` whether a sub of that
+name exists in the package (`exists &t`), and `name(x)` means
+`defined(x) ∧ x ≠ ''`.  `saved(t)` is `sym[t].CODE` if `declared(t)`,
+else `undef`.  `resolve(p, m)` is `sym[p::m].CODE` if `declared(p::m)`,
+else a delegator that at call time invokes the first defined `a::m` for
+`a` in `tail(linear_isa(p)) ⌢ ⟨UNIVERSAL⟩`, or croaks `"Undefined
+subroutine &p::m called"`.
+
 ## mock
 
     mock ≙
-      ∀ target : Str; replacement : CodeRef •
-        pre  target ≠ '' ∧ defined(replacement)
-        post mocked'[target] = ⟨saved(target)⟩ ⌢ mocked[target]
-             ∧ sym_table'[target].CODE = replacement
-             ∧ prototype(replacement) = prototype(saved(target))
+      ∀ pkg, meth : Str; replacement : CodeRef •
+        pre  name(pkg) ∧ name(meth) ∧ ref(replacement) = 'CODE'
+        let  t = pkg::meth •
+        post mocked'[t] = ⟨saved(t)⟩ ⌢ mocked[t]
+             ∧ sym'[t].CODE = replacement
+             ∧ (saved(t) ≠ undef ⇒ prototype(replacement) = prototype(saved(t)))
+             ∧ mock_meta'[t] = ⟨{ type, installed_at, original_existed }⟩ ⌢ mock_meta[t]
 
 ## unmock
 
     unmock ≙
-      ∀ target : Str •
-        let prev = head(mocked[target]) •
-          post mocked'[target] = tail(mocked[target])
-               ∧ sym_table'[target].CODE = prev
-               ∧ mock_meta'[target] = tail(mock_meta[target])
+      ∀ t : Str •
+        mocked[t] = ⟨⟩ ⇒ no change
+        mocked[t] ≠ ⟨⟩ ⇒
+          let prev = head(mocked[t]) •
+          post mocked'[t] = tail(mocked[t]) ∧ mock_meta'[t] = tail(mock_meta[t])
+               ∧ restore_slot(t, prev)
+
+    restore_slot(t, prev) ≙
+        prev ≠ undef                  ⇒ sym'[t].CODE = prev
+        prev = undef ∧ t ∈ CORE::GLOBAL ⇒ t ∉ dom(stash')
+        prev = undef ∧ t ∉ CORE::GLOBAL ⇒ sym'[t].CODE = ∅
+                                        ∧ sym'[t] = sym[t] on every other slot
+                                        ∧ t ∈ dom(stash')
 
 ## before
 
     before ≙
-      ∀ target : Str; hook : CodeRef •
-        pre  target ≠ '' ∧ ref(hook) = 'CODE'
-        let orig = sym_table[target].CODE •
-          post sym_table'[target].CODE = wrapper
-               ∧ wrapper(@args) ≙ hook(@args); orig(@args)
+      ∀ pkg, meth : Str; hook : CodeRef •
+        pre  name(pkg) ∧ name(meth) ∧ ref(hook) = 'CODE'
+        let orig = resolve(pkg, meth) •
+          post mock(pkg::meth, wrapper)
+               ∧ wrapper(@args) ≙ hook(@args); orig(@args)   -- caller's context
 
 ## after
 
     after ≙
-      ∀ target : Str; hook : CodeRef •
-        pre  target ≠ '' ∧ ref(hook) = 'CODE'
-        let orig = sym_table[target].CODE •
-          post sym_table'[target].CODE = wrapper
+      ∀ pkg, meth : Str; hook : CodeRef •
+        pre  name(pkg) ∧ name(meth) ∧ ref(hook) = 'CODE'
+        let orig = resolve(pkg, meth) •
+          post mock(pkg::meth, wrapper)
                ∧ wrapper(@args) ≙ let ret = orig(@args) • hook(@args); ret
+               ∧ orig dies ⇒ hook not called
 
 ## around
 
     around ≙
-      ∀ target : Str; hook : CodeRef •
-        pre  target ≠ '' ∧ ref(hook) = 'CODE'
-        let orig = sym_table[target].CODE •
-          post sym_table'[target].CODE = wrapper
-               ∧ wrapper(@args) ≙ hook(orig, @args)
-
-## mock\_core
-
-    mock_core ≙
-      ∀ name : Str; replacement : CodeRef •
-        pre  _is_core_overridable(name) ∧ ref(replacement) = 'CODE'
-        let  call_core = eval("sub { CORE::name(@_) }") •
-        let  wrapper   = sub { replacement(call_core, @_) } •
-          post CORE::GLOBAL::name.CODE = wrapper
-               ∧ prototype(wrapper) = prototype(CORE::name)
-               ∧ mocked'["CORE::GLOBAL::name"] = ⟨wrapper⟩ ⌢ mocked["CORE::GLOBAL::name"]
+      ∀ pkg, meth : Str; hook : CodeRef •
+        pre  name(pkg) ∧ name(meth) ∧ ref(hook) = 'CODE'
+        let orig = resolve(pkg, meth) •
+          post mock(pkg::meth, wrapper) ∧ wrapper(@args) ≙ hook(orig, @args)
 
 ## mock\_scoped
 
@@ -809,17 +835,23 @@ Nigel Horne, `<njh at nigelhorne.com>`
 ## spy
 
     spy ≙
-      ∀ target : Str •
-        pre  defined(target)
-        post sym_table'[target].CODE = wrapper(orig)
-             ∧ wrapper: @args → (calls' = calls ⌢ ⟨[target, @args]⟩ ∧ orig(@args))
+      ∀ pkg, meth : Str •
+        pre  name(pkg) ∧ name(meth)
+        let t = pkg::meth; orig = resolve(pkg, meth) •
+        post mocked'[t] = ⟨saved(t)⟩ ⌢ mocked[t]
+             ∧ sym'[t].CODE = wrapper ∧ prototype(wrapper) = prototype(orig)
+             ∧ wrapper(@args) ≙ calls' = calls ⌢ ⟨[t, @args]⟩
+                               ∧ call_log' = call_log ⌢ ⟨t⟩
+                               ∧ orig(@args)
+             ∧ returns sub { calls }
 
 ## inject
 
     inject ≙
-      ∀ pkg : Str; dep : Str; val : Any •
-        pre  pkg ≠ '' ∧ dep ≠ ''
-        post sym_table'["${pkg}::${dep}"].CODE = sub { val }
+      ∀ pkg, dep : Str; val : Any •
+        pre  name(pkg) ∧ name(dep)
+        let t = pkg::dep •
+        post mocked'[t] = ⟨saved(t)⟩ ⌢ mocked[t] ∧ sym'[t].CODE = sub { val }
 
 ## inject\_all
 
@@ -835,19 +867,40 @@ Nigel Horne, `<njh at nigelhorne.com>`
         let  rep = (factory : CodeRef) ? factory : sub { factory } •
           post mock("${class}::new", rep)
 
+## mock\_core
+
+    mock_core ≙
+      ∀ name : Str; replacement : CodeRef •
+        pre  _is_core_overridable(name) ∧ ref(replacement) = 'CODE'
+        let  t         = CORE::GLOBAL::name •
+        let  call_core = core_delegator(name, prototype(CORE::name)) •
+        let  wrapper   = sub { replacement(call_core, @_) } •
+          post sym'[t].CODE = wrapper
+               ∧ prototype(wrapper) = prototype(CORE::name) // '@'
+               ∧ mocked'[t] = ⟨defined(sym[t].CODE) ? sym[t].CODE : undef⟩ ⌢ mocked[t]
+
+    core_delegator(name, proto) ≙
+        call_core(@a) = CORE::name(@a) with @a passed by position for a
+        fixed-slot proto, as $a[0] for '_', as @a otherwise; if no such call
+        compiles, call_core croaks "mock_core: cannot call through to ...".
+
 ## restore\_all
 
     restore_all ≙
-      global: mocked' = {} ∧ mock_meta' = {} ∧ call_log' = []
-      scoped: ∀ target ∈ dom(mocked) • target =~ /^pkg::/ ⇒ unmock_all(target)
-              ∧ call_log' = [ e ∈ call_log | e !~ /^pkg::/ ]
+      global: ∀ t ∈ dom(mocked) • restore_slot(t, last(mocked[t]))
+              ∧ mocked' = {} ∧ mock_meta' = {} ∧ call_log' = []
+      scoped: ∀ t ∈ dom(mocked) • t =~ /^\Qpkg\E::/ ⇒
+                  restore_slot(t, last(mocked[t])) ∧ t ∉ dom(mocked') ∪ dom(mock_meta')
+              ∧ call_log' = [ e ∈ call_log | e !~ /^\Qpkg\E::/ ]
+              -- sub-packages (pkg::Inner::m) match; pkgX::m does not
 
 ## restore
 
     restore ≙
-      ∀ target : Str •
-        pre  defined(target)
-        post mocked[target] = []
+      ∀ t : Str •
+        pre  defined(t)
+        post t ∈ dom(mocked) ⇒ restore_slot(t, last(mocked[t]))
+             ∧ t ∉ dom(mocked') ∪ dom(mock_meta')
 
 ## mock\_return
 
@@ -893,52 +946,11 @@ Nigel Horne, `<njh at nigelhorne.com>`
 ## diagnose\_mocks
 
     diagnose_mocks ≙
-      returns { target ↦ { depth, layers } | target ∈ dom(mocked) }
+      returns { target ↦ { depth, original_existed, layers } | target ∈ dom(mocked) }
 
 ## diagnose\_mocks\_pretty
 
     diagnose_mocks_pretty ≙ stringify(diagnose_mocks())
-
-## before
-
-    before ≙
-      ∀ target : Str; hook : CodeRef •
-        pre  target ≠ '' ∧ ref(hook) = 'CODE'
-        let orig = sym_table[target].CODE •
-          post sym_table'[target].CODE = wrapper
-               ∧ wrapper(@args) ≙ hook(@args); orig(@args)
-
-## after
-
-    after ≙
-      ∀ target : Str; hook : CodeRef •
-        pre  target ≠ '' ∧ ref(hook) = 'CODE'
-        let orig = sym_table[target].CODE •
-          post sym_table'[target].CODE = wrapper
-               ∧ wrapper(@args) ≙
-                   let ret = orig(@args) •
-                   hook(@args);
-                   ret
-
-## around
-
-    around ≙
-      ∀ target : Str; hook : CodeRef •
-        pre  target ≠ '' ∧ ref(hook) = 'CODE'
-        let orig = sym_table[target].CODE •
-          post sym_table'[target].CODE = wrapper
-               ∧ wrapper(@args) ≙ hook(orig, @args)
-
-## mock\_core
-
-    mock_core ≙
-      ∀ name : Str; replacement : CodeRef •
-        pre  _is_core_overridable(name) ∧ ref(replacement) = 'CODE'
-        let  call_core = eval("sub { CORE::name(@_) }") •
-        let  wrapper   = sub { replacement(call_core, @_) } •
-          post CORE::GLOBAL::name.CODE = wrapper
-               ∧ prototype(wrapper) = prototype(CORE::name)
-               ∧ mocked'["CORE::GLOBAL::name"] = ⟨wrapper⟩ ⌢ mocked["CORE::GLOBAL::name"]
 
 # LICENCE AND COPYRIGHT
 

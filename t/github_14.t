@@ -142,6 +142,21 @@ subtest 'call-through on a method defined nowhere dies instead of recursing' => 
 	ok(!My::Nowhere->can('ghost'), '->can() is false after restore');
 };
 
+subtest 'call-through reaches UNIVERSAL, and UNIVERSAL has no ancestors' => sub {
+	{ no strict 'refs'; *{'UNIVERSAL::gh14_probe'} = sub { 'universal' }; }
+
+	spy 'My::Base::gh14_probe';
+	is(My::Base->gh14_probe, 'universal', 'inherited UNIVERSAL method is reached');
+	restore_all();
+
+	spy 'UNIVERSAL::gh14_missing';
+	throws_ok { UNIVERSAL::gh14_missing() } qr/Undefined subroutine &UNIVERSAL::gh14_missing called/,
+		'a missing UNIVERSAL method is not looked up in itself';
+	restore_all();
+
+	{ no strict 'refs'; delete $UNIVERSAL::{gh14_probe}; }
+};
+
 subtest 'a declared-but-undefined stub is put back, not removed' => sub {
 	{ no strict 'refs'; eval 'package My::Stubbed; our @ISA = ("My::Base"); sub hello; 1' or die $@; }
 	mock 'My::Stubbed::hello' => sub { 'mocked' };

@@ -25,7 +25,9 @@ jobs:
           fetch-depth: 0
       - uses: shogo82148/actions-setup-perl@v1.44.0
 
-      - run: cpanm --verbose --skip-satisfied --installdeps .
+      # --with-recommends installs Future; without it the Async tests (and
+      # their mutant killers) are skipped and every Async mutant "survives".
+      - run: cpanm --verbose --skip-satisfied --with-recommends --installdeps .
       - run: prove -l t/
 
       - run: echo "$(pwd)/local/bin" >> $GITHUB_PATH

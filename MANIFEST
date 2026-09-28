@@ -28,7 +28,6 @@ t/fixme.t
 t/function.t
 t/github_14.t
 t/gv.t
-t/inherited.t
 t/inject.t
 t/inject_all.t
 t/integration.t

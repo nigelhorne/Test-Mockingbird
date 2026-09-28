@@ -1,6 +1,6 @@
 Revision history for Test::Mockingbird - Advanced mocking library for Perl with support for dependency injection and spies
 
-0.14
+0.14	Mon Sep 28 07:23:18 PM EDT 2026
   [ Bug Fixes]
   - Fixed GH#14: mocking a method that a class only inherits broke it once
     the mock was removed (by unmock, restore, restore_all or a mock_scoped
@@ -13,8 +13,36 @@ Revision history for Test::Mockingbird - Advanced mocking library for Perl with 
     calling through looped forever ("Deep recursion").  They now delegate to
     the parent class's implementation, looked up at call time, and die with
     "Undefined subroutine" if there is none.
+  - mock() now croaks "mock: replacement for 'Pkg::m' must be a coderef"
+    when given a string or non-CODE reference.  Previously a string aliased
+    the whole typeglob to another symbol (the method vanished) and a
+    reference filled the wrong slot (the mock silently did nothing).
+  - mock_core() could not mock time, index, substr, fork, wait, rename and
+    about 50 other builtins with a fixed argument list: it croaked at
+    install time because CORE::time(@_) does not compile.  Arguments are
+    now passed by position.  Builtins whose arguments cannot be delegated at
+    all (tie, pos, dbmopen, dbmclose) can still be mocked; only calling
+    $call_builtin croaks.
+  - '0' is now accepted as a package, method or dependency name by mock,
+    unmock, before, after, around, spy, inject and async_spy (previously
+    rejected by a truthiness check).
+  - inject('NoColons', $value) now croaks.  A two-argument call is always
+    the 'Pkg::dep' shorthand; without '::' it used to be read as longhand
+    and silently injected undef as a dependency named after the value.
+  [Documentation]
+  - restore_all($pkg) is documented as also restoring sub-packages.
+  - LIMITATIONS: misspelt method names; non-ASCII names.
+  - FORMAL SPECIFICATION: removed duplicate entries and brought unmock, spy,
+    before, after, around, mock_core, restore and restore_all in line with
+    the code.  Async.pm gains a FORMAL SPECIFICATION and core-style API
+    SPECIFICATION/MESSAGES sections.
   [Tests]
-  - t/inherited.t: regression tests for GH#14.
+  - t/github_14.t: regression tests for GH#14.
+  - Tests for the above, a UTF-8 name round trip, recursive spy calls, and a
+    killer for mutant COND_INV_740_2 (spy prototype stamping).
+  [Build]
+  - cpanfile recommends Future 0.33; the mutation and dashboard workflows
+    install recommended modules so the Async tests are no longer skipped.
 
 0.13	Sun Aug  2 05:28:58 PM EDT 2026
   [Enhancements]
