@@ -293,7 +293,7 @@ a.intra-dot:hover { color: #7700bb; }
 <div class="nav"><a href="../../../../index.html">Index</a>
  <a href="../Mockingbird.pm.html">Next ➡</a></div><div class='summary'>
 <strong>Structural Coverage (Approximate)</strong><p>
-TER1 (Statement): 31.08%<br>
+TER1 (Statement): 29.41%<br>
 TER2 (Branch): 12.50%<br>
 TER3 (LCSAJ): -<br>
 Approximate LCSAJ segments: 17<br>
@@ -711,24 +711,24 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </span><span class="">  315: 
 </span><span class="">  316: 	my $full_method = &quot;${package}::${method}&quot;;
 </span><span class="">  317: 
-</span><span class="">  318: 	# Capture current implementation so the wrapper can delegate to it.
-</span><span class="">  319: 	# mock() will also capture it independently for stack bookkeeping;
-</span><span class="">  320: 	# both captures see the same coderef at this point.
-</span><span class="">  321: 	my $orig;
-</span><span class="">  322: 	{
-</span><span class="">  323: 		## no critic (ProhibitNoStrict)
-</span><span class="">  324: 		no strict &#39;refs&#39;;
-</span><span class="">  325: 		$orig = \&amp;{$full_method};
-</span><span class="">  326: 	}
-</span><span class="">  327: 
-</span><span class="">  328: 	my @calls;
-</span><span class="">  329: 
-</span><span class="">  330: 	my $wrapper = sub {
-</span><span class="">  331: 		my @call_args = @_;
-</span><span class="">  332: 		my $future    = $orig-&gt;(@call_args);
-</span><span class="">  333: 		push @calls, { args =&gt; [$full_method, @call_args], future =&gt; $future };
-</span><span class="">  334: 		Test::Mockingbird::_record_call($full_method);
-</span><span class="survived-2 tooltip" data-tooltip="Return value mutation survived. Add tests asserting exact return values. Boolean logic mutation survived. Add tests covering both true and false paths.">  335: 		return $future;
+</span><span class="">  318: 	# Resolve what the wrapper delegates to (the parent&#39;s implementation
+</span><span class="">  319: 	# for an inherited method).  mock() separately saves the CODE slot for
+</span><span class="">  320: 	# stack bookkeeping.
+</span><span class="">  321: 	my $orig = Test::Mockingbird::_call_through($package, $method);
+</span><span class="">  322: 
+</span><span class="">  323: 	my @calls;
+</span><span class="">  324: 
+</span><span class="">  325: 	my $wrapper = sub {
+</span><span class="">  326: 		my @call_args = @_;
+</span><span class="">  327: 		my $future    = $orig-&gt;(@call_args);
+</span><span class="">  328: 		push @calls, { args =&gt; [$full_method, @call_args], future =&gt; $future };
+</span><span class="">  329: 		Test::Mockingbird::_record_call($full_method);
+</span><span class="">  330: 		return $future;
+</span><span class="">  331: 	};
+</span><span class="">  332: 
+</span><span class="">  333: 	local $Test::Mockingbird::TYPE = &#39;async_spy&#39;;
+</span><span class="">  334: 	Test::Mockingbird::mock($full_method, $wrapper);
+</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  335: 
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
@@ -750,12 +750,12 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </pre>
 								</div>
 							</li></ul></details>
-<span class="">  336: 	};
-</span><span class="">  337: 
-</span><span class="">  338: 	local $Test::Mockingbird::TYPE = &#39;async_spy&#39;;
-</span><span class="">  339: 	Test::Mockingbird::mock($full_method, $wrapper);
-</span><span class="">  340: 
-</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  341: 	return sub { @calls };
+<span class="">  336: 	return sub { @calls };
+</span><span class="">  337: }
+</span><span class="">  338: 
+</span><span class="">  339: # ----------------------------------------------------------------------
+</span><span class="">  340: # Private helpers
+</span><span class="survived-2 tooltip" data-tooltip="Boolean logic mutation survived. Add tests covering both true and false paths. Return value mutation survived. Add tests asserting exact return values.">  341: # ----------------------------------------------------------------------
 </span>
 					<details class="mutant-details">
 					<summary>Mutants (Total: 2, Killed: 0, Survived: 2)</summary>
@@ -777,51 +777,46 @@ is( func(INPUT), EXPECTED, &#39;Verify correct return value&#39; );
 </pre>
 								</div>
 							</li></ul></details>
-<span class="">  342: }
-</span><span class="">  343: 
-</span><span class="">  344: # ----------------------------------------------------------------------
-</span><span class="">  345: # Private helpers
-</span><span class="">  346: # ----------------------------------------------------------------------
-</span><span class="">  347: 
-</span><span class="">  348: sub _require_future {
-</span><span class="">  349: 	eval { require Future; 1 }
-</span><span class="">  350: 		or croak &quot;Test::Mockingbird::Async requires the Future module.\n&quot;
-</span><span class="">  351: 			. &quot;Install it with: cpanm Future\n&quot;;
-</span><span class="">  352: }
-</span><span class="">  353: 
-</span><span class="">  354: =head1 SUPPORT
-</span><span class="">  355: 
-</span><span class="">  356: This module is provided as-is without any warranty.
-</span><span class="">  357: 
-</span><span class="">  358: Please report bugs at L&lt;https://github.com/nigelhorne/Test-Mockingbird/issues&gt;.
-</span><span class="">  359: 
-</span><span class="">  360: =head1 AUTHOR
-</span><span class="">  361: 
-</span><span class="">  362: Nigel Horne, C&lt;&lt; &lt;njh at nigelhorne.com&gt; &gt;&gt;
-</span><span class="">  363: 
-</span><span class="">  364: =head1 SEE ALSO
-</span><span class="">  365: 
-</span><span class="">  366: =over 4
-</span><span class="">  367: 
-</span><span class="">  368: =item * L&lt;Test::Mockingbird&gt;
-</span><span class="">  369: 
-</span><span class="">  370: =item * L&lt;Test::Mockingbird::DeepMock&gt;
-</span><span class="">  371: 
-</span><span class="">  372: =item * L&lt;Future&gt;
-</span><span class="">  373: 
-</span><span class="">  374: =back
-</span><span class="">  375: 
-</span><span class="">  376: =head1 LICENCE AND COPYRIGHT
-</span><span class="">  377: 
-</span><span class="">  378: Copyright 2026 Nigel Horne.
-</span><span class="">  379: 
-</span><span class="">  380: Usage is subject to the GPL2 licence terms.
-</span><span class="">  381: If you use it,
-</span><span class="">  382: please let me know.
-</span><span class="">  383: 
-</span><span class="">  384: =cut
-</span><span class="">  385: 
-</span><span class="">  386: 1;
+<span class="">  342: 
+</span><span class="">  343: sub _require_future {
+</span><span class="">  344: 	eval { require Future; 1 }
+</span><span class="">  345: 		or croak &quot;Test::Mockingbird::Async requires the Future module.\n&quot;
+</span><span class="">  346: 			. &quot;Install it with: cpanm Future\n&quot;;
+</span><span class="">  347: }
+</span><span class="">  348: 
+</span><span class="">  349: =head1 SUPPORT
+</span><span class="">  350: 
+</span><span class="">  351: This module is provided as-is without any warranty.
+</span><span class="">  352: 
+</span><span class="">  353: Please report bugs at L&lt;https://github.com/nigelhorne/Test-Mockingbird/issues&gt;.
+</span><span class="">  354: 
+</span><span class="">  355: =head1 AUTHOR
+</span><span class="">  356: 
+</span><span class="">  357: Nigel Horne, C&lt;&lt; &lt;njh at nigelhorne.com&gt; &gt;&gt;
+</span><span class="">  358: 
+</span><span class="">  359: =head1 SEE ALSO
+</span><span class="">  360: 
+</span><span class="">  361: =over 4
+</span><span class="">  362: 
+</span><span class="">  363: =item * L&lt;Test::Mockingbird&gt;
+</span><span class="">  364: 
+</span><span class="">  365: =item * L&lt;Test::Mockingbird::DeepMock&gt;
+</span><span class="">  366: 
+</span><span class="">  367: =item * L&lt;Future&gt;
+</span><span class="">  368: 
+</span><span class="">  369: =back
+</span><span class="">  370: 
+</span><span class="">  371: =head1 LICENCE AND COPYRIGHT
+</span><span class="">  372: 
+</span><span class="">  373: Copyright 2026 Nigel Horne.
+</span><span class="">  374: 
+</span><span class="">  375: Usage is subject to the GPL2 licence terms.
+</span><span class="">  376: If you use it,
+</span><span class="">  377: please let me know.
+</span><span class="">  378: 
+</span><span class="">  379: =cut
+</span><span class="">  380: 
+</span><span class="">  381: 1;
 </span></pre>
 
 <script>
